@@ -8,7 +8,7 @@ This is a Demo for tttwebsdk.
 TTTWebSDK is 3T-RTN WEB Access SDK. It is provide complete APIs.
 
 ## Copyright
-3ttech.cn @2019-
+3ttech.cn @2019-2020
 
 ## build and run
 npm install
