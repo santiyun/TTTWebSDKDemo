@@ -1,0 +1,85 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel='shortcut icon' href='favicon.ico' />
+
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: auto auto auto auto auto auto;
+            grid-gap: 5px;
+            background-color: #2196F3;
+            padding: 5px;
+        }
+
+        .grid-container>div {
+            background-color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            padding: 5px 0;
+            font-size: 10px;
+        }
+
+        .grid-container-video {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            grid-gap: 5px;
+            background-color: #2196F3;
+            padding: 5px;
+        }
+
+        .grid-container-video>video {
+            background-color: #000000;
+            text-align: center;
+            padding: 5px 0;
+        }
+
+        .grid-container-video>div {
+            background-color: #ffffff;
+            text-align: left;
+            padding: 5px 0;
+            font-size: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='userInfo'>
+        <table>
+            <tr>
+                <td>AppID</td>
+                <!-- <td><input type="text" id="appID" value="test900572e02867fab8131651339518" /></td> -->
+                <td><input type="text" id="appID" value="a967ac491e3acf92eed5e1b5ba641ab7" /></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>ChannelID</td>
+                <td><input type="text" value="123" id="chanid" /></td>
+                <td>UserID</td>
+                <td><input type="text" value="555888" id="userid" /></td>
+                <td>
+                    <select>
+                        <option value="h264">h264</option>
+                    </select>
+                </td>
+                <td>
+                    <button id="joinChan">加入</button>
+                </td>
+                <td>
+                    正确修改参数.防止冲突.请修改UserID(数值).ChannelID(数值).
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="testButton" class="grid-container"></div>
+    <div id="video" class="grid-container-video"></div>
+    <script type='text/javascript' src='./dist/pagedemo-bundle.js' charset="utf-8"></script>
+</body>
+
+</html>
