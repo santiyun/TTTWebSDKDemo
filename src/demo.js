@@ -80,13 +80,21 @@ function joinChan() {
 
     client.on('stream-subscribed', function (evt) {
         var stream = evt.stream;
-        // info.val(info.val() + "Subscribe remote stream successfully: " + stream.getId() + "\n");
-        var videoId = "3t_remote" + stream.getId();
-        if ($('div#video #' + videoId).length === 0) {
-            $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
-        }
+        if(stream.type === 'audio') {
+            // play audio
+            stream.play()
+            return
+        } else {
+            // play video
+            // info.val(info.val() + "Subscribe remote stream successfully: " + stream.getId() + "\n");
+            var videoId = "3t_remote" + stream.getId();
+            if ($('div#video #' + videoId).length === 0) {
+                $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
+            }
 
-        stream.play('3t_remote' + stream.getId());
+            stream.play('3t_remote' + stream.getId());
+        }
+        
     });
 
     client.on('video-mute', () => {
