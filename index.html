@@ -46,35 +46,86 @@
 </head>
 
 <body>
+	<div id='tip'>
+		<table>
+			<tr>
+				<td>
+					正确修改参数 -- 防止冲突，请修改 UserID(数值)、ChannelID(数值)
+				</td>
+			</tr>
+			<tr></tr>
+		</table>
+	</div>
     <div id='userInfo'>
         <table>
+			<tr>
+				<td>AppID : </td>
+				<!-- <td><input type="text" id="appID" value="test900572e02867fab8131651339518" /></td> -->
+				<td><input type="text" id="appID" value="a967ac491e3acf92eed5e1b5ba641ab7" /></td>
+			</tr>
             <tr>
-                <td>AppID</td>
-                <!-- <td><input type="text" id="appID" value="test900572e02867fab8131651339518" /></td> -->
-                <td><input type="text" id="appID" value="a967ac491e3acf92eed5e1b5ba641ab7" /></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>ChannelID</td>
+                <td>房间ID : </td>
                 <td><input type="text" value="123" id="chanid" /></td>
-                <td>UserID</td>
+                <td>用户ID : </td>
                 <td><input type="text" value="555888" id="userid" /></td>
-                <td>
-                    <select>
-                        <option value="h264">h264</option>
-                    </select>
-                </td>
-                <td>
-                    <button id="joinChan">加入</button>
-                </td>
-                <td>
-                    正确修改参数.防止冲突.请修改UserID(数值).ChannelID(数值).
-                </td>
-            </tr>
+			</tr>
+			<tr>
+				<td>用户角色 : </td>
+				<td><input type="text" value="2" id="userrole" /></td>
+				<td></td>
+				<td>
+					注 -- 1 : 主播；2 : 副播；3 : 观众 -- 同一个房间内只允许有一个主播
+				</td>
+			</tr>
+			<tr>
+				<td>CDN 推流地址 : </td>
+				<td><input type="text" value="rtmp://pushjs.3ttech.cn/sdk/test-rtmp-stream-aaa" id="rtmpUrl" /></td>
+				<td>
+					<button id="setCDNUrl">设置CDN</button>
+				</td>
+				<td>
+					注 -- 如果要设置推流地址，要确保 [用户角色] 取值为 1
+				</td>
+			</tr>
+			<tr>
+				<td><font color="red">=== 首先请 ==></font></td>
+				<td>
+					<button id="joinChan"><font color="red">加入房间</font></button>
+				</td>
+				<td>
+					<button id="leaveChan">离开房间</button>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					如下两种示例场景 ------
+				</td>
+			</tr>
+			<tr>
+				<td>
+					场景1 : 摄像头流 -- 
+				</td>
+				<td>
+                    <button id="publishStream">发布摄像头流</button>
+				</td>
+				<td>
+					<button id="unpublishStream">取消发布摄像头流</button>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					场景2 : 屏幕流 -- 
+				</td>
+				<td>
+					<button id="captureScreen">采集屏幕流</button>
+				</td>
+				<td>
+					<button id="publishScreen">发布屏幕流</button>
+				</td>
+				<td>
+					<button id="unpublishScreen">取消发布屏幕流</button>
+				</td>
+			</tr>
         </table>
     </div>
     <div id="testButton" class="grid-container"></div>

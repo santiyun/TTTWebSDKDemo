@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "sweetalert2": "^9.4.0",
     "tttwebsdk": "^3.2.2"
   },
   "devDependencies": {

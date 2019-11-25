@@ -1,12 +1,38 @@
 const TTTRtcWeb = require('tttwebsdk');
 
+import Swal from 'sweetalert2'
+
+let cdnUrl = 'rtmp://pushjs.3ttech.cn/sdk/test-rtmp-stream-aaa';
+
 let RTCObj = new TTTRtcWeb();
-let client = null, localStream = null;
+let client = null;
+let streams = new Map();
+
 let remote_stream = new Map();
 
+let tttStatus = 0;
+
+let sei = {
+    "ts": "",
+    "ver": "20161227",
+    "canvas": {
+        "bgrad": [
+            232,
+            230,
+            232
+        ],
+        "h": 640,
+        "w": 368
+    },
+    "mid": "",
+    "pos": []
+}
+
 function joinChan() {
-    client = RTCObj.createClient({role: '2'});
-    localStream = null;
+	const userRole = $("#userrole").val();
+
+    client = RTCObj.createClient({ role: userRole, rtmpUrl: cdnUrl });
+
     const appid = $("#appID").val();
 
     let chanid = document.getElementById("chanid").value;
@@ -14,23 +40,13 @@ function joinChan() {
 
     client.init(appid, userid, function () {
         client.join(chanid, function () {
-            local_stream = RTCObj.createStream({
-                streamID: userid,
-                audio: true,
-                video: true,
-                screen: false
-            });
+			console.log('login success.');
 
-            local_stream.init(function () {
-                $('div#video').append('<div id="div_3t_local"><video autoplay muted id="3t_local" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video><div id="local_info"></div></div>');
-                local_stream.play('3t_local');
-                client.publish(local_stream, function success() {
-                }, function failure() {
-                });
-            },
-                function () {
-                });
+			Swal.fire('成功加入房间!!');
+			
+			tttStatus = 1; // 状态标注为: 登录成功
         }, function (err) {
+			console.log('login failed.');
         });
     }, function (err) {
     });
@@ -108,10 +124,12 @@ function joinChan() {
 }
 
 function leaveChan() {
+	tttStatus = 0;
+
     if (client) {
-        client.leave();
+        client.leave(() => { }, () => { });
         client.close();
-    }
+	}
 }
 
 $('#joinChan').bind('click', () => {
@@ -121,3 +139,179 @@ $('#joinChan').bind('click', () => {
 $('#leaveChan').bind('click', () => {
     return leaveChan();
 });
+
+let videoStream = null;
+// 
+function publishStream() {
+	// 
+	if (tttStatus !== 1)
+	{
+		Swal.fire('请先[加入房间]');
+		return;
+	}
+
+	let userid = document.getElementById('userid').value;
+
+	let videoStream = RTCObj.createStream({
+		streamID: userid,
+		audio: true,
+		video: true,
+		screen: false
+	});
+
+	videoStream.init(function () {
+		$('div#video').append('<div id="div_3t_local"><video autoplay muted id="3t_local" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video><div id="local_info"></div></div>');
+		videoStream.play('3t_local');
+		streams.set(videoStream.getId(), videoStream);
+
+		client.publish(videoStream, function success() {
+			console.log(`publish video succ. videoStream: ${videoStream.getId()}`);
+		}, function failure() {
+			console.log('publish video failed.');
+		});
+	}, function () {
+	});
+}
+
+function unpublishStream() {
+	// 
+	if (tttStatus !== 1)
+	{
+		Swal.fire('请先[加入房间]');
+		return;
+	}
+	
+    client.unpublish(videoStream, function () {
+        console.log(`unpublish local stream success. steamID: ${videoStream.getId()}`);
+		// optionPublishedStream(videoStream, 'del')
+		
+		streams.delete(videoStream.getId());
+    }, function () {
+        console.log('unpublish local stream failed');
+    });
+}
+
+$('#publishStream').bind('click', () => {
+    publishStream();
+})
+
+$('#unpublishStream').bind('click', () => {
+    unpublishStream();
+})
+
+// 
+$('#setCDNUrl').bind('click', () => {
+    cdnUrl = $('#rtmpUrl').val();
+    if (cdnUrl.trim() === '') {
+        Swal.fire('set cdn url', cdnUrl.trim(), 'error');
+    } else {
+        Swal.fire('set cdn url', cdnUrl, 'success');
+    }
+})
+
+// 
+let screen_stream = null;
+// 
+function captureScreenAndAudio() {
+	// 
+	if (tttStatus !== 1)
+	{
+		Swal.fire('请先[加入房间]');
+		return;
+	}
+
+	const appid = $("#appID").val();
+
+    let chanid = document.getElementById("chanid").value;
+    let userid = document.getElementById('userid').value;
+
+	// 
+    screen_stream = RTCObj.createStream({ streamID: userid + '-screen-audio', userID: userid, video: false, audio: true, screen: true });
+    screen_stream.init(() => {
+		streams.set(screen_stream.getId(), screen_stream);
+		
+        // optionPublishedStream(screen_stream, 'add');
+        $('div#video').append('<video autoplay muted id="3t_local' + screen_stream.getId() + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
+		screen_stream.play("3t_local" + screen_stream.getId());
+		
+        console.log(`screen display -- screen_stream: ${screen_stream.getId()} screen_stream_id: ${screen_stream.innerStreamID}`);
+    }, (err) => {
+        console.log('local screen stream init failed.');
+    });
+
+    // streamEvents(screen_stream);
+}
+// 
+
+function setScreenSEI(mid, type) {
+    let position = {
+        "id": 0,
+        "h": 0,
+        "w": 0,
+        "x": 0,
+        "y": 0,
+        "z": 1
+    };
+
+    sei.mid = mid;
+    sei.ts = + new Date();
+    position.id = mid;
+    position.x = 0;
+    position.y = 0;
+    position.w = 1;
+    position.h = 1;
+    position.z = 0;
+    if (type === 'add') {
+        sei.pos.push(position);
+    } else {
+        sei.pos.pop();
+    }
+
+    client.setSEI(mid, type, true, sei);
+};
+
+function publishScreen() {
+	// 
+	if (tttStatus !== 1)
+	{
+		Swal.fire('请先[加入房间]');
+		return;
+	}
+
+    client.publishScreen(screen_stream, (e) => {
+		const mid = screen_stream.innerStreamID;
+        setScreenSEI(mid, 'add');
+        console.log(`publish screen stream success: streamID = ${screen_stream.getId()}`);
+    }, (e) => {
+        console.log(`publish screen stream failed: streamID = ${screen_stream.getId()}`);
+    });
+}
+
+function unpublishScreen() {
+	// 
+	if (tttStatus !== 1)
+	{
+		Swal.fire('请先[加入房间]');
+		return;
+	}
+
+	client.unpublishScreen(screen_stream, (e) => {
+		console.log(`unpublish screen stream success: streamID = ${screen_stream.getId()}`);
+		
+		streams.delete(screen_stream.getId());
+    }, (e) => {
+        console.log(`unpublish screen stream failed: streamID = ${screen_stream.getId()}`);
+    });
+}
+
+$('#captureScreen').bind('click', () => {
+    captureScreenAndAudio();
+})
+
+$('#publishScreen').bind('click', () => {
+    publishScreen();
+})
+
+$('unpublishScreen').bind('click', () => {
+	unpublishScreen();
+})
