@@ -45,11 +45,11 @@ function joinChan() {
 			Swal.fire('成功加入房间!!');
 			
 			tttStatus = 1; // 状态标注为: 登录成功
-			document.getElementById("loginStatus").innerHTML = `登录成功 -- role: ${userRole} CDN: ${cdnUrl}`;
+			document.getElementById("loginStatus").innerHTML = `<font color="green">登录成功</font><br> -- role: ${userRole}<br> -- CDN: ${cdnUrl}`;
         }, function (err) {
 			console.log('login failed.');
 
-			document.getElementById("loginStatus").innerHTML = '登录失败';
+			document.getElementById("loginStatus").innerHTML = '<font color="red">登录失败</font>';
         });
     }, function (err) {
     });
