@@ -11,7 +11,7 @@
             display: grid;
             grid-template-columns: auto auto auto auto auto auto;
             grid-gap: 5px;
-            background-color: #2196F3;
+            background-color: #ffffff;
             padding: 5px;
         }
 
@@ -26,7 +26,7 @@
             display: grid;
             grid-template-columns: auto auto auto auto;
             grid-gap: 5px;
-            background-color: #2196F3;
+            background-color: #ffffff;
             padding: 5px;
         }
 
@@ -79,9 +79,8 @@
 			</tr>
 			<tr>
 				<td>CDN 推流地址 : </td>
-				<td><input type="text" value="rtmp://pushjs.3ttech.cn/sdk/test-rtmp-stream-aaa" id="rtmpUrl" /></td>
+				<td><input type="text" value="rtmp://stech.3ttech.cn/live/test" id="rtmpUrl" /></td>
 				<td>
-					<button id="setCDNUrl">设置CDN</button>
 				</td>
 				<td>
 					注 -- 如果要设置推流地址，要确保 [用户角色] 取值为 1
@@ -92,9 +91,16 @@
 				<td>
 					<button id="joinChan"><font color="red">加入房间</font></button>
 				</td>
+			</tr>
+			<tr>
+				<td></td>
 				<td>
 					<button id="leaveChan">离开房间</button>
 				</td>
+			</tr>
+			<tr>
+				<td>登录状态 : </td>
+				<td><p id = "loginStatus">未登录</p></td>
 			</tr>
 			<tr>
 				<td>
@@ -105,25 +111,57 @@
 				<td>
 					场景1 : 摄像头流 -- 
 				</td>
+			</tr>
+			<tr>
+				<td></td>
 				<td>
-                    <button id="publishStream">发布摄像头流</button>
+					<table>
+						<tr>
+							<td>
+								<button id="publishStream">发布摄像头流</button>
+							</td>
+							<td>
+								<button id="unpublishStream">取消发布摄像头流</button>
+							</td>
+						</tr>
+					</table>
 				</td>
-				<td>
-					<button id="unpublishStream">取消发布摄像头流</button>
-				</td>
+			</tr>
+			<tr>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
 			</tr>
 			<tr>
 				<td>
 					场景2 : 屏幕流 -- 
 				</td>
 				<td>
-					<button id="captureScreen">采集屏幕流</button>
+					按步骤
+					<br>1. 采集屏幕流
+					<br>2. 发布屏幕流
 				</td>
+			</tr>
+			<tr>
+				<td></td>
 				<td>
-					<button id="publishScreen">发布屏幕流</button>
-				</td>
-				<td>
-					<button id="unpublishScreen">取消发布屏幕流</button>
+					<table>
+						<tr>
+							<td>
+								<button id="captureScreen">采集屏幕流</button>
+							</td>
+							<td>
+								<button id="publishScreen">发布屏幕流</button>
+							</td>
+							<td>
+								<button id="unpublishScreen">取消发布屏幕流</button>
+							</td>
+						</tr>
+					</table>
 				</td>
 			</tr>
         </table>

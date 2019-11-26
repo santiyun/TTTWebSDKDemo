@@ -2,7 +2,7 @@ const TTTRtcWeb = require('tttwebsdk');
 
 import Swal from 'sweetalert2'
 
-let cdnUrl = 'rtmp://pushjs.3ttech.cn/sdk/test-rtmp-stream-aaa';
+let cdnUrl = 'rtmp://stech.3ttech.cn/live/test';
 
 let RTCObj = new TTTRtcWeb();
 let client = null;
@@ -29,14 +29,14 @@ let sei = {
 }
 
 function joinChan() {
-	const userRole = $("#userrole").val();
-
-    client = RTCObj.createClient({ role: userRole, rtmpUrl: cdnUrl });
-
     const appid = $("#appID").val();
 
     let chanid = document.getElementById("chanid").value;
     let userid = document.getElementById('userid').value;
+	const userRole = $("#userrole").val();
+    cdnUrl = $('#rtmpUrl').val();
+
+    client = RTCObj.createClient({ role: userRole, rtmpUrl: cdnUrl });
 
     client.init(appid, userid, function () {
         client.join(chanid, function () {
@@ -45,8 +45,11 @@ function joinChan() {
 			Swal.fire('成功加入房间!!');
 			
 			tttStatus = 1; // 状态标注为: 登录成功
+			document.getElementById("loginStatus").innerHTML = `登录成功 -- role: ${userRole} CDN: ${cdnUrl}`;
         }, function (err) {
 			console.log('login failed.');
+
+			document.getElementById("loginStatus").innerHTML = '登录失败';
         });
     }, function (err) {
     });
@@ -165,6 +168,9 @@ function publishStream() {
 		streams.set(videoStream.getId(), videoStream);
 
 		client.publish(videoStream, function success() {
+			const mid = videoStream.innerStreamID;
+			setStreamSEI(mid, 'add', false);
+	
 			console.log(`publish video succ. videoStream: ${videoStream.getId()}`);
 		}, function failure() {
 			console.log('publish video failed.');
@@ -175,11 +181,13 @@ function publishStream() {
 
 function unpublishStream() {
 	// 
-	if (tttStatus !== 1)
-	{
+	if (tttStatus !== 1) {
 		Swal.fire('请先[加入房间]');
 		return;
 	}
+
+	if (videoStream === null)
+		return;
 	
     client.unpublish(videoStream, function () {
         console.log(`unpublish local stream success. steamID: ${videoStream.getId()}`);
@@ -197,16 +205,6 @@ $('#publishStream').bind('click', () => {
 
 $('#unpublishStream').bind('click', () => {
     unpublishStream();
-})
-
-// 
-$('#setCDNUrl').bind('click', () => {
-    cdnUrl = $('#rtmpUrl').val();
-    if (cdnUrl.trim() === '') {
-        Swal.fire('set cdn url', cdnUrl.trim(), 'error');
-    } else {
-        Swal.fire('set cdn url', cdnUrl, 'success');
-    }
 })
 
 // 
@@ -243,7 +241,7 @@ function captureScreenAndAudio() {
 }
 // 
 
-function setScreenSEI(mid, type) {
+function setStreamSEI(mid, type, isScreen) {
     let position = {
         "id": 0,
         "h": 0,
@@ -267,20 +265,24 @@ function setScreenSEI(mid, type) {
         sei.pos.pop();
     }
 
-    client.setSEI(mid, type, true, sei);
+    client.setSEI(mid, type, isScreen, sei);
 };
 
 function publishScreen() {
 	// 
-	if (tttStatus !== 1)
-	{
+	if (tttStatus !== 1) {
 		Swal.fire('请先[加入房间]');
+		return;
+	}
+
+	if (screen_stream === null) {
+		Swal.fire('请先[采集屏幕流]');
 		return;
 	}
 
     client.publishScreen(screen_stream, (e) => {
 		const mid = screen_stream.innerStreamID;
-        setScreenSEI(mid, 'add');
+        setStreamSEI(mid, 'add', true);
         console.log(`publish screen stream success: streamID = ${screen_stream.getId()}`);
     }, (e) => {
         console.log(`publish screen stream failed: streamID = ${screen_stream.getId()}`);
