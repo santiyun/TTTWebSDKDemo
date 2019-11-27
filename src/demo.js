@@ -167,6 +167,15 @@ function publishStream() {
 		videoStream.play('3t_local');
 		streams.set(videoStream.getId(), videoStream);
 
+		// set video profile
+		let resolution = $('#resolution option:selected').text();
+		videoStream.setVideoProfile(resolution, (msg) => { 
+			console.log(`setVideoProfile succ: ${resolution}`);
+		}, (e) => {
+			console.log(`setVideoProfile error: ${JSON.stringify(e)}`);
+		});
+		// 
+
 		client.publish(videoStream, function success() {
 			const mid = videoStream.innerStreamID;
 			setStreamSEI(mid, 'add', false);
