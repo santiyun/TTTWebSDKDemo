@@ -80,7 +80,8 @@ function joinChan() {
 
     client.on('stream-removed', function (evt) {
         var peer = evt;
-        $('#3t_remote' + peer.name).remove();
+    	document.getElementById("3t_remote" + peer.name).remove()
+        // $('#3t_remote' + peer.name).remove();
 
         // remove stream from map
         remote_stream.delete(peer.name);
@@ -91,7 +92,8 @@ function joinChan() {
         var stream = evt.stream;
         stream.stop();
         stream.close();
-        $('#3t_remote' + stream.getId()).remove();
+	document.getElementById("3t_remote" + stream.getId()).remove()
+        // $('#3t_remote' + stream.getId()).remove();
 
         // remove stream from map
         remote_stream.delete(stream.getId());
@@ -107,7 +109,8 @@ function joinChan() {
             // play video
             // info.val(info.val() + "Subscribe remote stream successfully: " + stream.getId() + "\n");
             var videoId = "3t_remote" + stream.getId();
-            if ($('div#video #' + videoId).length === 0) {
+            // if ($('div#video #' + videoId).length === 0) {
+	    if(!document.getElementById(videoId)) {
                 $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
             }
 
@@ -119,7 +122,8 @@ function joinChan() {
     client.on('video-mute', () => {
         var peer = evt;
         console.log('video-mute', peer.name);
-        $('#3t_remote' + peer.name).remove();
+    	document.getElementById("3t_remote" + peer.name).remove()
+        // $('#3t_remote' + peer.name).remove();
 
         // remove stream from map
         remote_stream.delete(peer.name);
