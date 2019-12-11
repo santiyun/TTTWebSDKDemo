@@ -157,9 +157,15 @@ function publishStream() {
 		return;
 	}
 
+	if (videoStream !== null)
+	{
+		Swal.fire('已推流，无需重复推流');
+		return;
+	}
+
 	let userid = document.getElementById('userid').value;
 
-	let videoStream = RTCObj.createStream({
+	videoStream = RTCObj.createStream({
 		streamID: userid,
 		audio: true,
 		video: true,
@@ -169,6 +175,7 @@ function publishStream() {
 	videoStream.init(function () {
 		$('div#video').append('<div id="div_3t_local"><video autoplay muted id="3t_local" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video><div id="local_info"></div></div>');
 		videoStream.play('3t_local');
+		
 		streams.set(videoStream.getId(), videoStream);
 
 		// set video profile
@@ -199,17 +206,22 @@ function unpublishStream() {
 		return;
 	}
 
-	if (videoStream === null)
+	if (videoStream === null) {
+		console.log('当前尚未创建 videoStream');
 		return;
+	}
 	
     client.unpublish(videoStream, function () {
         console.log(`unpublish local stream success. steamID: ${videoStream.getId()}`);
 		// optionPublishedStream(videoStream, 'del')
 		
 		streams.delete(videoStream.getId());
+
+		videoStream.close();
+		videoStream = null;
     }, function () {
         console.log('unpublish local stream failed');
-    });
+	});
 }
 
 $('#publishStream').bind('click', () => {
@@ -228,6 +240,12 @@ function captureScreenAndAudio() {
 	if (tttStatus !== 1)
 	{
 		Swal.fire('请先[加入房间]');
+		return;
+	}
+
+	if (screen_stream !== null)
+	{
+		console.log('屏幕流已创建');
 		return;
 	}
 
@@ -289,7 +307,7 @@ function publishScreen() {
 	}
 
 	if (screen_stream === null) {
-		Swal.fire('请先[采集屏幕流]');
+		console.log('请先[采集屏幕流]');
 		return;
 	}
 
@@ -299,7 +317,7 @@ function publishScreen() {
         console.log(`publish screen stream success: streamID = ${screen_stream.getId()}`);
     }, (e) => {
         console.log(`publish screen stream failed: streamID = ${screen_stream.getId()}`);
-    });
+	});
 }
 
 function unpublishScreen() {
@@ -310,10 +328,14 @@ function unpublishScreen() {
 		return;
 	}
 
+	if (screen_stream === null)
+	{
+		console.log('unpublishScreen error - scrren_stream is null.');
+		return;
+	}
+
 	client.unpublishScreen(screen_stream, (e) => {
 		console.log(`unpublish screen stream success: streamID = ${screen_stream.getId()}`);
-		
-		streams.delete(screen_stream.getId());
     }, (e) => {
         console.log(`unpublish screen stream failed: streamID = ${screen_stream.getId()}`);
     });
@@ -327,6 +349,6 @@ $('#publishScreen').bind('click', () => {
     publishScreen();
 })
 
-$('unpublishScreen').bind('click', () => {
+$('#unpublishScreen').bind('click', () => {
 	unpublishScreen();
 })
