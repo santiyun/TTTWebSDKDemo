@@ -70,12 +70,9 @@ function joinChan() {
         client.subscribe(in_stream, function (event) {
             //successful doing someting, like play remote video or audio.
         },
-            function () {
-                // info.val(info.val() + 'Subscribe stream successful\n');
-            },
-            function (err) {
-                // info.val(info.val() + "Subscribe stream failed" + err + '\n');
-            });
+        function (err) {
+	    // info.val(info.val() + "Subscribe stream failed" + err + '\n');
+        });
     });
 
     client.on('stream-removed', function (evt) {
