@@ -162,11 +162,17 @@ function publishStream() {
 	{
 		Swal.fire('请先[加入房间]');
 		return;
-	}
-
+    }
+    
+    if (videoStream !== null)
+	{
+		Swal.fire('已推流，无需重复推流');
+		return;
+    }
+    
 	let userid = document.getElementById('userid').value;
 
-	let videoStream = RTCObj.createStream({
+	videoStream = RTCObj.createStream({
 		streamID: userid,
 		audio: true,
 		video: true,
@@ -217,14 +223,19 @@ function unpublishStream() {
 		return;
 	}
 
-	if (videoStream === null)
+	if (videoStream === null) {
+		console.log('当前尚未创建 videoStream');
 		return;
-	
+    }
+    
     client.unpublish(videoStream, function () {
         console.log(`unpublish local stream success. steamID: ${videoStream.getId()}`);
 		// optionPublishedStream(videoStream, 'del')
 		
-		streams.delete(videoStream.getId());
+        streams.delete(videoStream.getId());
+        
+        videoStream.close();
+		videoStream = null;
     }, function () {
         console.log('unpublish local stream failed');
     });
@@ -249,7 +260,11 @@ function captureScreenAndAudio() {
 		return;
 	}
 
-	// const appid = $("#appID").val();
+	if (screen_stream !== null)
+	{
+		console.log('屏幕流已创建');
+		return;
+	}
 
     let chanid = document.getElementById("chanid").value;
     let userid = document.getElementById('userid').value;
@@ -278,6 +293,7 @@ function captureScreenAndAudio() {
 // 
 
 function setStreamSEI(mid, type, isScreen) {
+    if(client._role !== "1") return
     let position = {
         "id": 0,
         "h": 0,
@@ -312,7 +328,7 @@ function publishScreen() {
 	}
 
 	if (screen_stream === null) {
-		Swal.fire('请先[采集屏幕流]');
+		console.log('请先[采集屏幕流]');
 		return;
 	}
 
@@ -331,6 +347,12 @@ function unpublishScreen() {
 	{
 		Swal.fire('请先[加入房间]');
 		return;
+    }
+    
+    if (screen_stream === null)
+	{
+		console.log('unpublishScreen error - scrren_stream is null.');
+		return;
 	}
 
 	client.unpublishScreen(screen_stream, (e) => {
@@ -342,12 +364,12 @@ function unpublishScreen() {
     });
 }
 
-document.getElementById("captureScreen", () => {
+document.getElementById("captureScreen").addEventListener("click", () => {
     captureScreenAndAudio()
 })
-document.getElementById("publishScreen", () => {
+document.getElementById("publishScreen").addEventListener("click", () => {
     publishScreen()
 })
-document.getElementById("unpublishScreen", () => {
+document.getElementById("unpublishScreen").addEventListener("click", () => {
     unpublishScreen()
 })
