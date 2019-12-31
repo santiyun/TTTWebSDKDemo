@@ -29,12 +29,12 @@ let sei = {
 }
 
 function joinChan() {
-    const appid = $("#appID").val();
+    const appid = document.getElementById("appID").value;
 
     let chanid = document.getElementById("chanid").value;
     let userid = document.getElementById('userid').value;
-	const userRole = $("#userrole").val();
-    cdnUrl = $('#rtmpUrl').val();
+	const userRole = document.getElementById("userrole").value;
+    cdnUrl = document.getElementById('rtmpUrl').value;
 
     client = RTCObj.createClient({ role: userRole, rtmpUrl: cdnUrl });
 
@@ -59,7 +59,16 @@ function joinChan() {
     });
 
     client.on('peer-leave', (evt) => {
-        console.log('user leaved room. uid=', evt.name);
+        console.log('user leaved room. uid=', evt.userID);
+
+        evt.streams.forEach(stream => {
+            stream.close();
+            document.getElementById("3t_remote" + stream.getId()).remove()
+
+            // remove stream from map
+            remote_stream.delete(stream.getId());
+        });
+        // $('#3t_remote' + stream.getId()).remove();
     });
 
     client.on('stream-added', (evt) => {
@@ -69,13 +78,9 @@ function joinChan() {
         let in_stream = remote_stream.get(stream.getId());
         client.subscribe(in_stream, function (event) {
             //successful doing someting, like play remote video or audio.
-        },
-            function () {
-                // info.val(info.val() + 'Subscribe stream successful\n');
-            },
-            function (err) {
-                // info.val(info.val() + "Subscribe stream failed" + err + '\n');
-            });
+        }, function (err) {
+            // info.val(info.val() + "Subscribe stream failed" + err + '\n');
+        });
     });
 
     client.on('stream-removed', function (evt) {
@@ -92,7 +97,7 @@ function joinChan() {
         var stream = evt.stream;
         stream.stop();
         stream.close();
-	document.getElementById("3t_remote" + stream.getId()).remove()
+	    document.getElementById("3t_remote" + stream.getId()).remove()
         // $('#3t_remote' + stream.getId()).remove();
 
         // remove stream from map
@@ -110,8 +115,12 @@ function joinChan() {
             // info.val(info.val() + "Subscribe remote stream successfully: " + stream.getId() + "\n");
             var videoId = "3t_remote" + stream.getId();
             // if ($('div#video #' + videoId).length === 0) {
-	    if(!document.getElementById(videoId)) {
-                $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
+            if(!document.getElementById(videoId)) {
+                let video = document.createElement('video');
+                video.id = videoId;
+                video.style.cssText = 'height: 300px; width: 300px; background: black; position:relative; display:inline-block;'
+                document.getElementById('video').append(video)
+                    // $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
             }
 
             stream.play('3t_remote' + stream.getId());
@@ -138,14 +147,12 @@ function leaveChan() {
         client.close();
 	}
 }
-
-$('#joinChan').bind('click', () => {
-    return joinChan();
-});
-
-$('#leaveChan').bind('click', () => {
-    return leaveChan();
-});
+document.getElementById("joinChan").addEventListener("click", () => {
+    joinChan()
+})
+document.getElementById("leaveChan").addEventListener("click", () => {
+    leaveChan()
+})
 
 let videoStream = null;
 // 
@@ -166,13 +173,24 @@ function publishStream() {
 		screen: false
 	});
 
+    window.ls = videoStream
+    document.getElementById('setInputVolume').addEventListener('change', (e) => {
+        videoStream.setInputVolume(+e.target.value)
+    })
 	videoStream.init(function () {
-		$('div#video').append('<div id="div_3t_local"><video autoplay muted id="3t_local" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video><div id="local_info"></div></div>');
+
+        let video = document.createElement("video");
+        video.id = '3t_local';
+        video.muted = true;
+        video.style.cssText = "height: 300px; width: 300px; background: black; position: relative; display: inline-block;"
+
+        document.getElementById('video').append(video)
+		// $('div#video').append('<div id="div_3t_local"><video autoplay muted id="3t_local" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video><div id="local_info"></div></div>');
 		videoStream.play('3t_local');
 		streams.set(videoStream.getId(), videoStream);
 
 		// set video profile
-		let resolution = $('#resolution option:selected').text();
+		let resolution = document.getElementById('resolution').value;
 		videoStream.setVideoProfile(resolution, (msg) => { 
 			console.log(`setVideoProfile succ: ${resolution}`);
 		}, (e) => {
@@ -212,11 +230,11 @@ function unpublishStream() {
     });
 }
 
-$('#publishStream').bind('click', () => {
+document.getElementById("publishStream").addEventListener('click', () => {
     publishStream();
 })
 
-$('#unpublishStream').bind('click', () => {
+document.getElementById("unpublishStream").addEventListener('click', () => {
     unpublishStream();
 })
 
@@ -231,7 +249,7 @@ function captureScreenAndAudio() {
 		return;
 	}
 
-	const appid = $("#appID").val();
+	// const appid = $("#appID").val();
 
     let chanid = document.getElementById("chanid").value;
     let userid = document.getElementById('userid').value;
@@ -240,9 +258,14 @@ function captureScreenAndAudio() {
     screen_stream = RTCObj.createStream({ streamID: userid + '-screen-audio', userID: userid, video: false, audio: true, screen: true });
     screen_stream.init(() => {
 		streams.set(screen_stream.getId(), screen_stream);
-		
+        
+        let video = document.createElement("video");
+        video.id = '3t_local' + screen_stream.getId();
+        video.muted = true;
+        video.style.cssText = "height: 300px; width: 300px; background: black; position: relative; display: inline-block;"
         // optionPublishedStream(screen_stream, 'add');
-        $('div#video').append('<video autoplay muted id="3t_local' + screen_stream.getId() + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
+        document.getElementById("video").append(video)
+        // $('div#video').append('<video autoplay muted id="3t_local' + screen_stream.getId() + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
 		screen_stream.play("3t_local" + screen_stream.getId());
 		
         console.log(`screen display -- screen_stream: ${screen_stream.getId()} screen_stream_id: ${screen_stream.innerStreamID}`);
@@ -319,14 +342,12 @@ function unpublishScreen() {
     });
 }
 
-$('#captureScreen').bind('click', () => {
-    captureScreenAndAudio();
+document.getElementById("captureScreen", () => {
+    captureScreenAndAudio()
 })
-
-$('#publishScreen').bind('click', () => {
-    publishScreen();
+document.getElementById("publishScreen", () => {
+    publishScreen()
 })
-
-$('unpublishScreen').bind('click', () => {
-	unpublishScreen();
+document.getElementById("unpublishScreen", () => {
+    unpublishScreen()
 })
