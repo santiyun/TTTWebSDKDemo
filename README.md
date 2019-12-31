@@ -16,7 +16,7 @@ TTTWebSDK is 3T-RTN WEB Access SDK. It is provide complete APIs.
 * npm run start
 
 ## Online demo address
-[Online Demonstrate](https://120_79_141_78.3ttech.cn/latest/index.html)
+[Online Demonstrate](https://stech.3ttech.cn/webdemo/index.html)
 
 ## The tttwebsdk install
 npm install tttwebsdk@latest
