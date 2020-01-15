@@ -506,7 +506,7 @@ function publishStream()
 				videoStream.close();
 				videoStream = null;
 
-				document.getElementById('publishStreamStatus').innerHTML = `<font color="green">未推流</font>`;
+				document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
 			});
 		}, (e) => {
 			text_info.value = text_info.value + `publishStream - videoStream.setVideoProfile failed. - error: ${JSON.stringify(e)}` + '\n';
@@ -524,7 +524,7 @@ function publishStream()
 			videoStream.close();
 			videoStream = null;
 
-			document.getElementById('publishStreamStatus').innerHTML = `<font color="green">未推流</font>`;
+			document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
 		});
 		// 
 	}, (evt) => {
@@ -543,7 +543,7 @@ function publishStream()
 		videoStream.close();
 		videoStream = null;
 
-		document.getElementById('publishStreamStatus').innerHTML = `<font color="green">未推流</font>`;
+		document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
 	});
 }
 
@@ -591,7 +591,7 @@ function _innerUnpublishStream()
         videoStream.close();
 		videoStream = null;
 
-		document.getElementById('publishStreamStatus').innerHTML = `<font color="green">未推流</font>`;
+		document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
     }, () => {
 		text_info.value = text_info.value + '<demo> unpublishStream - client.unpublish local stream failed' + '\n';
         console.log('<demo> unpublishStream - client.unpublish local stream failed');
@@ -608,7 +608,7 @@ function _innerUnpublishStream()
         videoStream.close();
 		videoStream = null;
 
-		document.getElementById('publishStreamStatus').innerHTML = `<font color="green">未推流</font>`;
+		document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
     });
 }
 
@@ -623,19 +623,19 @@ document.getElementById('unpublishStream').addEventListener('click', () => {
 // 
 let screen_stream = null;
 // 
-function captureScreenAndAudio()
+function publishScreen()
 {
 	// 
 	if (tttStatus !== 1)
 	{
-		text_info.value = text_info.value + 'captureScreenAndAudio - 请先[加入房间]' + '\n';
+		text_info.value = text_info.value + 'publishScreen - 请先[加入房间]' + '\n';
 		Swal.fire('请先[加入房间]');
 		return;
 	}
 
 	if (screen_stream !== null)
 	{
-		text_info.value = text_info.value + 'captureScreenAndAudio - 屏幕流已创建' + '\n';
+		text_info.value = text_info.value + 'publishScreen - 屏幕流已创建' + '\n';
 		console.log('屏幕流已创建');
 		return;
 	}
@@ -667,12 +667,48 @@ function captureScreenAndAudio()
         // $('div#video').append('<video autoplay muted id="3t_local' + screen_stream.getId() + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
 		screen_stream.play('3t_local' + screen_stream.getId());
 		
-		text_info.value = text_info.value + `<demo> captureScreenAndAudio - screen_stream.init screen display -- screen_stream: ${screen_stream.getId()} screen_stream_id: ${screen_stream.innerStreamID}` + '\n';
-        console.log(`<demo> captureScreenAndAudio - screen_stream.init screen display -- screen_stream: ${screen_stream.getId()} screen_stream_id: ${screen_stream.innerStreamID}`);
+		// TODO : 
+		client.publishScreen(screen_stream, (e) => {
+			const mid = screen_stream.innerStreamID;
+			setStreamSEI(mid, 'add', true);
+			text_info.value = text_info.value + `<demo> publishScreen - client.publishScreen screen stream ${screen_stream.getId()} success.` + '\n';
+			console.log(`<demo> publishScreen - client.publishScreen screen stream ${screen_stream.getId()} success.`);
+	
+			hasPublishScreen = true;
+	
+			document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
+		}, (e) => {
+			text_info.value = text_info.value + `<demo> publishScreen - client.publishScreen screen stream ${screen_stream.getId()} failed.` + '\n';
+			console.log(`<demo> publishScreen - client.publishScreen screen stream ${screen_stream.getId()} failed.`);
+
+			let obj = document.getElementById('3t_local' + screen_stream.getId());
+			if (obj)
+			{
+				obj.remove();
+			}
+			// 
+			streams.delete(screen_stream.getId());
+			
+			screen_stream.close();
+			screen_stream = null;
+
+			document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
+		});
     }, (err) => {
-		text_info.value = text_info.value + 'captureScreenAndAudio - screen_stream.init local screen stream init failed.' + '\n';
-        console.log('<demo> captureScreenAndAudio - screen_stream.init local screen stream init failed.');
-    });
+		text_info.value = text_info.value + 'publishScreen - screen_stream.init local screen stream init failed.' + '\n';
+        console.log('<demo> publishScreen - screen_stream.init local screen stream init failed.');
+
+		let obj = document.getElementById('3t_local' + screen_stream.getId());
+		if (obj)
+		{
+			obj.remove();
+		}
+		// 
+		streams.delete(screen_stream.getId());
+		
+		screen_stream.close();
+		screen_stream = null;
+});
 
     // streamEvents(screen_stream);
 }
@@ -710,6 +746,7 @@ function setStreamSEI(mid, type, isScreen)
     client.setSEI(mid, type, isScreen, sei);
 };
 
+/*
 function publishScreen()
 {
 	// 
@@ -740,10 +777,10 @@ function publishScreen()
 		text_info.value = text_info.value + `<demo> publishScreen - client.publishScreen screen stream ${screen_stream.getId()} failed.` + '\n';
 		console.log(`<demo> publishScreen - client.publishScreen screen stream ${screen_stream.getId()} failed.`);
 		
-		document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
+		document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
     });
 }
-
+*/
 function unpublishScreen() {
 	// 
 	if (tttStatus !== 1)
@@ -774,22 +811,42 @@ function _innerUnpublishScreen()
 		text_info.value = text_info.value + `<demo> unpublishScreen - client.unpublish screen stream ${screen_stream.getId()} success.` + '\n';
 		console.log(`<demo> unpublishScreen - client.unpublish screen stream ${screen_stream.getId()} success.`);
 
+		let obj = document.getElementById('3t_local' + screen_stream.getId());
+		if (obj)
+		{
+			obj.remove();
+		}
+		// 
 		streams.delete(screen_stream.getId());
+		
+		screen_stream.close();
+		screen_stream = null;
 
-		document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
+		document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
     }, (e) => {
 		text_info.value = text_info.value + `<demo> unpublishScreen - client.unpublish screen stream ${screen_stream.getId()} failed.` + '\n';
         console.log(`<demo> unpublishScreen - client.unpublish screen stream ${screen_stream.getId()} failed.`);
 
+		let obj = document.getElementById('3t_local' + screen_stream.getId());
+		if (obj)
+		{
+			obj.remove();
+		}
+		// 
 		streams.delete(screen_stream.getId());
+		
+		screen_stream.close();
+		screen_stream = null;
 
-		document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
+		document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
     });
 }
 
+/*
 document.getElementById('captureScreen').addEventListener('click', () => {
     captureScreenAndAudio()
 })
+*/
 
 document.getElementById('publishScreen').addEventListener('click', () => {
     publishScreen()
