@@ -20,6 +20,14 @@ let remote_stream = new Map();
 const stream_net_info = document.getElementById('stream_net_info');
 const text_info = document.getElementById('text_info');
 
+const videoSelect = document.getElementById("cameraDev");
+const audioInputSelect = document.getElementById('micDev');
+const audioOutputSelect = document.getElementById('speakerDev');
+
+let cameraDevId = 'default';
+let micDevId = 'default';
+
+// 
 let tttStatus = 0;
 
 let joinAct = false;
@@ -556,12 +564,16 @@ function publishStream(opts)
 
 	const streamID = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
+	console.log(`publishStream() cameraDevId: ${cameraDevId} micDevId: ${micDevId}`);
+
 	videoStream = RTCObj.createStream({
 		streamID,
 		userID: userid,
 		audio: Boolean(audio),
 		video: Boolean(video),
-		screen: Boolean(screen)
+		screen: Boolean(screen),
+		cameraId: cameraDevId === 'default' ? null : cameraDevId,
+		microphoneId: micDevId === 'default' ? null : micDevId
 	});
 
 	if (!videoStream)
@@ -673,20 +685,8 @@ function publishStream(opts)
 		});
 		// 
 	}, (evt) => {
-		text_info.value = text_info.value + '<demo> publishStream - videoStream.init failed. - error: ${JSON.stringify(evt)}' + '\n';
+		text_info.value = text_info.value + `<demo> publishStream - videoStream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
 		console.log('<demo> publishStream - videoStream.init failed. - error: ' + evt);
-
-		let obj = document.getElementById(videoId);
-		if (obj)
-		{
-			obj.remove();
-		}
-
-		// 
-		streams.delete(videoStream.getId());
-
-		videoStream.close();
-		videoStream = null;
 
 		if (Boolean(screen))
 		{
@@ -830,3 +830,65 @@ document.getElementById('micVolumeSlider').addEventListener('change', () => {
   	document.getElementById('micVolumeSliderValue').innerHTML = (value / 10);
 })
 */
+
+function getDevices() {
+    let message = '';
+    RTCObj.getDevices((devices) => {
+        devices.forEach(function (deviceInfo) {
+            message = '<demo> getDevices - ' + deviceInfo.kind + ': ' + deviceInfo.label + ' id: ' + deviceInfo.deviceId + '\n';
+			text_info.value = text_info.value + message;
+			console.log(message);
+
+            let option = document.createElement('option');
+            option.value = deviceInfo.deviceId;
+            if (deviceInfo.kind === 'audioinput') {
+                option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
+                audioInputSelect.appendChild(option);
+            } else if (deviceInfo.kind === 'audiooutput') {
+                option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
+                audioOutputSelect.appendChild(option);
+            } else if (deviceInfo.kind === 'videoinput') {
+                option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
+                videoSelect.appendChild(option);
+            } else {
+                console.log('Some other kind of source/device: ', deviceInfo);
+            }
+		});
+		
+		// 
+		let option = document.createElement('option');
+		option.value = 'default';
+
+		option.text = 'Default';
+		audioInputSelect.appendChild(option);
+
+		option.text = 'Default';
+		audioOutputSelect.appendChild(option);
+
+		option.text = 'Default';
+		videoSelect.appendChild(option);
+    }, (err) => {
+		const errMsg = err.name + err.message + '\n';
+		text_info.value = text_info.value + errMsg;
+    });
+}
+
+document.getElementById('getDevices').addEventListener('click', () => {
+	getDevices();
+})
+
+document.getElementById('cameraDev').addEventListener('change', () => {
+	let index = videoSelect.selectedIndex;
+
+	cameraDevId = videoSelect.options[index].value;
+
+	console.log(`cameraDev change - cameraDevId: ${cameraDevId}`);
+})
+
+document.getElementById('micDev').addEventListener('change', () => {
+	let index = audioInputSelect.selectedIndex;
+
+	micDevId = audioInputSelect.options[index].value;
+	
+	console.log(`micDev change - micDevId: ${micDevId}`);
+})

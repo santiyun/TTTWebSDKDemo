@@ -128,13 +128,37 @@
 		</table>
     </div>
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#987cb9 SIZE=3>
-	<div id='case'>
+	<div>
 		<table>
 			<tr>
-				<td>
-					如下两种示例场景 ------
-				</td>
+				<table>
+					<tr>
+						<td> - </td>
+						<td>
+							<button id="getDevices">获取设备</button>
+						</td>
+					</tr>
+					<tr>
+						<td> - </td>
+						<td>
+							<label for="cameraDev">摄像头</label><select id="cameraDev"></select>
+						</td>
+						<td> - </td>
+						<td>
+							<label for="micDev">MIC</label><select id="micDev"></select>
+						</td>
+						<td> - </td>
+						<td>
+							<label for="speakerDev">speaker</label><select id="speakerDev"></select>
+						</td>
+					</tr>
+				</table>
 			</tr>
+		</table>
+	</div>
+	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#987cb9 SIZE=3>
+	<div>
+		<table>
 			<tr>
 				<td>
 					场景1 : 摄像头流 -- 
@@ -144,7 +168,7 @@
 						<tr>
 							<td>
 								<div>
-									<span>视频分辨率选择</span>
+									<span>视频分辨率</span>
 									<select id="resolution">
 										<option value="240p">240p</option>
 										<option value="360p">360p</option>
@@ -154,7 +178,6 @@
 									</select>
 								</div>
 							</td>
-							<td> - </td>
 							<td>
 								<button id="publishStream">发布摄像头流</button>
 							</td>
@@ -192,6 +215,7 @@
 				<td>
 					<table>
 						<tr>
+							<td> - </td>
 							<td>
 								<button id="publishScreen">发布屏幕流</button>
 							</td>
