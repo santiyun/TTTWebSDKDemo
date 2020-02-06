@@ -1,10 +1,12 @@
-// const TTTRtcWeb = require('../dist/tttwebsdk');
+const TTTRtcWeb = require('tttwebsdk');
 
 import Swal from 'sweetalert2'
 
 let cdnUrl = '';// 'rtmp://stech.3ttech.cn/live/test';
 
-let RTCObj = new window.TTTRtcWeb();
+// let RTCObj = new window.TTTRtcWeb();
+let RTCObj = new TTTRtcWeb();
+
 let client = null;
 let streams = new Map();
 
@@ -58,7 +60,7 @@ function joinChan()
 	
 	// 
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
-	RTCObj.setServerUrl('webmedia6.3ttech.cn');
+	// RTCObj.setServerUrl('webmedia6.3ttech.cn');
 
     client = RTCObj.createClient({ role: userRole, rtmpUrl: cdnUrl });
  
@@ -78,7 +80,31 @@ function joinChan()
 			// 
 			intv = setInterval(() => {
 				stream_net_info.value = `${JSON.stringify(client.getNetState())}`;
-			}, 1000);
+				// 
+				client.getRemoteAudioStats((audioStats) => {
+					audioStats.forEach((value, key) => {
+						console.log(`<STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+					});
+				});
+				// 
+				client.getRemoteVideoStats((videoStats) => {
+					videoStats.forEach((value, key) => {
+						console.log(`<STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+					});
+				});
+				// 
+				client.getLocalAudioStats((audioStats) => {
+					audioStats.forEach((value, key) => {
+						console.log(`<STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+					});
+				});
+				// 
+				client.getLocalVideoStats((videoStats) => {
+					videoStats.forEach((value, key) => {
+						console.log(`<STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+					});
+				});
+			}, 2000);
 			// 
         }, (err) => {
 			tttStatus = 0;
@@ -341,7 +367,8 @@ function joinChan()
                 let video = document.createElement('video');
                 video.id = videoId;
                 video.style.cssText = 'height: 300px; width: 300px; background: black; position:relative; display:inline-block;'
-                document.getElementById('video').append(video);
+				document.getElementById('video').append(video);
+
                 // $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
             }
 
@@ -482,6 +509,23 @@ let gVideoStream = null;
 
 let gScreenStream = null;
 
+function setVideoProfile(prof)
+{
+	if (gVideoStream === null)
+	{
+		return;
+	}
+
+	// set video profile
+	gVideoStream.setVideoProfile(prof, (msg) => {
+		text_info.value = text_info.value + `<demo> setVideoProfile - gVideoStream.setVideoProfile succ. ${prof}` + '\n';
+		console.log(`<demo> setVideoProfile - gVideoStream.setVideoProfile succ: ${prof}`);
+	}, (e) => {
+		text_info.value = text_info.value + `setVideoProfile - gVideoStream.setVideoProfile failed. - error: ${JSON.stringify(e)}` + '\n';
+		console.log('<demo> setVideoProfile - gVideoStream.setVideoProfile - error: ' + e);
+	});
+}
+
 // 
 function publishStream(opts)
 {
@@ -514,6 +558,7 @@ function publishStream(opts)
 
 	videoStream = RTCObj.createStream({
 		streamID,
+		userID: userid,
 		audio: Boolean(audio),
 		video: Boolean(video),
 		screen: Boolean(screen)
@@ -772,3 +817,16 @@ document.getElementById('unpublishScreen').addEventListener('click', () => {
 		screen : true
 	});
 })
+
+document.getElementById('resolution').addEventListener('change', () => {
+	let prof = document.getElementById('resolution').value;
+
+	setVideoProfile(prof);
+})
+
+/*
+document.getElementById('micVolumeSlider').addEventListener('change', () => {
+	var value = document.getElementById('micVolumeSlider').value;
+  	document.getElementById('micVolumeSliderValue').innerHTML = (value / 10);
+})
+*/
