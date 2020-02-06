@@ -574,10 +574,11 @@ function publishStream(opts)
 	}
 
 	let userid = document.getElementById('userid').value;
+	let resolution = Boolean(screen) ? '1080p' : document.getElementById('resolution').value;
 
 	const streamID = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
-	console.log(`publishStream() cameraDevId: ${cameraDevId} micDevId: ${micDevId}`);
+	console.log(`publishStream() cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
 
 	videoStream = RTCObj.createStream({
 		streamID,
@@ -586,7 +587,8 @@ function publishStream(opts)
 		video: Boolean(video),
 		screen: Boolean(screen),
 		cameraId: cameraDevId === 'default' ? null : cameraDevId,
-		microphoneId: micDevId === 'default' ? null : micDevId
+		microphoneId: micDevId === 'default' ? null : micDevId,
+		attributes: { videoProfile : resolution }
 	});
 
 	if (!videoStream)
@@ -608,81 +610,49 @@ function publishStream(opts)
         video.style.cssText = "height: 300px; width: 300px; background: black; position: relative; display: inline-block;"
 
 		document.getElementById('video').append(video);
-		
-		// $('div#video').append('<div id="div_3t_local"><video autoplay muted id="3t_local" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video><div id="local_info"></div></div>');
+
 		videoStream.play(videoId);
 		streams.set(videoStream.innerStreamID, videoStream);
 
-		// set video profile
-		let resolution = Boolean(screen) ? '1080p' : document.getElementById('resolution').value;
-		videoStream.setVideoProfile(resolution, (msg) => {
-			text_info.value = text_info.value + `<demo> publishStream - videoStream.setVideoProfile succ. ${resolution}` + '\n';
-			console.log(`<demo> publishStream - videoStream.setVideoProfile succ: ${resolution}`);
+		// 
+		client.publish(videoStream, () => {
+			// 
+			text_info.value = text_info.value + `<demo> publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}` + '\n';
+			console.log(`<demo> publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}`);
 
 			// 
-			client.publish(videoStream, () => {
-				// 
-				text_info.value = text_info.value + `<demo> publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}` + '\n';
-				console.log(`<demo> publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}`);
+			hasPublishStream = true;
 
-				// 
-				hasPublishStream = true;
+			if (Boolean(screen))
+			{
+				gScreenStream = videoStream;
 
-				if (Boolean(screen))
-				{
-					gScreenStream = videoStream;
+				document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
+			}
+			else
+			{
+				gVideoStream = videoStream;
 
-					document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
-				}
-				else
-				{
-					gVideoStream = videoStream;
+				document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
+			}
 
-					document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
-				}
+			// cdn 推流
+			const mid = videoStream.innerStreamID;
+			setStreamSEI(mid, false);
 
-				// cdn 推流
-				const mid = videoStream.innerStreamID;
-				setStreamSEI(mid, false);
-
-				// 
-				videoStream.on('volume-change', e => {
-					;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
-				});	
-			}, (evt) => {
-				text_info.value = text_info.value + `publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}` + '\n';
-				console.log(`<demo> publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}`);
-
-				let obj = document.getElementById(videoId);
-				if (obj)
-				{
-					obj.remove();
-				}
-				// 
-				streams.delete(videoStream.innerStreamID);
-				
-				videoStream.close();
-				videoStream = null;
-
-				if (Boolean(screen))
-				{
-					document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
-				}
-				else
-				{
-					document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
-				}
-			});
-		}, (e) => {
-			text_info.value = text_info.value + `publishStream - videoStream.setVideoProfile failed. - error: ${JSON.stringify(e)}` + '\n';
-			console.log('<demo> publishStream - videoStream.setVideoProfile - error: ' + e);
+			// 
+			videoStream.on('volume-change', e => {
+				;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
+			});	
+		}, (evt) => {
+			text_info.value = text_info.value + `publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}` + '\n';
+			console.log(`<demo> publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}`);
 
 			let obj = document.getElementById(videoId);
 			if (obj)
 			{
 				obj.remove();
 			}
-
 			// 
 			streams.delete(videoStream.innerStreamID);
 			
