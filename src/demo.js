@@ -1,14 +1,14 @@
-const TTTRtcWeb = require('tttwebsdk');
+// const TTTRtcWeb = require('tttwebsdk');
 
 import Swal from 'sweetalert2'
 
-let cdnUrl = '';// 'rtmp://stech.3ttech.cn/live/test';
-
-// let RTCObj = new window.TTTRtcWeb();
-let RTCObj = new TTTRtcWeb();
+let RTCObj = new window.TTTRtcWeb();
+//let RTCObj = new TTTRtcWeb();
 
 let client = null;
 let streams = new Map();
+
+let cdnUrl = '';// 'rtmp://stech.3ttech.cn/live/test';
 
 let hasPublishStream = false;
 let hasPublishScreen = false;
@@ -31,22 +31,6 @@ let micDevId = 'default';
 let tttStatus = 0;
 
 let joinAct = false;
-
-let sei = {
-    'ts': '',
-    'ver': '20161227',
-    'canvas': {
-        'bgrad': [
-            232,
-            230,
-            232
-        ],
-        'h': 640,
-        'w': 368
-    },
-    'mid': '',
-    'pos': []
-}
 
 function joinChan()
 {
@@ -215,7 +199,7 @@ function joinChan()
 			if (Boolean(item))
 			{
 				// 
-				let obj = document.getElementById('3t_remote' + item.getId());
+				let obj = document.getElementById('3t_remote' + item.innerStreamID);
 				if (obj)
 				{
 					obj.remove();
@@ -260,18 +244,17 @@ function joinChan()
 			if (!stream)
 				return;
 
-			let obj = document.getElementById('3t_remote' + stream.getId());
+			let obj = document.getElementById('3t_remote' + stream.innerStreamID);
 			if (obj)
 			{
 				obj.remove();
 			}
 
             // remove stream from map
-            remote_stream.delete(stream.getId());
+            remote_stream.delete(stream.innerStreamID);
 
 			stream.close();
         });
-        // $('#3t_remote' + stream.getId()).remove();
 	});
 	
 	client.on('audio-added', (evt) => {
@@ -279,17 +262,17 @@ function joinChan()
 		if (!stream)
 			return;
 			
-		text_info.value = text_info.value + `<demo> - event [audio-added] streamId: ${evt.stream.getId()}` + '\n';
+		text_info.value = text_info.value + `<demo> - event [audio-added] streamId: ${evt.stream.innerStreamID}` + '\n';
 
-		console.log(`<demo> - event [audio-added] streamId: ${evt.stream.getId()}`);
+		console.log(`<demo> - event [audio-added] streamId: ${evt.stream.innerStreamID}`);
 
-		remote_stream.set(stream.getId(), stream);
-        let in_stream = remote_stream.get(stream.getId());
+		remote_stream.set(stream.innerStreamID, stream);
+        let in_stream = remote_stream.get(stream.innerStreamID);
         client.subscribe(in_stream, (event) => {
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.innerStreamID} type: ${evt.stream.type} succ.` + '\n';
             // successful doing someting, like play remote video or audio.
         }, (err) => {
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.innerStreamID} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
             // info.val(info.val() + 'Subscribe stream failed' + err + '\n');
         });
 	})
@@ -299,61 +282,30 @@ function joinChan()
 		if (!stream)
 			return;
 			
-		text_info.value = text_info.value + `<demo> - event [video-added] streamId: ${evt.stream.getId()}` + '\n';
+		text_info.value = text_info.value + `<demo> - event [video-added] streamId: ${evt.stream.innerStreamID}` + '\n';
 
-		console.log(`<demo> - event [video-added] streamId: ${evt.stream.getId()}`);
+		console.log(`<demo> - event [video-added] streamId: ${evt.stream.innerStreamID}`);
 
-        remote_stream.set(stream.getId(), stream);
-        let in_stream = remote_stream.get(stream.getId());
+		remote_stream.set(stream.innerStreamID, stream);
+		// 
+        let in_stream = remote_stream.get(stream.innerStreamID);
         client.subscribe(in_stream, (event) => {
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.innerStreamID} type: ${evt.stream.type} succ.` + '\n';
             // successful doing someting, like play remote video or audio.
         }, (err) => {
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.innerStreamID} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
             // info.val(info.val() + 'Subscribe stream failed' + err + '\n');
         });
 	})
-
-	/*
-    client.on('stream-added', (evt) => {
-		text_info.value = text_info.value + `<demo> - event [stream-added] streamId: ${evt.stream.getId()} type: ${evt.stream.type}` + '\n';
-
-		console.log(`<demo> - event [stream-added] streamId: ${evt.stream.getId()} type: ${evt.stream.type}`);
-		
-        var stream = evt.stream;
-        remote_stream.set(stream.getId(), stream);
-        let in_stream = remote_stream.get(stream.getId());
-        client.subscribe(in_stream, (event) => {
-			text_info.value = text_info.value + `<demo> subscribe stream ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
-            // successful doing someting, like play remote video or audio.
-        }, (err) => {
-			text_info.value = text_info.value + `<demo> subscribe stream ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
-            // info.val(info.val() + 'Subscribe stream failed' + err + '\n');
-        });
-    });
-
-    client.on('stream-removed', (evt) => {
-        var peer = evt;
-		document.getElementById('3t_remote' + peer.name).remove();
-		
-		text_info.value = text_info.value + `<demo> - event [stream-removed] streamId: ${peer.name}` + '\n';
-
-		console.log(`<demo> - event [stream-removed] streamId: ${peer.name}`);
-        // $('#3t_remote' + peer.name).remove();
-
-        // remove stream from map
-        remote_stream.delete(peer.name);
-	});
-	*/
 
     client.on('stream-subscribed', (evt) => {
         var stream = evt.stream;
 		if (!stream)
 			return;
 
-		text_info.value = text_info.value + `<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type}` + '\n';
+		text_info.value = text_info.value + `<demo> - event [stream-subscribed] streamId: ${stream.innerStreamID} stream.type: ${stream.type}` + '\n';
 
-		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type}`);
+		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.innerStreamID} stream.type: ${stream.type}`);
 
 		if(stream.type === 'audio')
 		{
@@ -366,9 +318,10 @@ function joinChan()
 		}
 		else
 		{
+			// setStreamSEI(false);
+
 			// play video
-            // info.val(info.val() + 'Subscribe remote stream successfully: ' + stream.getId() + '\n');
-            var videoId = '3t_remote' + stream.getId();
+            var videoId = '3t_remote' + stream.innerStreamID;
             // if ($('div#video #' + videoId).length === 0) {
 			if(!document.getElementById(videoId))
 			{
@@ -380,7 +333,7 @@ function joinChan()
                 // $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
             }
 
-            stream.play('3t_remote' + stream.getId());
+            stream.play('3t_remote' + stream.innerStreamID);
         }
         
     });
@@ -390,8 +343,8 @@ function joinChan()
 		if (!stream)
 			return;
 
-		text_info.value = text_info.value + `<demo> - event [video-mute] streamId: ${stream.getId()}` + '\n';
-		console.log(`<demo> - event [video-mute] streamId: ${stream.getId()}`);
+		text_info.value = text_info.value + `<demo> - event [video-mute] streamId: ${stream.innerStreamID}` + '\n';
+		console.log(`<demo> - event [video-mute] streamId: ${stream.innerStreamID}`);
 
 		stream._video.style.backgroundColor = 'transparent';
 		stream._video.srcObject = null;
@@ -399,7 +352,6 @@ function joinChan()
 
 		// visibility: hidden
 		
-    	// document.getElementById('3t_remote' + stream.getId())
 	});
 	
 	client.on('video-unmute', (evt) => {
@@ -407,14 +359,12 @@ function joinChan()
 		if (!stream)
 			return;
 			
-		text_info.value = text_info.value + `<demo> - event [video-unmute] streamId: ${stream.getId()}` + '\n';
-		console.log(`<demo> - event [video-unmute] streamId: ${stream.getId()}`);
+		text_info.value = text_info.value + `<demo> - event [video-unmute] streamId: ${stream.innerStreamID}` + '\n';
+		console.log(`<demo> - event [video-unmute] streamId: ${stream.innerStreamID}`);
 		
 		stream._video.style.backgroundColor = '#000';
 		stream._video.srcObject = stream._streamObj;
 		stream._video.poster = '';
-
-    	// document.getElementById('3t_remote' + stream.getId())
 	});
 }
 
@@ -432,7 +382,7 @@ function leaveChan()
 		if (Boolean(item))
 		{
 			// 
-			let obj = document.getElementById('3t_remote' + item.getId());
+			let obj = document.getElementById('3t_remote' + item.innerStreamID);
 			if (obj)
 			{
 				obj.remove();
@@ -481,36 +431,99 @@ document.getElementById('leaveChan').addEventListener('click', () => {
     leaveChan()
 })
 
-function setStreamSEI(mid, type, isScreen)
- {
-    if(client._role !== "1") return
-    let position = {
-        "id": 0,
-        "h": 0,
-        "w": 0,
-        "x": 0,
-        "y": 0,
-        "z": 1
-    };
+function setStreamSEI(mid, isScreen)
+{
+	if(client._role !== "1")
+		return;
+
+	let sei = {
+		'ts': '',
+		'ver': '20161227',
+		'canvas': {
+			'bgrad': [
+				232,
+				230,
+				232
+			],
+			'h': 640,
+			'w': 368
+		},
+		'mid': '',
+		'pos': []
+	}
 
     sei.mid = mid;
-    sei.ts = + new Date();
-    position.id = mid;
-    position.x = 0;
-    position.y = 0;
-    position.w = 1;
-    position.h = 1;
-    position.z = 0;
-	if (type === 'add')
-	{
-        sei.pos.push(position);
-	}
-	else
-	{
-        sei.pos.pop();
-    }
+	sei.ts = + new Date();
 
-    client.setSEI(mid, type, isScreen, sei);
+	let nCnt = remote_stream.size;
+
+	if (!!gVideoStream)
+	{
+		nCnt++;
+	}
+	
+	if (!!gScreenStream)
+	{
+		nCnt++;
+	}
+
+	let isSplit = nCnt > 1;
+	
+	let nIndex = 0;
+	if (!!gVideoStream)
+	{
+		let position = {};
+
+		position.id = gVideoStream.innerStreamID;
+		position.x = 0;
+		position.y = 0;
+		position.w = isSplit ? 0.5 : 1;
+		position.h = isSplit ? 0.5 : 1;
+		position.z = 0;
+
+		sei.pos.push(position);
+
+		nIndex++;
+	}
+	
+	if (!!gScreenStream)
+	{
+		let position = {};
+
+		position.id = gScreenStream.innerStreamID;
+		position.x = (isSplit && nIndex === 1) ? 0.5 : 0;
+		position.y = 0;
+		position.w = isSplit ? 0.5 : 1;
+		position.h = isSplit ? 0.5 : 1;
+		position.z = 0;
+
+		sei.pos.push(position);
+
+		nIndex++;
+	}
+
+	// 
+	remote_stream.forEach((item) =>
+	{
+		if (Boolean(item))
+		{
+			let position = {};
+			// 
+			position.id = item.innerStreamID;
+			position.x = (isSplit && (nIndex === 3)) ? 0 : 0.5;
+			position.y = (isSplit && nIndex > 0) ? 0.5 : 0;
+			position.w = isSplit ? 0.5 : 1;
+			position.h = isSplit ? 0.5 : 1;
+			position.z = 0;
+
+			sei.pos.push(position);
+	
+			nIndex++;
+		}
+	});
+
+	// 
+    client.setSEI(mid, 'add', isScreen, sei);
 };
 
 let gVideoStream = null;
@@ -598,7 +611,7 @@ function publishStream(opts)
 		
 		// $('div#video').append('<div id="div_3t_local"><video autoplay muted id="3t_local" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video><div id="local_info"></div></div>');
 		videoStream.play(videoId);
-		streams.set(videoStream.getId(), videoStream);
+		streams.set(videoStream.innerStreamID, videoStream);
 
 		// set video profile
 		let resolution = Boolean(screen) ? '1080p' : document.getElementById('resolution').value;
@@ -608,11 +621,9 @@ function publishStream(opts)
 
 			// 
 			client.publish(videoStream, () => {
-				const mid = videoStream.innerStreamID;
-				setStreamSEI(mid, 'add', false);
-		
-				text_info.value = text_info.value + `<demo> publishStream - client.publish video succ. videoStream: ${videoStream.getId()}` + '\n';
-				console.log(`<demo> publishStream - client.publish video succ. videoStream: ${videoStream.getId()}`);
+				// 
+				text_info.value = text_info.value + `<demo> publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}` + '\n';
+				console.log(`<demo> publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}`);
 
 				// 
 				hasPublishStream = true;
@@ -630,6 +641,10 @@ function publishStream(opts)
 					document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
 				}
 
+				// cdn 推流
+				const mid = videoStream.innerStreamID;
+				setStreamSEI(mid, false);
+
 				// 
 				videoStream.on('volume-change', e => {
 					;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
@@ -644,7 +659,7 @@ function publishStream(opts)
 					obj.remove();
 				}
 				// 
-				streams.delete(videoStream.getId());
+				streams.delete(videoStream.innerStreamID);
 				
 				videoStream.close();
 				videoStream = null;
@@ -669,7 +684,7 @@ function publishStream(opts)
 			}
 
 			// 
-			streams.delete(videoStream.getId());
+			streams.delete(videoStream.innerStreamID);
 			
 			videoStream.close();
 			videoStream = null;
@@ -739,8 +754,8 @@ function _innerUnpublishStream(opts)
 	}
 
     client.unpublish(videoStream, () => {
-		text_info.value = text_info.value + `<demo> unpublishStream - client.unpublish local stream ${videoStream.getId()} success.` + '\n';
-        console.log(`<demo> unpublishStream - client.unpublish local stream ${videoStream.getId()} success.`);
+		text_info.value = text_info.value + `<demo> unpublishStream - client.unpublish local stream ${videoStream.innerStreamID} success.` + '\n';
+        console.log(`<demo> unpublishStream - client.unpublish local stream ${videoStream.innerStreamID} success.`);
 		// optionPublishedStream(videoStream, 'del')
 
 		let obj = document.getElementById(videoId);
@@ -750,7 +765,7 @@ function _innerUnpublishStream(opts)
 		}
 
 		// 
-        streams.delete(videoStream.getId());
+        streams.delete(videoStream.innerStreamID);
         
         videoStream.close();
 		videoStream = null;
@@ -774,7 +789,7 @@ function _innerUnpublishStream(opts)
 		}
 
 		// 
-        streams.delete(videoStream.getId());
+        streams.delete(videoStream.innerStreamID);
         
         videoStream.close();
 		videoStream = null;
