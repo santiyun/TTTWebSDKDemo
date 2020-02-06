@@ -28,6 +28,22 @@ let cameraDevId = 'default';
 let micDevId = 'default';
 
 // 
+let sei = {
+    'ts': '',
+    'ver': '20161227',
+    'canvas': {
+        'bgrad': [
+            232,
+            230,
+            232
+        ],
+        'h': 640,
+        'w': 368
+    },
+    'mid': '',
+    'pos': []
+}
+// 
 let tttStatus = 0;
 
 let joinAct = false;
@@ -431,6 +447,7 @@ document.getElementById('leaveChan').addEventListener('click', () => {
     leaveChan()
 })
 
+/*
 function setStreamSEI(mid, isScreen)
 {
 	if(client._role !== "1")
@@ -524,6 +541,41 @@ function setStreamSEI(mid, isScreen)
 
 	// 
     client.setSEI(mid, 'add', isScreen, sei);
+};
+*/
+
+function setStreamSEI(mid, type, isScreen)
+ {
+	if(client._role !== "1")
+		return;
+
+    let position = {
+        "id": 0,
+        "h": 0,
+        "w": 0,
+        "x": 0,
+        "y": 0,
+        "z": 1
+    };
+
+    sei.mid = mid;
+    sei.ts = + new Date();
+    position.id = mid;
+    position.x = 0;
+    position.y = 0;
+    position.w = 1;
+    position.h = 1;
+    position.z = 0;
+	if (type === 'add')
+	{
+        sei.pos.push(position);
+	}
+	else
+	{
+        sei.pos.pop();
+    }
+
+    client.setSEI(mid, type, isScreen, sei);
 };
 
 let gVideoStream = null;
@@ -638,7 +690,7 @@ function publishStream(opts)
 
 			// cdn 推流
 			const mid = videoStream.innerStreamID;
-			setStreamSEI(mid, false);
+			setStreamSEI(mid, 'add', false);
 
 			// 
 			videoStream.on('volume-change', e => {
