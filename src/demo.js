@@ -67,6 +67,7 @@ function joinChan()
 	cdnUrl = document.getElementById('rtmpUrl').value;
 	
 	// 
+	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
 	// RTCObj.setServerUrl('webmedia6.3ttech.cn');
 
@@ -91,25 +92,25 @@ function joinChan()
 				// 
 				client.getRemoteAudioStats((audioStats) => {
 					audioStats.forEach((value, key) => {
-						console.log(`<STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						;// console.log(`<STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getRemoteVideoStats((videoStats) => {
 					videoStats.forEach((value, key) => {
-						console.log(`<STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						;// console.log(`<STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getLocalAudioStats((audioStats) => {
 					audioStats.forEach((value, key) => {
-						console.log(`<STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						;// console.log(`<STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getLocalVideoStats((videoStats) => {
 					videoStats.forEach((value, key) => {
-						console.log(`<STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						;// console.log(`<STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 			}, 2000);
@@ -334,8 +335,6 @@ function joinChan()
 		}
 		else
 		{
-			// setStreamSEI(false);
-
 			// play video
             var videoId = '3t_remote' + stream.innerStreamID;
             // if ($('div#video #' + videoId).length === 0) {
@@ -544,7 +543,7 @@ function setStreamSEI(mid, isScreen)
 };
 */
 
-function setStreamSEI(mid, type, isScreen)
+function setStreamSEI(userid, mid, type, isScreen)
  {
 	if(client._role !== "1")
 		return;
@@ -565,7 +564,8 @@ function setStreamSEI(mid, type, isScreen)
     position.y = 0;
     position.w = 1;
     position.h = 1;
-    position.z = 0;
+	position.z = 0;
+	/*
 	if (type === 'add')
 	{
         sei.pos.push(position);
@@ -573,9 +573,12 @@ function setStreamSEI(mid, type, isScreen)
 	else
 	{
         sei.pos.pop();
-    }
+	}
+	*/
+	sei.pos = [];
+	sei.pos.push(position);
 
-    client.setSEI(mid, type, isScreen, sei);
+    client.setSEI(userid, type, isScreen, sei, mid);
 };
 
 let gVideoStream = null;
@@ -690,7 +693,7 @@ function publishStream(opts)
 
 			// cdn 推流
 			const mid = videoStream.innerStreamID;
-			setStreamSEI(mid, 'add', false);
+			setStreamSEI(userid, mid, 'add', false);
 
 			// 
 			videoStream.on('volume-change', e => {
