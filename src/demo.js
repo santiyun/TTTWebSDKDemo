@@ -78,7 +78,7 @@ function joinChan()
 	// 
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
-	RTCObj.setServerUrl('webmedia6.3ttech.cn');
+	// RTCObj.setServerUrl('webmedia6.3ttech.cn');
 
     client = RTCObj.createClient({ role: userRole, rtmpUrl: cdnUrl });
  
@@ -630,9 +630,10 @@ function publishStream(opts)
     
 	let videoStream = Boolean(screen) ? gScreenStream : gVideoStream;
 
-    if (videoStream === null)
+	let userid = document.getElementById('userid').value;
+
+	if (videoStream === null)
 	{
-		let userid = document.getElementById('userid').value;
 		let resolution = Boolean(screen) ? '1080p' : document.getElementById('resolution').value;
 
 		const streamID = Boolean(screen) ? `${userid}-screen` : `${userid}`;
@@ -676,40 +677,27 @@ function publishStream(opts)
 			if (Boolean(screen))
 			{
 				gScreenStream = videoStream;
-
-				document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
 			}
 			else
 			{
 				gVideoStream = videoStream;
-
-				document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
 			}
 
-			_publishStream(videoStream);
+			_publishStream(userid, videoStream, Boolean(screen));
 			// 
 		}, (evt) => {
 			text_info.value = text_info.value + `<demo> publishStream - videoStream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
 			console.log('<demo> publishStream - videoStream.init failed. - error: ' + evt);
-
-			if (Boolean(screen))
-			{
-				document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
-			}
-			else
-			{
-				document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
-			}
 		});
 	}
 	else
 	{
-		_publishStream(videoStream);
+		_publishStream(userid, videoStream, Boolean(screen));
 	}
 	// 
 }
 
-function _publishStream(videoStream)
+function _publishStream(userid, videoStream, isScreen)
 {
 	if (!videoStream)
 	{
@@ -742,7 +730,16 @@ function _publishStream(videoStream)
 		// 
 		videoStream.on('volume-change', e => {
 			;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
-		});	
+		});
+		
+		if (isScreen)
+		{
+			document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
+		}
+		else
+		{
+			document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
+		}
 	}, (evt) => {
 		text_info.value = text_info.value + `_publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}` + '\n';
 		console.log(`<demo> _publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}`);
@@ -753,7 +750,7 @@ function _publishStream(videoStream)
 			obj.remove();
 		}
 
-		if (Boolean(screen))
+		if (isScreen)
 		{
 			document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
 		}
