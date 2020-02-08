@@ -2,9 +2,18 @@
 
 import Swal from 'sweetalert2'
 
+const pkg = require('../package.json');
+
 let RTCObj = new window.TTTRtcWeb();
 //let RTCObj = new TTTRtcWeb();
 
+// 
+let demoVersion = pkg.version;
+let sdkVersion = RTCObj.getVersion();
+
+document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVersion}`;
+
+// 
 let client = null;
 let streams = new Map();
 
@@ -69,7 +78,7 @@ function joinChan()
 	// 
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
-	// RTCObj.setServerUrl('webmedia6.3ttech.cn');
+	RTCObj.setServerUrl('webmedia6.3ttech.cn');
 
     client = RTCObj.createClient({ role: userRole, rtmpUrl: cdnUrl });
  
@@ -621,62 +630,48 @@ function publishStream(opts)
     
 	let videoStream = Boolean(screen) ? gScreenStream : gVideoStream;
 
-    if (videoStream !== null)
+    if (videoStream === null)
 	{
-		Swal.fire('已推流，无需重复推流');
-		text_info.value = text_info.value + 'publishStream - 已推流，无需重复推流' + '\n';
-		return;
-	}
+		let userid = document.getElementById('userid').value;
+		let resolution = Boolean(screen) ? '1080p' : document.getElementById('resolution').value;
 
-	let userid = document.getElementById('userid').value;
-	let resolution = Boolean(screen) ? '1080p' : document.getElementById('resolution').value;
+		const streamID = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
-	const streamID = Boolean(screen) ? `${userid}-screen` : `${userid}`;
+		console.log(`publishStream() cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
 
-	console.log(`publishStream() cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
+		videoStream = RTCObj.createStream({
+			streamID,
+			userID: userid,
+			audio: Boolean(audio),
+			video: Boolean(video),
+			screen: Boolean(screen),
+			cameraId: cameraDevId === 'default' ? null : cameraDevId,
+			microphoneId: micDevId === 'default' ? null : micDevId,
+			attributes: { videoProfile : resolution }
+		});
 
-	videoStream = RTCObj.createStream({
-		streamID,
-		userID: userid,
-		audio: Boolean(audio),
-		video: Boolean(video),
-		screen: Boolean(screen),
-		cameraId: cameraDevId === 'default' ? null : cameraDevId,
-		microphoneId: micDevId === 'default' ? null : micDevId,
-		attributes: { videoProfile : resolution }
-	});
+		if (!videoStream)
+			return;
 
-	if (!videoStream)
-		return;
-
-	window.ls = videoStream;
-	// 
-	/*
-    document.getElementById('setInputVolume').addEventListener('change', (e) => {
-        videoStream.setInputVolume(+e.target.value)
-	})
-	*/
-
-	videoStream.init(() => {
-		const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
-        let video = document.createElement('video');
-        video.id = videoId;
-        video.muted = true;
-        video.style.cssText = "height: 300px; width: 300px; background: black; position: relative; display: inline-block;"
-
-		document.getElementById('video').append(video);
-
-		videoStream.play(videoId);
-		streams.set(videoStream.innerStreamID, videoStream);
-
+		window.ls = videoStream;
 		// 
-		client.publish(videoStream, () => {
-			// 
-			text_info.value = text_info.value + `<demo> publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}` + '\n';
-			console.log(`<demo> publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}`);
+		/*
+		document.getElementById('setInputVolume').addEventListener('change', (e) => {
+			videoStream.setInputVolume(+e.target.value)
+		})
+		*/
 
-			// 
-			hasPublishStream = true;
+		videoStream.init(() => {
+			const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
+			let video = document.createElement('video');
+			video.id = videoId;
+			video.muted = true;
+			video.style.cssText = "height: 300px; width: 300px; background: black; position: relative; display: inline-block;"
+
+			document.getElementById('video').append(video);
+
+			videoStream.play(videoId);
+			streams.set(videoStream.innerStreamID, videoStream);
 
 			if (Boolean(screen))
 			{
@@ -691,28 +686,11 @@ function publishStream(opts)
 				document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
 			}
 
-			// cdn 推流
-			const mid = videoStream.innerStreamID;
-			setStreamSEI(userid, mid, 'add', false);
-
+			_publishStream(videoStream);
 			// 
-			videoStream.on('volume-change', e => {
-				;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
-			});	
 		}, (evt) => {
-			text_info.value = text_info.value + `publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}` + '\n';
-			console.log(`<demo> publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}`);
-
-			let obj = document.getElementById(videoId);
-			if (obj)
-			{
-				obj.remove();
-			}
-			// 
-			streams.delete(videoStream.innerStreamID);
-			
-			videoStream.close();
-			videoStream = null;
+			text_info.value = text_info.value + `<demo> publishStream - videoStream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
+			console.log('<demo> publishStream - videoStream.init failed. - error: ' + evt);
 
 			if (Boolean(screen))
 			{
@@ -723,10 +701,57 @@ function publishStream(opts)
 				document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
 			}
 		});
+	}
+	else
+	{
+		_publishStream(videoStream);
+	}
+	// 
+}
+
+function _publishStream(videoStream)
+{
+	if (!videoStream)
+	{
+		text_info.value = text_info.value + '<demo> _publishStream error - videoStream is null' + '\n';
+		console.log('<demo> _publishStream error - videoStream is null');
+
+		return;
+	}
+
+	if (hasPublishStream)
+	{
+		text_info.value = text_info.value + `<demo> _publishStream - hasPublishStream: ${hasPublishStream} videoStream: ${videoStream.innerStreamID}` + '\n';
+		console.log(`<demo> _publishStream - hasPublishStream: ${hasPublishStream}  videoStream: ${videoStream.innerStreamID}`);
+
+		return;
+	}
+	// 
+	client.publish(videoStream, () => {
 		// 
+		text_info.value = text_info.value + `<demo> _publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}` + '\n';
+		console.log(`<demo> _publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}`);
+
+		// 
+		hasPublishStream = true;
+
+		// cdn 推流
+		const mid = videoStream.innerStreamID;
+		setStreamSEI(userid, mid, 'add', false);
+
+		// 
+		videoStream.on('volume-change', e => {
+			;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
+		});	
 	}, (evt) => {
-		text_info.value = text_info.value + `<demo> publishStream - videoStream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
-		console.log('<demo> publishStream - videoStream.init failed. - error: ' + evt);
+		text_info.value = text_info.value + `_publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}` + '\n';
+		console.log(`<demo> _publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}`);
+
+		let obj = document.getElementById(videoId);
+		if (obj)
+		{
+			obj.remove();
+		}
 
 		if (Boolean(screen))
 		{
@@ -769,20 +794,12 @@ function _innerUnpublishStream(opts)
 		return;
 	}
 
-	if (Boolean(screen))
-	{
-		gScreenStream = null;
-	}
-	else
-	{
-		gVideoStream = null;
-	}
-
     client.unpublish(videoStream, () => {
 		text_info.value = text_info.value + `<demo> unpublishStream - client.unpublish local stream ${videoStream.innerStreamID} success.` + '\n';
         console.log(`<demo> unpublishStream - client.unpublish local stream ${videoStream.innerStreamID} success.`);
 		// optionPublishedStream(videoStream, 'del')
 
+		/* 不再关闭本地视频
 		let obj = document.getElementById(videoId);
 		if (obj)
 		{
@@ -794,6 +811,17 @@ function _innerUnpublishStream(opts)
         
         videoStream.close();
 		videoStream = null;
+			
+		if (Boolean(screen))
+		{
+			gScreenStream = null;
+		}
+		else
+		{
+			gVideoStream = null;
+		}
+
+		*/
 
 		if (Boolean(screen))
 		{
@@ -807,6 +835,7 @@ function _innerUnpublishStream(opts)
 		text_info.value = text_info.value + '<demo> unpublishStream - client.unpublish local stream failed' + '\n';
         console.log('<demo> unpublishStream - client.unpublish local stream failed');
 
+		/*不再关闭本地视频
 		let obj = document.getElementById(videoId);
 		if (obj)
 		{
@@ -818,6 +847,17 @@ function _innerUnpublishStream(opts)
         
         videoStream.close();
 		videoStream = null;
+			
+		if (Boolean(screen))
+		{
+			gScreenStream = null;
+		}
+		else
+		{
+			gVideoStream = null;
+		}
+
+		*/
 
 		if (Boolean(screen))
 		{
