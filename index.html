@@ -82,13 +82,22 @@
 			<tr>
 				<td>用户角色 : </td>
 				<td><input type="text" value="2" id="userrole" /></td>
+			</tr>
+			<tr>
+				<td></td>
 				<td>
 					注 -- 1 : 主播；2 : 副播；3 : 观众 -- 同一个房间内只允许有一个主播
 				</td>
 			</tr>
 			<tr>
 				<td>CDN 推流地址 : </td>
-				<td><input type="text" value="" id="rtmpUrl" /></td>
+				<td>
+					<input type="text" value="" id="rtmpUrl" />
+					<input type="checkbox" id="disableRtmpVideo">只推音频
+				</td>
+			</tr>
+			<tr>
+				<td></td>
 				<td>
 					注 -- 如果要设置推流地址，要确保 [用户角色] 取值为 1
 				</td>				
@@ -179,10 +188,10 @@
 								</div>
 							</td>
 							<td>
-								<button id="publishStream">发布摄像头流</button>
+								<button id="publishStream">发布流</button>
 							</td>
 							<td>
-								<button id="unpublishStream">取消发布摄像头流</button>
+								<button id="unpublishStream">取消发布流</button>
 							</td>
 							<td> - </td>
 							<td>状态 : </td>
@@ -236,7 +245,7 @@
     <div id="testButton" class="grid-container"></div>
     <div id="video" class="grid-container-video"></div>
     <!-- <script src='https://stech.3ttech.cn/websdk/prod/tttwebsdk.js'></script> -->
-    <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script>
+    <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script><!--  -->
     <script type='text/javascript' src='./dist/pagedemo-bundle.js' charset="utf-8"></script>
 </body>
 
