@@ -64,6 +64,7 @@ let xRoomId = getQueryVariable('r');
 let xUserId = getQueryVariable('u');
 let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7';
 let xSpecMic = getQueryVariable('m');
+let xSpecServer = getQueryVariable('h');
 
 autoPublish();
 
@@ -125,6 +126,13 @@ function joinChan(appid, chanid, userid)
 	let disableRtmpVideo = document.getElementById("disableRtmpVideo").checked;
 	
 	// 
+	if (!!xSpecServer)
+	{
+		if (xSpecServer !== '')
+		{
+			RTCObj.setServerUrl(xSpecServer);
+		}
+	}
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
 	// RTCObj.setServerUrl('webmedia6.3ttech.cn');
@@ -396,12 +404,15 @@ function joinChan(appid, chanid, userid)
 
 		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.innerStreamID} stream.type: ${stream.type}`);
 
-		if(stream.type === 'audio')
+		if (stream.hasAudio())
 		{
 			stream.on('volume-change', e => {
-				;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
+				console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
-		
+		}
+
+		if(stream.type === 'audio')
+		{
             // play audio
             stream.play();
 		}
@@ -886,9 +897,12 @@ function _publishStream(userid, videoStream, onSuccess, onFailure)
 		setStreamSEI(userid, mid, 'add', false);
 
 		// 
-		videoStream.on('volume-change', e => {
-			;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
-		});
+		if (videoStream.hasAudio())
+		{
+			videoStream.on('volume-change', e => {
+				console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
+			});
+		}
 	}, (evt) => {
 		text_info.value = text_info.value + `_publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}` + '\n';
 		console.log(`<demo> _publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}`);
