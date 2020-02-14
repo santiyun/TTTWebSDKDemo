@@ -59,10 +59,12 @@ let tttStatus = 0;
 
 let joinAct = false;
 
+// 
+// url: https://...../?auto=1&r=666777&u=111111&h=webmedia4.3ttech.cn
 let isAutoPub = getQueryVariable('auto');
 let xRoomId = getQueryVariable('r');
 let xUserId = getQueryVariable('u');
-let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7';
+let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab8131651339518
 let xSpecMic = getQueryVariable('m');
 let xSpecServer = getQueryVariable('h');
 
@@ -72,7 +74,7 @@ function autoPublish()
 {
 	console.log(`<demo> Load. isAutoPub: ${isAutoPub} xRoomId: ${xRoomId} xUserId: ${xUserId}`);
 
-	if (!!isAutoPub && !!xRoomId && !!xUserId)
+	if (!!xRoomId && !!xUserId)
 	{
 		document.getElementById('chanid').value = xRoomId;
 		document.getElementById('userid').value = xUserId;
@@ -230,6 +232,11 @@ function joinChan(appid, chanid, userid)
 			screen : true
 		});
 	});
+
+	client.on('connection-state-change', (evt) =>{
+		text_info.value = text_info.value + `<demo> - event [connection-state-change] - ${JSON.stringify(evt)}` + '\n';
+		console.log(`<demo> - event [connection-state-change] - ${JSON.stringify(evt)}`);
+	})
 
 	client.on('enter', () => {
 		// 
@@ -407,7 +414,7 @@ function joinChan(appid, chanid, userid)
 		if (stream.hasAudio())
 		{
 			stream.on('volume-change', e => {
-				console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
+				; // console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
 
@@ -900,7 +907,7 @@ function _publishStream(userid, videoStream, onSuccess, onFailure)
 		if (videoStream.hasAudio())
 		{
 			videoStream.on('volume-change', e => {
-				console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
+				;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
 	}, (evt) => {
@@ -1038,6 +1045,32 @@ document.getElementById('unpublishStream').addEventListener('click', () => {
 		screen : false
 	});
 })
+
+let isAudioPaused = false;
+document.getElementById('pauseAudio').addEventListener('click', () => {
+	if (!client)
+	{
+		return;
+	}
+	if (!gVideoStream)
+	{
+		return;
+	}
+
+	if (isAudioPaused)
+	{
+		client.resumeMic(gVideoStream);
+	}
+	else
+	{
+		client.pauseMic(gVideoStream);
+	}
+
+	isAudioPaused = !isAudioPaused;
+
+	document.getElementById('pauseAudio').innerHTML = isAudioPaused ? '取消静音' : '静音';
+})
+
 
 document.getElementById('publishScreen').addEventListener('click', () => {
 	let userid = document.getElementById('userid').value;
