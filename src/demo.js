@@ -430,8 +430,13 @@ function joinChan(appid, chanid, userid)
             // if ($('div#video #' + videoId).length === 0) {
 			if(!document.getElementById(videoId))
 			{
+				// <video id="video" autoplay playsinline controls="true"></video>
                 let video = document.createElement('video');
-                video.id = videoId;
+				video.id = videoId;
+				video.muted = false;
+				video.autoplay = true;
+				video.controls = true;
+				video.setAttribute('playsinline', '');
                 video.style.cssText = 'height: 300px; width: 300px; background: black; position:relative; display:inline-block;'
 				document.getElementById('video').append(video);
 
@@ -790,6 +795,9 @@ function publishStream(opts)
 			let video = document.createElement('video');
 			video.id = videoId;
 			video.muted = true;
+			video.autoplay = true;
+			video.controls = true;
+			video.setAttribute('playsinline', '');
 			video.style.cssText = "height: 300px; width: 300px; background: black; position: relative; display: inline-block;"
 
 			document.getElementById('video').append(video);
@@ -1068,7 +1076,32 @@ document.getElementById('pauseAudio').addEventListener('click', () => {
 
 	isAudioPaused = !isAudioPaused;
 
-	document.getElementById('pauseAudio').innerHTML = isAudioPaused ? '取消静音' : '静音';
+	document.getElementById('pauseAudio').innerHTML = isAudioPaused ? 'resumeAudio' : 'pauseAudio';
+})
+
+let isAudioDisabled = false;
+document.getElementById('disableAudio').addEventListener('click', () => {
+	if (!client)
+	{
+		return;
+	}
+	if (!gVideoStream)
+	{
+		return;
+	}
+
+	if (isAudioDisabled)
+	{
+		gVideoStream.enableAudio();
+	}
+	else
+	{
+		gVideoStream.disableAudio();
+	}
+
+	isAudioDisabled = !isAudioDisabled;
+
+	document.getElementById('disableAudio').innerHTML = isAudioDisabled ? 'enableAudio' : 'disableAudio';
 })
 
 
