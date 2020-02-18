@@ -93,7 +93,8 @@
 				<td>CDN 推流地址 : </td>
 				<td>
 					<input type="text" value="" id="rtmpUrl" />
-					<input type="checkbox" id="disableRtmpVideo">只推音频
+					<input type="checkbox" id="disableRtmpVideo">只推音频</input>
+					<button id="setRtmpUrl">切换CDN</button>
 				</td>
 			</tr>
 			<tr>
@@ -202,12 +203,10 @@
 							<td>
 								<button id="disableAudio">disableAudio</button>
 							</td>
-							<!--
 							<td>
-								<input id="micVolumeSlider" type="range" min="1" max="15" value="10"/>
+								<input id="micVolumeSlider" type="range" min="0" max="15" value="10"/>
 							</td>
 							<td><span id="micVolumeSliderValue">1</span></td>
-							-->
 							<!--
 							<td>
 								<input id="setInputVolume" type="range" min="0" max="1.5" step="0.01" value="1"/>
@@ -251,7 +250,7 @@
     <div id="testButton" class="grid-container"></div>
     <div id="video" class="grid-container-video"></div>
     <!-- <script src='https://stech.3ttech.cn/websdk/prod/tttwebsdk.js'></script> -->
-    <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script><!--  -->
+    <!-- <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script> -->
     <script type='text/javascript' src='./dist/pagedemo-bundle.js' charset="utf-8"></script>
 </body>
 

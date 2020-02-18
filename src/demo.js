@@ -1,11 +1,11 @@
-// const TTTRtcWeb = require('tttwebsdk');
+const TTTRtcWeb = require('tttwebsdk');
 
 import Swal from 'sweetalert2'
 
 const pkg = require('../package.json');
 
-let RTCObj = new window.TTTRtcWeb();
-// let RTCObj = new TTTRtcWeb();
+// let RTCObj = new window.TTTRtcWeb();
+let RTCObj = new TTTRtcWeb();
 
 // 
 let demoVersion = pkg.version;
@@ -139,7 +139,10 @@ function joinChan(appid, chanid, userid)
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
 	// RTCObj.setServerUrl('webmedia6.3ttech.cn');
 
-    client = RTCObj.createClient({ role: userRole, rtmpUrl: cdnUrl, disableRtmpVideo });
+    client = RTCObj.createClient({
+		role: userRole,
+		rtmpUrl: cdnUrl,
+		disableRtmpVideo });
  
     client.init(appid, userid, () => {
         client.join(chanid, () => {
@@ -152,7 +155,7 @@ function joinChan(appid, chanid, userid)
 			tttStatus = 1; // 状态标注为: 登录成功
 
 			document.getElementById('loginStatus').innerHTML = `<font color="green">登录成功</font>`;
-			document.getElementById('loginInfo').innerHTML = `-- role: ${userRole}<br> -- CDN: ${cdnUrl}`;
+			document.getElementById('loginInfo').innerHTML = `-- role: ${userRole}<br>`;
 
 			// 
 			intv = setInterval(() => {
@@ -236,29 +239,30 @@ function joinChan(appid, chanid, userid)
 	client.on('connection-state-change', (evt) =>{
 		text_info.value = text_info.value + `<demo> - event [connection-state-change] - ${JSON.stringify(evt)}` + '\n';
 		console.log(`<demo> - event [connection-state-change] - ${JSON.stringify(evt)}`);
-	})
 
-	client.on('enter', () => {
-		// 
-		let userid = document.getElementById('userid').value;
-		if (hasPublishStream)
+		if (evt.curState === 'CONNECTED')
 		{
-			publishStream({
-				userid,
-				audio  : true,
-				video  : true,
-				screen : false
-			});
-		}
+			// 
+			let userid = document.getElementById('userid').value;
+			if (hasPublishStream)
+			{
+				publishStream({
+					userid,
+					audio  : true,
+					video  : true,
+					screen : false
+				});
+			}
 
-		if (hasPublishScreen)
-		{
-			publishStream({
-				userid,
-				audio  : false,
-				video  : false,
-				screen : true
-			});
+			if (hasPublishScreen)
+			{
+				publishStream({
+					userid,
+					audio  : false,
+					video  : false,
+					screen : true
+				});
+			}
 		}
 	});
 
@@ -430,6 +434,7 @@ function joinChan(appid, chanid, userid)
             // if ($('div#video #' + videoId).length === 0) {
 			if(!document.getElementById(videoId))
 			{
+				// var isIPhone = window.navigator.appVersion.match(/iphone/gi);
 				// <video id="video" autoplay playsinline controls="true"></video>
                 let video = document.createElement('video');
 				video.id = videoId;
@@ -443,7 +448,7 @@ function joinChan(appid, chanid, userid)
                 // $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
             }
 
-            stream.play('3t_remote' + stream.innerStreamID);
+            stream.play('3t_remote' + stream.innerStreamID, true);
         }
         
     });
@@ -571,6 +576,20 @@ function leaveChan()
 	document.getElementById('loginInfo').innerHTML = '';
 }
 
+function setRtmpUrl(url)
+{
+	// 
+	if (tttStatus !== 1)
+	{
+		// Swal.fire('已在房间内，无需重复登录');
+		text_info.value = text_info.value + '<demo> setRtmpUrl - 请先[加入房间]' + '\n';
+
+		return;
+    }
+
+	client.setRtmpUrl(url);
+}
+
 document.getElementById('joinChan').addEventListener('click', () => {	
     const appid = document.getElementById('appID').value;
 
@@ -583,6 +602,12 @@ document.getElementById('joinChan').addEventListener('click', () => {
 document.getElementById('leaveChan').addEventListener('click', () => {
     leaveChan();
 })
+
+document.getElementById('setRtmpUrl').addEventListener('click', () => {
+	cdnUrl = document.getElementById('rtmpUrl').value;
+    setRtmpUrl(cdnUrl);
+})
+
 
 /*
 function setStreamSEI(mid, isScreen)
@@ -776,7 +801,8 @@ function publishStream(opts)
 			screen: Boolean(screen),
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
-			attributes: { videoProfile : resolution }
+			attributes: { videoProfile : resolution },
+			openAudioCtx: true
 		});
 
 		if (!videoStream)
@@ -798,11 +824,11 @@ function publishStream(opts)
 			video.autoplay = true;
 			video.controls = true;
 			video.setAttribute('playsinline', '');
-			video.style.cssText = "height: 300px; width: 300px; background: black; position: relative; display: inline-block;"
+			video.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;'
 
 			document.getElementById('video').append(video);
 
-			videoStream.play(videoId);
+			videoStream.play(videoId, true);
 			streams.set(videoStream.innerStreamID, videoStream);
 
 			if (Boolean(screen))
@@ -1127,12 +1153,15 @@ document.getElementById('resolution').addEventListener('change', () => {
 	setVideoProfile(prof);
 })
 
-/*
 document.getElementById('micVolumeSlider').addEventListener('change', () => {
-	var value = document.getElementById('micVolumeSlider').value;
-  	document.getElementById('micVolumeSliderValue').innerHTML = (value / 10);
+	var value = (document.getElementById('micVolumeSlider').value) / 10;
+	document.getElementById('micVolumeSliderValue').innerHTML = (value);
+	
+	if (!!gVideoStream)
+	{
+		gVideoStream.setInputVolume(+value);
+	}
 })
-*/
 
 function getDevices(callback) {
 	let message = '';
