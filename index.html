@@ -72,7 +72,7 @@
 			</tr>
             <tr>
                 <td>房间ID : </td>
-                <td><input type="text" value="123" id="chanid" /></td>
+                <td><input type="text" value="666777000" id="chanid" /></td>
                 
 			</tr>
 			<tr>
@@ -81,7 +81,13 @@
 			</tr>
 			<tr>
 				<td>用户角色 : </td>
-				<td><input type="text" value="2" id="userrole" /></td>
+				<td>
+					<select id="userRole">
+						<option value=1>主播</option>
+						<option value=2 selected>副播</option>
+						<option value=3>观众</option>
+					</select>
+				</td>
 			</tr>
 			<tr>
 				<td></td>
@@ -100,7 +106,7 @@
 			<tr>
 				<td></td>
 				<td>
-					注 -- 如果要设置推流地址，要确保 [用户角色] 取值为 1
+					注 -- 如果要设置推流地址，要确保 [用户角色] 为 [主播]
 				</td>				
 			</tr>
 			<tr><td></td></tr>
@@ -130,11 +136,22 @@
 	<div id="info" style="display: block; margin: 10px;">
 		<table>
 			<td>
-				<textarea id="text_info" type="text" rows="12" cols="70" readonly="readonly"></textarea>
+				<textarea id="text_info" type="text" rows="8" cols="90" readonly="readonly"></textarea>
 			</td>
+			<!--
+			<td>
+				<video id="mediaSource" playsinline controls muted style="height: 300px; width: 300px; background: black; position: relative; display: inline-block;">
+					<source src="./res/chrome.webm" type="video/webm"/>
+					<source src="./res/video/chrome.mp4" type="video/mp4"/>
+					<p>This browser does not support the video element.</p>
+				</video>	
+			</td>
+			-->
+			<!--
 			<td>
 				<textarea id="stream_net_info" type="text" rows="12" cols="50" readonly="readonly"></textarea>
 			</td>
+			-->
 		</table>
     </div>
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#987cb9 SIZE=3>
@@ -151,15 +168,31 @@
 					<tr>
 						<td> - </td>
 						<td>
-							<label for="cameraDev">摄像头</label><select id="cameraDev"></select>
+							<label for="cameraDev">摄像头 : </label>
+							<select id="cameraDev"></select>
 						</td>
 						<td> - </td>
 						<td>
-							<label for="micDev">MIC</label><select id="micDev"></select>
+							<label for="micDev">MIC : </label>
+							<select id="micDev"></select>
 						</td>
 						<td> - </td>
 						<td>
-							<label for="speakerDev">speaker</label><select id="speakerDev"></select>
+							<label for="speakerDev">Speaker : </label>
+							<select id="speakerDev"></select>
+						</td>
+						<td> - </td>
+						<td>
+							<label for="audioProfile">AudioProfile : </label>
+							<select id="audioProfile">
+								<option value="default" selected>default</option>
+								<option value="speech_low_quality">speech_low_quality(24kbps)</option>
+								<option value="speech_standard">speech_standard(24kbps)</option>
+								<option value="music_standard">music_standard(40kbps)</option>
+								<option value="standard_stereo">standard_stereo(64kbps)</option>
+								<option value="high_quality">high_quality(128kbps)</option>
+								<option value="high_quality_stereo">high_quality_stereo(192kbps)</option>
+							</select>
 						</td>
 					</tr>
 				</table>
@@ -189,14 +222,22 @@
 								</div>
 							</td>
 							<td>
+								<input type="checkbox" id="onlyAudio">纯音频</input>
+							</td>
+							<td>
 								<button id="publishStream">发布流</button>
 							</td>
 							<td>
 								<button id="unpublishStream">取消发布流</button>
 							</td>
-							<td> - </td>
 							<td>状态 : </td>
 							<td><p id = "publishStreamStatus">未推流</p></td>
+						</tr>
+						<tr>
+							<td> - </td>
+							<td>
+								<button id="pauseVideo">pauseVideo</button>
+							</td>
 							<td>
 								<button id="pauseAudio">pauseAudio</button>
 							</td>
@@ -218,6 +259,8 @@
 			</tr>
 		</table>
 	</div>
+	<div id="video" class="grid-container-video"></div>
+
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#000000 SIZE=1>
 	<div>
 		<table>
@@ -245,12 +288,46 @@
 			</tr>
         </table>
 	</div>
+	<div id="screen" class="grid-container-video"></div>
+
+	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#000000 SIZE=1>
+	<div>
+		<table>
+			<tr>
+				<td>
+					场景3 : 媒体文件流 -- 
+				</td>
+				<td></td>
+				<td>
+					<table>
+						<tr>
+							<td> - </td>
+							<td>
+								<button id="publishMediaSource">发布媒体流</button>
+							</td>
+							<td>
+								<button id="unpublishMediaSource">取消发布媒体流</button>
+							</td>
+							<td> - </td>
+							<td>状态 : </td>
+							<td><p id = "publishMediaSourceStatus">未推流</p></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<video id="mediaSource" playsinline controls muted style="height: 300px; width: 300px; background: black; position: relative; display: inline-block;">
+		<source src="./res/chrome.webm" type="video/webm"/>
+		<source src="./res/video/chrome.mp4" type="video/mp4"/>
+		<p>This browser does not support the video element.</p>
+	</video>	
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="95%"color=#987cb9 SIZE=3>
 
     <div id="testButton" class="grid-container"></div>
-    <div id="video" class="grid-container-video"></div>
     <!-- <script src='https://stech.3ttech.cn/websdk/prod/tttwebsdk.js'></script> -->
-    <!-- <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script> -->
+    <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script><!--  -->
     <script type='text/javascript' src='./dist/pagedemo-bundle.js' charset="utf-8"></script>
 </body>
 

@@ -1,11 +1,11 @@
-const TTTRtcWeb = require('tttwebsdk');
+// const TTTRtcWeb = require('tttwebsdk');
 
 import Swal from 'sweetalert2'
 
 const pkg = require('../package.json');
 
-// let RTCObj = new window.TTTRtcWeb();
-let RTCObj = new TTTRtcWeb();
+let RTCObj = new window.TTTRtcWeb();
+// let RTCObj = new TTTRtcWeb();
 
 // 
 let demoVersion = pkg.version;
@@ -19,24 +19,56 @@ document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVe
 let client = null;
 let streams = new Map();
 
-let cdnUrl = '';// 'rtmp://stech.3ttech.cn/live/test';
-
 let hasPublishStream = false;
 let hasPublishScreen = false;
+let hasPublishMediaSource = false;
+
+let gStream = null;
+let gScreenStream = null;
+let gMediaSourceStream = null;
 
 let intv = null;
 
 let remote_stream = new Map();
 
-const stream_net_info = document.getElementById('stream_net_info');
+// const stream_net_info = document.getElementById('stream_net_info');
 const text_info = document.getElementById('text_info');
 
+let sourceMediaStream;
+
+const audioProfileSelect = document.getElementById('audioProfile');
 const videoSelect = document.getElementById("cameraDev");
 const audioInputSelect = document.getElementById('micDev');
 const audioOutputSelect = document.getElementById('speakerDev');
+const userRoleSelect = document.getElementById('userRole');
 
 let cameraDevId = 'default';
 let micDevId = 'default';
+let audioProfile = 'default';
+
+const appIdEle = document.getElementById('appID');
+
+// 
+const rSeed = (Math.random() * 100000000);
+const userId = Math.floor(rSeed) + 1;
+const userIdEle = document.getElementById('userid');
+if (!!userIdEle)
+{
+	userIdEle.value = userId;
+}
+
+const roomIdEle = document.getElementById('chanid');
+
+const rtmpUrlEle = document.getElementById('rtmpUrl');
+const disableRtmpVideoEle = document.getElementById("disableRtmpVideo");
+// 
+let screenEle = document.getElementById('screen');
+let videoEle = document.getElementById('video');
+
+let audioVolumeProgressEle = document.getElementById('audioVolumeProgress');
+let audioVolumeValueEle = document.getElementById('audioVolumeValue');
+// 
+let userRole = 2;
 
 // 
 let sei = {
@@ -48,8 +80,8 @@ let sei = {
             230,
             232
         ],
-        'h': 640,
-        'w': 368
+        'h': 480,
+        'w': 640
     },
     'mid': '',
     'pos': []
@@ -63,7 +95,7 @@ let joinAct = false;
 // url: https://...../?auto=1&r=666777&u=111111&h=webmedia4.3ttech.cn
 let isAutoPub = getQueryVariable('auto');
 let xRoomId = getQueryVariable('r');
-let xUserId = getQueryVariable('u');
+let xUserId = getQueryVariable('u') || userId;
 let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab8131651339518
 let xSpecMic = getQueryVariable('m');
 let xSpecServer = getQueryVariable('h');
@@ -74,10 +106,16 @@ function autoPublish()
 {
 	console.log(`<demo> Load. isAutoPub: ${isAutoPub} xRoomId: ${xRoomId} xUserId: ${xUserId}`);
 
-	if (!!xRoomId && !!xUserId)
+	if (!!xRoomId && !!xUserId && isAutoPub)
 	{
-		document.getElementById('chanid').value = xRoomId;
-		document.getElementById('userid').value = xUserId;
+		if (!!roomIdEle)
+		{
+			roomIdEle.value = xRoomId;
+		}
+		if (!!userIdEle)
+		{
+			userIdEle.value = xUserId;
+		}
 
 		if (xSpecMic)
 		{
@@ -123,10 +161,6 @@ function joinChan(appid, chanid, userid)
 		return;
     }
 
-	const userRole = document.getElementById('userrole').value;
-	cdnUrl = document.getElementById('rtmpUrl').value;
-	let disableRtmpVideo = document.getElementById("disableRtmpVideo").checked;
-	
 	// 
 	if (!!xSpecServer)
 	{
@@ -135,10 +169,16 @@ function joinChan(appid, chanid, userid)
 			RTCObj.setServerUrl(xSpecServer);
 		}
 	}
+
+	RTCObj.setIpLocationAddress('xiaoyao1.3ttech.cn');
+	// RTCObj.setIpLocationPort(8443);
+
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
 	// RTCObj.setServerUrl('webmedia6.3ttech.cn');
 
+	const disableRtmpVideo = (!!disableRtmpVideoEle) ? disableRtmpVideoEle.checked : false;
+	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
     client = RTCObj.createClient({
 		role: userRole,
 		rtmpUrl: cdnUrl,
@@ -159,7 +199,7 @@ function joinChan(appid, chanid, userid)
 
 			// 
 			intv = setInterval(() => {
-				stream_net_info.value = `${JSON.stringify(client.getNetState())}`;
+				// stream_net_info.value = `${JSON.stringify(client.getNetState())}`;
 				// 
 				client.getRemoteAudioStats((audioStats) => {
 					audioStats.forEach((value, key) => {
@@ -184,16 +224,40 @@ function joinChan(appid, chanid, userid)
 						;// console.log(`<STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
+
+				// for volume
+				if (!!gStream)
+				{
+					const vol = gStream.getAudioLevel();
+					console.log(`<AUDIO-VOLUME> - local audio: ${vol}`);
+					
+					// 
+					remote_stream.forEach((item) =>
+					{
+						if (Boolean(item))
+						{
+							// 
+							const rVol = item.getAudioLevel();
+							console.log(`<AUDIO-VOLUME> - remote audio: ${rVol}`);
+						}
+					});
+				}
+
+				// 
+				// for 
 			}, 2000);
 
 			// 
 			if (isAutoPub)
 			{
+				let onlyAudio = document.getElementById('onlyAudio').checked;
+
 				publishStream({
 					userid : xUserId,
 					audio  : true,
-					video  : true,
-					screen : false
+					video  : !Boolean(onlyAudio),
+					screen : false,
+					mediasource : false
 				});
 			}
 			// 
@@ -229,10 +293,19 @@ function joinChan(appid, chanid, userid)
 
 		// 
 		_innerUnpublishStream({
-			screen : false
+			video       : true,
+			screen      : false,
+			mediasource : false
 		});
 		_innerUnpublishStream({
-			screen : true
+			video       : false,
+			screen      : true,
+			mediasource : false
+		});
+		_innerUnpublishStream({
+			video       : false,
+			screen      : false,
+			mediasource : true
 		});
 	});
 
@@ -243,24 +316,38 @@ function joinChan(appid, chanid, userid)
 		if (evt.curState === 'CONNECTED')
 		{
 			// 
-			let userid = document.getElementById('userid').value;
 			if (hasPublishStream)
 			{
+				let onlyAudio = document.getElementById('onlyAudio').checked;
+
 				publishStream({
-					userid,
+					userid : xUserId,
 					audio  : true,
-					video  : true,
-					screen : false
+					video  : !Boolean(onlyAudio),
+					screen : false,
+					mediasource : false
 				});
 			}
 
 			if (hasPublishScreen)
 			{
 				publishStream({
-					userid,
+					userid : xUserId,
 					audio  : false,
 					video  : false,
-					screen : true
+					screen : true,
+					mediasource : false
+				});
+			}
+
+			if (hasPublishMediaSource)
+			{
+				publishStream({
+					userid : xUserId,
+					audio  : false,
+					video  : false,
+					screen : false,
+					mediasource : true
 				});
 			}
 		}
@@ -272,27 +359,7 @@ function joinChan(appid, chanid, userid)
 		text_info.value = text_info.value + '<demo> - event [disconnected]' + '\n';
 		console.log('<demo> - event [disconnected]');
 		
-		// 
-		remote_stream.forEach((item) =>
-		{
-			if (Boolean(item))
-			{
-				// 
-				item.close();
-			}
-		});
-		remote_stream.clear();
-
-		// 
-		document.getElementById('loginStatus').innerHTML = '<font color="red">未登录</font>';
-		document.getElementById('loginInfo').innerHTML = '';
-
-		// 
-		if (intv !== null)
-		{
-			clearInterval(intv);
-			intv = null;
-		}
+		_onClose();
 	});
 
 	client.on('kickout', (evt) => {
@@ -301,41 +368,7 @@ function joinChan(appid, chanid, userid)
 		text_info.value = text_info.value + `<demo> - event [kickout] ${JSON.stringify(evt)}` + '\n';
 		console.log(`<demo> - event [kickout] ${JSON.stringify(evt)}`);
 		
-		// 
-		remote_stream.forEach((item) =>
-		{
-			if (Boolean(item))
-			{
-				// 
-				let obj = document.getElementById('3t_remote' + item.innerStreamID);
-				if (obj)
-				{
-					obj.remove();
-				}
-				// 
-				item.close();
-			}
-		});
-		remote_stream.clear();
-
-		// 
-		unpublishStream({
-			screen : false
-		});
-		unpublishStream({
-			screen : true
-		});
-
-		// 
-		document.getElementById('loginStatus').innerHTML = '<font color="red">未登录</font>';
-		document.getElementById('loginInfo').innerHTML = '';
-
-		// 
-		if (intv !== null)
-		{
-			clearInterval(intv);
-			intv = null;
-		}
+		_onClose();
 	});
 
     client.on('peer-join', (evt) => {
@@ -418,7 +451,7 @@ function joinChan(appid, chanid, userid)
 		if (stream.hasAudio())
 		{
 			stream.on('volume-change', e => {
-				; // console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
+				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
 
@@ -432,7 +465,7 @@ function joinChan(appid, chanid, userid)
 			// play video
             var videoId = '3t_remote' + stream.innerStreamID;
             // if ($('div#video #' + videoId).length === 0) {
-			if(!document.getElementById(videoId))
+			if(!!videoEle && !document.getElementById(videoId))
 			{
 				// var isIPhone = window.navigator.appVersion.match(/iphone/gi);
 				// <video id="video" autoplay playsinline controls="true"></video>
@@ -443,7 +476,7 @@ function joinChan(appid, chanid, userid)
 				video.controls = true;
 				video.setAttribute('playsinline', '');
                 video.style.cssText = 'height: 300px; width: 300px; background: black; position:relative; display:inline-block;'
-				document.getElementById('video').append(video);
+				videoEle.append(video);
 
                 // $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
             }
@@ -462,7 +495,7 @@ function joinChan(appid, chanid, userid)
 		console.log(`<demo> - event [video-mute] streamId: ${stream.innerStreamID}`);
 
 		stream._video.style.backgroundColor = 'transparent';
-		stream._video.srcObject = null;
+		// stream._video.srcObject = null;
 		stream._video.poster = 'http://www.3ttech.cn/favicon.ico';
 
 		// visibility: hidden
@@ -489,8 +522,21 @@ function leaveChan()
 	{
 		text_info.value = text_info.value + 'leaveChan while tttStatus is not 1?' + '\n';
 		return;
-    }
+	}
+	
+	_onClose();
 
+	if (client)
+	{
+        client.leave(() => { }, () => { });
+        client.close();
+	}
+
+	text_info.value = text_info.value + 'leaveChan OK' + '\n';
+}
+
+function _onClose()
+{
 	// 
 	remote_stream.forEach((item) =>
 	{
@@ -508,11 +554,22 @@ function leaveChan()
 	});
 	remote_stream.clear();
 
-	if (client)
-	{
-        client.leave(() => { }, () => { });
-        client.close();
-	}
+	// 
+	unpublishStream({
+		video       : true,
+		screen      : false,
+		mediasource : false
+		});
+	unpublishStream({
+		video       : false,
+		screen      : true,
+		mediasource : false
+		});
+	unpublishStream({
+		video       : false,
+		screen      : false,
+		mediasource : true
+		});
 
 	// 
 	if (intv !== null)
@@ -520,14 +577,6 @@ function leaveChan()
 		clearInterval(intv);
 		intv = null;
 	}
-
-	// 
-	unpublishStream({
-		screen : false
-	});
-	unpublishStream({
-		screen : true
-	});
 
 	// 
 	{
@@ -546,7 +595,7 @@ function leaveChan()
 			gScreenStream = null;
 		}
 	}
-	
+
 	// 
 	{
 		let obj = document.getElementById('3t_local');
@@ -556,19 +605,16 @@ function leaveChan()
 		}
 
 		// 
-		if (!!gVideoStream)
+		if (!!gStream)
 		{
-			streams.delete(gVideoStream.innerStreamID);
+			streams.delete(gStream.innerStreamID);
 			
-			gVideoStream.close();
-			gVideoStream = null;
+			gStream.close();
+			gStream = null;
 		}
 	}
 	// 
 	
-
-	text_info.value = text_info.value + 'leaveChan OK' + '\n';
-
 	tttStatus = 0;
 
 	// 
@@ -590,24 +636,36 @@ function setRtmpUrl(url)
 	client.setRtmpUrl(url);
 }
 
-document.getElementById('joinChan').addEventListener('click', () => {	
-    const appid = document.getElementById('appID').value;
+let joinChanEle = document.getElementById('joinChan');
+if (!!joinChanEle)
+{
+	joinChanEle.addEventListener('click', () => {
+		let appId = appIdEle.value;
+		let rid = roomIdEle.value;
+		let uid = userIdEle.value;
+		joinChan(appId, rid, uid);
+	})
+}
 
-    let chanid = document.getElementById('chanid').value;
-	let userid = document.getElementById('userid').value;
-	
-	joinChan(appid, chanid, userid);
-})
+let leaveChanEle = document.getElementById('leaveChan');
+if (!!leaveChanEle)
+{
+	leaveChanEle.addEventListener('click', () => {
+		leaveChan();
+	})
+}
 
-document.getElementById('leaveChan').addEventListener('click', () => {
-    leaveChan();
-})
-
-document.getElementById('setRtmpUrl').addEventListener('click', () => {
-	cdnUrl = document.getElementById('rtmpUrl').value;
-    setRtmpUrl(cdnUrl);
-})
-
+let setRtmpUrlEle = document.getElementById('setRtmpUrl');
+if (!!setRtmpUrlEle)
+{
+	setRtmpUrlEle.addEventListener('click', () => {
+		if (!!rtmpUrlEle)
+		{
+			const cdnUrl = rtmpUrlEle.value;
+			setRtmpUrl(cdnUrl);
+		}
+	})
+}
 
 /*
 function setStreamSEI(mid, isScreen)
@@ -636,7 +694,7 @@ function setStreamSEI(mid, isScreen)
 
 	let nCnt = remote_stream.size;
 
-	if (!!gVideoStream)
+	if (!!gStream)
 	{
 		nCnt++;
 	}
@@ -649,11 +707,11 @@ function setStreamSEI(mid, isScreen)
 	let isSplit = nCnt > 1;
 	
 	let nIndex = 0;
-	if (!!gVideoStream)
+	if (!!gStream)
 	{
 		let position = {};
 
-		position.id = gVideoStream.innerStreamID;
+		position.id = gStream.innerStreamID;
 		position.x = 0;
 		position.y = 0;
 		position.w = isSplit ? 0.5 : 1;
@@ -744,27 +802,53 @@ function setStreamSEI(userid, mid, type, isScreen)
     client.setSEI(userid, type, isScreen, sei, mid);
 };
 
-let gVideoStream = null;
-
-let gScreenStream = null;
-
 function setVideoProfile(prof)
 {
-	if (gVideoStream === null)
+	if (gStream === null)
 	{
 		return;
 	}
 
 	// set video profile
-	gVideoStream.setVideoProfile(prof, (msg) => {
-		text_info.value = text_info.value + `<demo> setVideoProfile - gVideoStream.setVideoProfile succ. ${prof}` + '\n';
-		console.log(`<demo> setVideoProfile - gVideoStream.setVideoProfile succ: ${prof}`);
+	gStream.setVideoProfile(prof, (msg) => {
+		text_info.value = text_info.value + `<demo> setVideoProfile - gStream.setVideoProfile succ. ${prof}` + '\n';
+		console.log(`<demo> setVideoProfile - gStream.setVideoProfile succ: ${prof}`);
 	}, (e) => {
-		text_info.value = text_info.value + `demo> setVideoProfile - gVideoStream.setVideoProfile failed. - error: ${JSON.stringify(e)}` + '\n';
-		console.log('<demo> setVideoProfile - gVideoStream.setVideoProfile - error: ' + e);
+		text_info.value = text_info.value + `<demo> setVideoProfile - gStream.setVideoProfile failed. - error: ${JSON.stringify(e)}` + '\n';
+		console.log('<demo> setVideoProfile - gStream.setVideoProfile - error: ' + e);
 	});
 }
 
+function createMediaSourceStream()
+{
+	if (!!sourceMediaStream)
+	{
+		return;
+	}
+
+	//
+	const mediaSource = document.getElementById('mediaSource');
+	if (!mediaSource)
+	{
+		return;
+	}
+
+	if (mediaSource.captureStream)
+	{
+		sourceMediaStream = mediaSource.captureStream();
+		console.log('Captured sourceMediaStream from mediaSource with captureStream', sourceMediaStream);
+	}
+	else if (mediaSource.mozCaptureStream)
+	{
+		sourceMediaStream = mediaSource.mozCaptureStream();
+		console.log('Captured sourceMediaStream from mediaSource with mozCaptureStream()', sourceMediaStream);
+	}
+	else
+	{
+		console.log('captureStream() not supported');
+	}
+}
+  
 // 
 function publishStream(opts)
 {
@@ -774,79 +858,150 @@ function publishStream(opts)
 		// Swal.fire('请先[加入房间]');
 		text_info.value = text_info.value + '<demo> publishStream - 请先[加入房间]' + '\n';
 		return;
-    }
+	}
 
 	const {
 		userid,
 		audio,
 		video,
-		screen
+		screen,
+		mediasource
 	} = opts;
-    
-	let videoStream = Boolean(screen) ? gScreenStream : gVideoStream;
 
-	if (videoStream === null)
+	let v = (+video) + (+screen) + (+mediasource);
+	if (v > 1)
 	{
-		let resolution = Boolean(screen) ? '1080p' : document.getElementById('resolution').value;
+		text_info.value = text_info.value + '<demo> publishStream - video/screen/mediasouce 三个参数，仅允许一个取 true' + '\n';
+		return;
+	}
+
+	let mediaStream = null;
+	
+	if (Boolean(screen))
+	{
+		mediaStream = gScreenStream;
+	}
+	else if (Boolean(mediasource))
+	{
+		mediaStream = gMediaSourceStream;
+	}
+	else if (Boolean(video) || Boolean(audio))
+	{
+		mediaStream = gStream;
+	}
+
+	if (mediaStream === null)
+	{
+		let resolutionEle = document.getElementById('resolution');
+		let specRes = (!!resolutionEle) ? resolutionEle.value : '480p';
+		let resolution = Boolean(screen) ? '1080p' : specRes;
 
 		const streamID = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
-		console.log(`demo> publishStream() cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
+		console.log(`<demo> publishStream() userid: ${userid} cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
 
-		videoStream = RTCObj.createStream({
+		// 
+		// 
+		let audioSource = null;
+		let videoSource = null;
+		if (mediasource)
+		{
+			createMediaSourceStream();
+
+			if (!!sourceMediaStream)
+			{
+				const audioTracks = sourceMediaStream.getVideoTracks();
+				if (audioTracks.length > 0)
+					audioSource = audioTracks[0];
+				const videoTracks = sourceMediaStream.getAudioTracks();
+				if (videoTracks.length > 0)
+					videoSource = videoTracks[0];
+			}
+		}
+
+		mediaStream = RTCObj.createStream({
 			streamID,
 			userID: userid,
 			audio: Boolean(audio),
 			video: Boolean(video),
 			screen: Boolean(screen),
+			mediasource: Boolean(mediasource),
+			audioSource,
+			videoSource,
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
 			attributes: { videoProfile : resolution },
 			openAudioCtx: true
 		});
 
-		if (!videoStream)
+		if (!mediaStream)
 			return;
 
-		window.ls = videoStream;
+		window.ls = mediaStream;
 		// 
-		/*
-		document.getElementById('setInputVolume').addEventListener('change', (e) => {
-			videoStream.setInputVolume(+e.target.value)
-		})
-		*/
 
-		videoStream.init(() => {
-			const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
-			let video = document.createElement('video');
-			video.id = videoId;
-			video.muted = true;
-			video.autoplay = true;
-			video.controls = true;
-			video.setAttribute('playsinline', '');
-			video.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;'
+		// 
+		if (audioProfile !== 'default')
+		{
+			mediaStream.setAudioProfile(audioProfile);
+		}
 
-			document.getElementById('video').append(video);
+		mediaStream.init(() => {
+			if (!Boolean(mediasource) && (Boolean(video) || Boolean(screen)))
+			{
+				const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
+				let videoE = document.createElement('video');
+				videoE.id = videoId;
+				videoE.muted = true;
+				videoE.autoplay = true;
+				videoE.controls = true;
+				videoE.setAttribute('playsinline', '');
+				videoE.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;'
 
-			videoStream.play(videoId, true);
-			streams.set(videoStream.innerStreamID, videoStream);
+				if (Boolean(screen))
+				{
+					if (!!screenEle)
+					{
+						screenEle.append(videoE);
+					}
+				}
+				else
+				{
+					if (!!videoEle)
+					{
+						videoEle.append(videoE);
+					}
+				}
+
+				mediaStream.play(videoId, true);
+			}
+			streams.set(mediaStream.innerStreamID, mediaStream);
 
 			if (Boolean(screen))
 			{
-				gScreenStream = videoStream;
+				gScreenStream = mediaStream;
 			}
-			else
+			else if (Boolean(mediasource))
 			{
-				gVideoStream = videoStream;
+				gMediaSourceStream = mediaStream;
+			}
+			else if (Boolean(video) || Boolean(audio))
+			{
+				gStream = mediaStream;
 			}
 
-			_publishStream(userid, videoStream, () => {
+			_publishStream(userid, mediaStream, () => {
 				if (Boolean(screen))
 				{
 					document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
 					hasPublishScreen = true;
 				}
-				else
+				else if (Boolean(mediasource))
+				{
+					document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="green">已推流</font>`;
+					hasPublishMediaSource = true;
+				}
+				else if (Boolean(video) || Boolean(audio))
 				{
 					document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
 					hasPublishStream = true;
@@ -854,48 +1009,60 @@ function publishStream(opts)
 			}, () => {
 				if (Boolean(screen))
 				{
-					document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
+					document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
 				}
-				else
+				else if (Boolean(mediasource))
+				{
+					document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="black">未推流</font>`;
+				}
+				else if (Boolean(video) || Boolean(audio))
 				{
 					document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
 				}
 			});
 			// 
 		}, (evt) => {
-			text_info.value = text_info.value + `<demo> publishStream - videoStream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
-			console.log('<demo> publishStream - videoStream.init failed. - error: ' + evt);
+			text_info.value = text_info.value + `<demo> publishStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
+			console.log('<demo> publishStream - Stream.init failed. - error: ' + evt);
 		});
 	}
 	else
 	{
-		if (Boolean(screen))
+		if (Boolean(screen) && hasPublishScreen)
 		{
-			if (hasPublishScreen)
-			{
-				text_info.value = text_info.value + `<demo> publishStream - hasPublishScreen: ${hasPublishScreen} videoStream: ${videoStream.innerStreamID}` + '\n';
-				console.log(`<demo> publishStream - hasPublishScreen: ${hasPublishScreen}  videoStream: ${videoStream.innerStreamID}`);
+			text_info.value = text_info.value + `<demo> publishStream - hasPublishScreen: ${hasPublishScreen} mediaStream: ${mediaStream.innerStreamID}` + '\n';
+			console.log(`<demo> publishStream - hasPublishScreen: ${hasPublishScreen}  mediaStream: ${mediaStream.innerStreamID}`);
 
-				return;
-			}
+			return;
 		}
-		else
+		else if (Boolean(mediasource) && hasPublishMediaSource)
 		{
-			if (hasPublishStream)
-			{
-				text_info.value = text_info.value + `<demo> publishStream - hasPublishStream: ${hasPublishStream} videoStream: ${videoStream.innerStreamID}` + '\n';
-				console.log(`<demo> publishStream - hasPublishStream: ${hasPublishStream}  videoStream: ${videoStream.innerStreamID}`);
-		
-				return;
-			}
+			text_info.value = text_info.value + `<demo> publishStream - hasPublishMediaSource: ${hasPublishMediaSource} mediaStream: ${mediaStream.innerStreamID}` + '\n';
+			console.log(`<demo> publishStream - hasPublishMediaSource: ${hasPublishMediaSource}  mediaStream: ${mediaStream.innerStreamID}`);
+	
+			return;
 		}
-		_publishStream(userid, videoStream, () => {
+		else if ((Boolean(video) || Boolean(audio)) && hasPublishStream)
+		{
+			text_info.value = text_info.value + `<demo> publishStream - hasPublishStream: ${hasPublishStream} mediaStream: ${mediaStream.innerStreamID}` + '\n';
+			console.log(`<demo> publishStream - hasPublishStream: ${hasPublishStream}  mediaStream: ${mediaStream.innerStreamID}`);
+	
+			return;
+		}
+
+		// 
+		_publishStream(userid, mediaStream, () => {
 			if (Boolean(screen))
 			{
 				document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
 				hasPublishScreen = true;
 			}
-			else
+			else if (Boolean(mediasource))
+			{
+				document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="green">已推流</font>`;
+				hasPublishMediaSource = true;
+			}
+			else if (Boolean(video) || Boolean(audio))
 			{
 				document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
 				hasPublishStream = true;
@@ -903,9 +1070,13 @@ function publishStream(opts)
 		}, () => {
 			if (Boolean(screen))
 			{
-				document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
+				document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
 			}
-			else
+			else if (Boolean(mediasource))
+			{
+				document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="black">未推流</font>`;
+			}
+			else if (Boolean(video) || Boolean(audio))
 			{
 				document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
 			}
@@ -914,39 +1085,43 @@ function publishStream(opts)
 	// 
 }
 
-function _publishStream(userid, videoStream, onSuccess, onFailure)
+function _publishStream(userid, mediaStream, onSuccess, onFailure)
 {
-	if (!videoStream)
+	if (!mediaStream)
 	{
-		text_info.value = text_info.value + '<demo> _publishStream error - videoStream is null' + '\n';
-		console.log('<demo> _publishStream error - videoStream is null');
+		text_info.value = text_info.value + '<demo> _publishStream error - mediaStream is null' + '\n';
+		console.log('<demo> _publishStream error - mediaStream is null');
 
 		return;
 	}
 
 	// 
-	client.publish(videoStream, () => {
+	client.publish(mediaStream, () => {
 		// 
-		text_info.value = text_info.value + `<demo> _publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}` + '\n';
-		console.log(`<demo> _publishStream - client.publish video succ. videoStream: ${videoStream.innerStreamID}`);
+		text_info.value = text_info.value + `<demo> _publishStream - client.publish succ. mediaStream: ${mediaStream.innerStreamID}` + '\n';
+		console.log(`<demo> _publishStream - client.publish succ. mediaStream: ${mediaStream.innerStreamID}`);
 
 		// 
 		onSuccess && onSuccess();
 
 		// cdn 推流
-		const mid = videoStream.innerStreamID;
+		const mid = mediaStream.innerStreamID;
 		setStreamSEI(userid, mid, 'add', false);
 
 		// 
-		if (videoStream.hasAudio())
+		if (mediaStream.hasAudio())
 		{
-			videoStream.on('volume-change', e => {
-				;// console.log(`volume-change -- userID: ${e.userID} volume: ${e.volume}`);
+			mediaStream.on('volume-change', e => {
+				if (!!audioVolumeProgressEle)
+					audioVolumeProgressEle.value = e.volume;
+				if (!!audioVolumeValueEle)
+					audioVolumeValueEle.innerHTML = e.volume;
+				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
 	}, (evt) => {
-		text_info.value = text_info.value + `_publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}` + '\n';
-		console.log(`<demo> _publishStream - client.publish video failed. - error: ${JSON.stringify(evt)}`);
+		text_info.value = text_info.value + `_publishStream - client.publish failed. - error: ${JSON.stringify(evt)}` + '\n';
+		console.log(`<demo> _publishStream - client.publish failed. - error: ${JSON.stringify(evt)}`);
 
 		onFailure && onFailure();
 	});
@@ -954,214 +1129,256 @@ function _publishStream(userid, videoStream, onSuccess, onFailure)
 
 function unpublishStream(opts)
 {
-	/*
-	// 
-	if (tttStatus !== 1)
-	{
-		text_info.value = text_info.value + 'unpublishStream - 请先[加入房间]' + '\n';
-		Swal.fire('请先[加入房间]');
-		return;
-	}
-	*/
-	
 	_innerUnpublishStream(opts);
 }
 
 function _innerUnpublishStream(opts)
 {
-	const { screen } = opts;
-	const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
-	let videoStream = Boolean(screen) ? gScreenStream : gVideoStream;
+	const { video, screen, mediasource } = opts;
+	let mediaStream = null;
 
 	if (Boolean(screen))
 	{
+		mediaStream = gScreenStream;
 		hasPublishScreen = false;
 	}
-	else
+	else if (Boolean(mediasource))
 	{
+		mediaStream = gMediaSourceStream;
+		hasPublishMediaSource = false;
+	}
+	else if (Boolean(video) || Boolean(audio))
+	{
+		mediaStream = gStream;
 		hasPublishStream = false;
 	}
 
-	if (videoStream === null)
+	if (mediaStream === null)
 	{
-		text_info.value = text_info.value + 'unpublishStream - 当前尚未创建 videoStream' + '\n';
-		console.log('<demo> 当前尚未创建 videoStream');
+		text_info.value = text_info.value + 'unpublishStream - 当前尚未创建 mediaStream' + '\n';
+		console.log('<demo> 当前尚未创建 mediaStream');
 		return;
 	}
 
-    client.unpublish(videoStream, () => {
-		text_info.value = text_info.value + `<demo> unpublishStream - client.unpublish local stream ${videoStream.innerStreamID} success.` + '\n';
-        console.log(`<demo> unpublishStream - client.unpublish local stream ${videoStream.innerStreamID} success.`);
-		// optionPublishedStream(videoStream, 'del')
-
-		/* 不再关闭本地视频
-		let obj = document.getElementById(videoId);
-		if (obj)
-		{
-			obj.remove();
-		}
-
-		// 
-        streams.delete(videoStream.innerStreamID);
-        
-        videoStream.close();
-		videoStream = null;
-			
-		if (Boolean(screen))
-		{
-			gScreenStream = null;
-		}
-		else
-		{
-			gVideoStream = null;
-		}
-		*/
-
-		if (Boolean(screen))
-		{
-			document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
-		}
-		else
-		{
-			document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
-		}
+    client.unpublish(mediaStream, () => {
+		text_info.value = text_info.value + `<demo> unpublishStream - client.unpublish local stream ${mediaStream.innerStreamID} success.` + '\n';
+        console.log(`<demo> unpublishStream - client.unpublish local stream ${mediaStream.innerStreamID} success.`);
     }, () => {
 		text_info.value = text_info.value + '<demo> unpublishStream - client.unpublish local stream failed' + '\n';
-        console.log('<demo> unpublishStream - client.unpublish local stream failed');
+		console.log('<demo> unpublishStream - client.unpublish local stream failed');
+	});
 
-		/*不再关闭本地视频
-		let obj = document.getElementById(videoId);
-		if (obj)
-		{
-			obj.remove();
-		}
-
-		// 
-        streams.delete(videoStream.innerStreamID);
-        
-        videoStream.close();
-		videoStream = null;
-			
-		if (Boolean(screen))
-		{
-			gScreenStream = null;
-		}
-		else
-		{
-			gVideoStream = null;
-		}
-		*/
-
-		if (Boolean(screen))
-		{
-			document.getElementById('publishScreenStatus').innerHTML = `<font color="green">未推流</font>`;
-		}
-		else
-		{
-			document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
-		}
-    });
+	//
+	if (Boolean(screen))
+	{
+		document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
+	}
+	else if (Boolean(mediasource))
+	{
+		document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="black">未推流</font>`;
+	}
+	else if (Boolean(video) || Boolean(audio))
+	{
+		document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
+	}
 }
 
-document.getElementById('publishStream').addEventListener('click', () => {
-	let userid = document.getElementById('userid').value;
+let publishStreamEle = document.getElementById('publishStream');
+if (!!publishStreamEle)
+{
+	publishStreamEle.addEventListener('click', () => {
+		let onlyAudio = document.getElementById('onlyAudio').checked;
+	
+		publishStream({
+			userid : xUserId,
+			audio  : true,
+			video  : !Boolean(onlyAudio),
+			screen : false,
+			mediasource : false
+		});
+	})
+}
 
-    publishStream({
-		userid,
-		audio  : true,
-		video  : true,
-		screen : false
-	});
-})
+let unpublishStreamEle = document.getElementById('unpublishStream');
+if (!!unpublishStreamEle)
+{
+	unpublishStreamEle.addEventListener('click', () => {
+		unpublishStream({
+			video       : true,
+			screen      : false,
+			mediasource : false
+		});
+	})
+}
 
-document.getElementById('unpublishStream').addEventListener('click', () => {
-    unpublishStream({
-		screen : false
-	});
-})
+let isVideoPaused = false;
+let pauseVideoEle = document.getElementById('pauseVideo');
+if (!!pauseVideoEle)
+{
+	pauseVideoEle.addEventListener('click', () => {
+		if (!client)
+		{
+			return;
+		}
+		if (!gStream)
+		{
+			return;
+		}
+
+		if (isVideoPaused)
+		{
+			client.resumeWebcam(gStream);
+		}
+		else
+		{
+			client.pauseWebcam(gStream);
+		}
+
+		isVideoPaused = !isVideoPaused;
+
+		pauseVideoEle.innerHTML = isVideoPaused ? 'resumeVideo' : 'pauseVideo';
+	})
+}
 
 let isAudioPaused = false;
-document.getElementById('pauseAudio').addEventListener('click', () => {
-	if (!client)
-	{
-		return;
-	}
-	if (!gVideoStream)
-	{
-		return;
-	}
-
-	if (isAudioPaused)
-	{
-		client.resumeMic(gVideoStream);
-	}
-	else
-	{
-		client.pauseMic(gVideoStream);
-	}
-
-	isAudioPaused = !isAudioPaused;
-
-	document.getElementById('pauseAudio').innerHTML = isAudioPaused ? 'resumeAudio' : 'pauseAudio';
-})
+let pauseAudioEle = document.getElementById('pauseAudio');
+if (!!pauseAudioEle)
+{
+	pauseAudioEle.addEventListener('click', () => {
+		if (!client)
+		{
+			return;
+		}
+		if (!gStream)
+		{
+			return;
+		}
+	
+		if (isAudioPaused)
+		{
+			client.resumeMic(gStream);
+		}
+		else
+		{
+			client.pauseMic(gStream);
+		}
+	
+		isAudioPaused = !isAudioPaused;
+	
+		pauseAudioEle.innerHTML = isAudioPaused ? 'resumeAudio' : 'pauseAudio';
+	})	
+}
 
 let isAudioDisabled = false;
-document.getElementById('disableAudio').addEventListener('click', () => {
-	if (!client)
-	{
-		return;
-	}
-	if (!gVideoStream)
-	{
-		return;
-	}
+let disableAudioEle = document.getElementById('disableAudio');
+if (!!disableAudioEle)
+{
+	disableAudioEle.addEventListener('click', () => {
+		if (!client)
+		{
+			return;
+		}
+		if (!gStream)
+		{
+			return;
+		}
 
-	if (isAudioDisabled)
-	{
-		gVideoStream.enableAudio();
-	}
-	else
-	{
-		gVideoStream.disableAudio();
-	}
+		if (isAudioDisabled)
+		{
+			gStream.enableAudio();
+		}
+		else
+		{
+			gStream.disableAudio();
+		}
 
-	isAudioDisabled = !isAudioDisabled;
+		isAudioDisabled = !isAudioDisabled;
 
-	document.getElementById('disableAudio').innerHTML = isAudioDisabled ? 'enableAudio' : 'disableAudio';
-})
+		disableAudioEle.innerHTML = isAudioDisabled ? 'enableAudio' : 'disableAudio';
+	})
+}
 
+// 
+let publishScreenEle = document.getElementById('publishScreen');
+if (!!publishScreenEle)
+{
+	publishScreenEle.addEventListener('click', () => {
+		publishStream({
+			userid : xUserId,
+			audio  : false,
+			video  : false,
+			screen : true,
+			mediasource : false
+		});
+	})	
+}
 
-document.getElementById('publishScreen').addEventListener('click', () => {
-	let userid = document.getElementById('userid').value;
-    publishStream({
-		userid,
-		audio  : false,
-		video  : false,
-		screen : true
-	});
-})
+let unpublishScreenEle = document.getElementById('unpublishScreen');
+if (!!unpublishScreenEle)
+{
+	unpublishScreenEle.addEventListener('click', () => {
+		unpublishStream({
+			video       : false,
+			screen      : true,
+			mediasource : false
+		});
+	})
+}
 
-document.getElementById('unpublishScreen').addEventListener('click', () => {
-	unpublishStream({
-		screen : true
-	});
-})
+// 
+let publishMediaSourceEle = document.getElementById('publishMediaSource');
+if (!!publishMediaSourceEle)
+{
+	publishMediaSourceEle.addEventListener('click', () => {
+		publishStream({
+			userid : xUserId,
+			audio  : false,
+			video  : false,
+			screen : false,
+			mediasource : true
+		});
+	})	
+}
 
-document.getElementById('resolution').addEventListener('change', () => {
-	let prof = document.getElementById('resolution').value;
+let unpublishMediaSourceEle = document.getElementById('unpublishMediaSource');
+if (!!unpublishMediaSourceEle)
+{
+	unpublishMediaSourceEle.addEventListener('click', () => {
+		unpublishStream({
+			video       : false,
+			screen      : false,
+			mediasource : true
+		});
+	})
+}
 
-	setVideoProfile(prof);
-})
-
-document.getElementById('micVolumeSlider').addEventListener('change', () => {
-	var value = (document.getElementById('micVolumeSlider').value) / 10;
-	document.getElementById('micVolumeSliderValue').innerHTML = (value);
+let resolutionEle = document.getElementById('resolution');
+if (!!resolutionEle)
+{
+	resolutionEle.addEventListener('change', () => {
+		let prof = resolutionEle.value;
 	
-	if (!!gVideoStream)
-	{
-		gVideoStream.setInputVolume(+value);
-	}
-})
+		setVideoProfile(prof);
+	})
+}
+
+let micVolumeSliderEle = document.getElementById('micVolumeSlider');
+if (!!micVolumeSliderEle)
+{
+	micVolumeSliderEle.addEventListener('change', () => {
+		var value = (micVolumeSliderEle.value) / 10;
+		let micVolumeSliderValueEle = document.getElementById('micVolumeSliderValue');
+		if (!!micVolumeSliderValueEle)
+		{
+			micVolumeSliderValueEle.innerHTML = (value);
+		}
+		
+		if (!!gStream)
+		{
+			gStream.setInputVolume(+value);
+		}
+	})
+}
 
 function getDevices(callback) {
 	let message = '';
@@ -1214,22 +1431,58 @@ function getDevices(callback) {
     });
 }
 
-document.getElementById('getDevices').addEventListener('click', () => {
-	getDevices((dev) => {});
-})
+let getDevicesEle = document.getElementById('getDevices');
+if (!!getDevicesEle)
+{
+	getDevicesEle.addEventListener('click', () => {
+		getDevices((dev) => {});
+	})
+}
 
-document.getElementById('cameraDev').addEventListener('change', () => {
-	let index = videoSelect.selectedIndex;
-
-	cameraDevId = videoSelect.options[index].value;
-
-	console.log(`<demo> cameraDev change - cameraDevId: ${cameraDevId}`);
-})
-
-document.getElementById('micDev').addEventListener('change', () => {
-	let index = audioInputSelect.selectedIndex;
-
-	micDevId = audioInputSelect.options[index].value;
+let cameraDevEle = document.getElementById('cameraDev');
+if (!!cameraDevEle)
+{
+	cameraDevEle.addEventListener('change', () => {
+		let index = videoSelect.selectedIndex;
 	
-	console.log(`<demo> micDev change - micDevId: ${micDevId}`);
-})
+		cameraDevId = videoSelect.options[index].value;
+	
+		console.log(`<demo> cameraDev change - cameraDevId: ${cameraDevId}`);
+	})
+}
+
+let micDevEle = document.getElementById('micDev');
+if (!!micDevEle)
+{
+	micDevEle.addEventListener('change', () => {
+		let index = audioInputSelect.selectedIndex;
+	
+		micDevId = audioInputSelect.options[index].value;
+		
+		console.log(`<demo> micDev change - micDevId: ${micDevId}`);
+	})
+}
+
+let audioProfileEle = document.getElementById('audioProfile');
+if (!!audioProfileEle)
+{
+	audioProfileEle.addEventListener('change', () => {
+		let index = audioProfileSelect.selectedIndex;
+	
+		audioProfile = audioProfileSelect.options[index].value;
+		
+		console.log(`<demo> audioProfile change - audioProfile: ${audioProfile}`);
+	})
+}
+
+let userRoleEle = document.getElementById('userRole');
+if (!!userRoleEle)
+{
+	userRoleEle.addEventListener('change', () => {
+		let index = userRoleSelect.selectedIndex;
+
+		userRole = userRoleSelect.options[index].value;
+		
+		console.log(`<demo> userRole change - userRole: ${userRole}`);
+	})
+}
