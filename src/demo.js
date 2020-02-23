@@ -1,17 +1,16 @@
 // const TTTRtcWeb = require('tttwebsdk');
+const { TTTRtcWeb } = require('../lib/tttwebsdk');
 
 import Swal from 'sweetalert2'
 
 const pkg = require('../package.json');
 
-let RTCObj = new window.TTTRtcWeb();
-// let RTCObj = new TTTRtcWeb();
+// let RTCObj = new window.TTTRtcWeb();
+let RTCObj = new TTTRtcWeb();
 
 // 
 let demoVersion = pkg.version;
 let sdkVersion = RTCObj.getVersion();
-
-// 
 
 document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVersion}`;
 
@@ -170,7 +169,7 @@ function joinChan(appid, chanid, userid)
 		}
 	}
 
-	RTCObj.setIpLocationAddress('xiaoyao1.3ttech.cn');
+	// RTCObj.setIpLocationAddress('xiaoyao1.3ttech.cn');
 	// RTCObj.setIpLocationPort(8443);
 
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
@@ -230,11 +229,11 @@ function joinChan(appid, chanid, userid)
 				{
 					const vol = gStream.getAudioLevel();
 					console.log(`<AUDIO-VOLUME> - local audio: ${vol}`);
-					
+
 					// 
 					remote_stream.forEach((item) =>
 					{
-						if (Boolean(item))
+						if (!!item)
 						{
 							// 
 							const rVol = item.getAudioLevel();
@@ -283,7 +282,7 @@ function joinChan(appid, chanid, userid)
 		// 
 		remote_stream.forEach((item) =>
 		{
-			if (Boolean(item))
+			if (!item)
 			{
 				// 
 				item.close();
@@ -540,7 +539,7 @@ function _onClose()
 	// 
 	remote_stream.forEach((item) =>
 	{
-		if (Boolean(item))
+		if (!!item)
 		{
 			// 
 			let obj = document.getElementById('3t_remote' + item.innerStreamID);
@@ -938,7 +937,6 @@ function publishStream(opts)
 			return;
 
 		window.ls = mediaStream;
-		// 
 
 		// 
 		if (audioProfile !== 'default')
@@ -1377,6 +1375,16 @@ if (!!micVolumeSliderEle)
 		{
 			gStream.setInputVolume(+value);
 		}
+
+		// 
+		remote_stream.forEach((item) =>
+		{
+			if (!!item)
+			{
+				// 
+				item.setAudioVolume(+value);
+			}
+		});
 	})
 }
 
