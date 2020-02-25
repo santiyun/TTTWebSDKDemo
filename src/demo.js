@@ -163,7 +163,7 @@ function joinChan(appid, chanid, userid)
 		}
 	}
 
-	RTCObj.setIpLocationAddress('xiaoyao1.3ttech.cn');
+	// RTCObj.setIpLocationAddress('xiaoyao1.3ttech.cn');
 	// RTCObj.setIpLocationPort(8443);
 
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
