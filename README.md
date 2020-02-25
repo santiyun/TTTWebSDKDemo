@@ -15,5 +15,11 @@ TTTWebSDK is 3T-RTN WEB Access SDK. It is provide complete APIs.
 * npm run build <br>
 * npm run start
 
+## demo web
+
+全功能页面: http://localhost:8080/
+纯音频功能页面: http://localhost:8080/audio.html
+
+
 ## Online demo address
 [Online Demonstrate](https://stech.3ttech.cn/webdemo/index.html)

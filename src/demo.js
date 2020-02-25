@@ -1,11 +1,7 @@
-// const TTTRtcWeb = require('tttwebsdk');
 const { TTTRtcWeb } = require('../lib/tttwebsdk');
-
-import Swal from 'sweetalert2'
 
 const pkg = require('../package.json');
 
-// let RTCObj = new window.TTTRtcWeb();
 let RTCObj = new TTTRtcWeb();
 
 // 
@@ -88,8 +84,6 @@ let sei = {
 // 
 let tttStatus = 0;
 
-let joinAct = false;
-
 // 
 // url: https://...../?auto=1&r=666777&u=111111&h=webmedia4.3ttech.cn
 let isAutoPub = getQueryVariable('auto');
@@ -169,7 +163,7 @@ function joinChan(appid, chanid, userid)
 		}
 	}
 
-	// RTCObj.setIpLocationAddress('xiaoyao1.3ttech.cn');
+	RTCObj.setIpLocationAddress('xiaoyao1.3ttech.cn');
 	// RTCObj.setIpLocationPort(8443);
 
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
@@ -202,27 +196,31 @@ function joinChan(appid, chanid, userid)
 				// 
 				client.getRemoteAudioStats((audioStats) => {
 					audioStats.forEach((value, key) => {
-						;// console.log(`<STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						console.log(`<STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getRemoteVideoStats((videoStats) => {
 					videoStats.forEach((value, key) => {
-						;// console.log(`<STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						console.log(`<STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getLocalAudioStats((audioStats) => {
 					audioStats.forEach((value, key) => {
-						;// console.log(`<STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						console.log(`<STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getLocalVideoStats((videoStats) => {
 					videoStats.forEach((value, key) => {
-						;// console.log(`<STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						console.log(`<STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
+
+				// 
+				const rtcStats = RTCObj.getStats();
+				console.log(`<STAT> rtcStats -- ${JSON.stringify(rtcStats)}`);
 
 				// for volume
 				if (!!gStream)
