@@ -1,8 +1,9 @@
-const { TTTRtcWeb } = require('../lib/tttwebsdk');
-
-const pkg = require('../package.json');
+// import TTTRtcWeb from '../lib/tttwebsdk';
+import TTTRtcWeb from 'tttwebsdk'
 
 let RTCObj = new TTTRtcWeb();
+
+const pkg = require('../package.json');
 
 // 
 let demoVersion = pkg.version;
@@ -272,6 +273,10 @@ function joinChan(appid, chanid, userid)
 		text_info.value = text_info.value + `<demo> init failed. - error: ${JSON.stringify(err)}` + '\n';
 		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
 	});
+
+	client.on('device-hot-plug', (e) => {
+		console.log(`<demo> - event [device-hot-plug] - ${JSON.stringify(e)}`);
+	})
 	
 	client.on('reinit', () => {
 		text_info.value = text_info.value + '<demo> - event [reinit]' + '\n';
