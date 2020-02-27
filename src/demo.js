@@ -1,5 +1,5 @@
-// import TTTRtcWeb from '../lib/tttwebsdk';
-import TTTRtcWeb from 'tttwebsdk'
+import TTTRtcWeb from '../lib/tttwebsdk';
+// import TTTRtcWeb from 'tttwebsdk'
 
 let RTCObj = new TTTRtcWeb();
 
@@ -197,37 +197,37 @@ function joinChan(appid, chanid, userid)
 				// 
 				client.getRemoteAudioStats((audioStats) => {
 					audioStats.forEach((value, key) => {
-						console.log(`<STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						;// console.log(`<demo> <STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getRemoteVideoStats((videoStats) => {
 					videoStats.forEach((value, key) => {
-						console.log(`<STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						;// console.log(`<demo> <STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getLocalAudioStats((audioStats) => {
 					audioStats.forEach((value, key) => {
-						console.log(`<STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						;// console.log(`<demo> <STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 				// 
 				client.getLocalVideoStats((videoStats) => {
 					videoStats.forEach((value, key) => {
-						console.log(`<STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+						;// console.log(`<demo> <STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 					});
 				});
 
 				// 
 				const rtcStats = RTCObj.getStats();
-				console.log(`<STAT> rtcStats -- ${JSON.stringify(rtcStats)}`);
+				;// console.log(`<demo> <STAT> rtcStats -- ${JSON.stringify(rtcStats)}`);
 
 				// for volume
 				if (!!gStream)
 				{
 					const vol = gStream.getAudioLevel();
-					console.log(`<AUDIO-VOLUME> - local audio: ${vol}`);
+					;// console.log(`<demo> <AUDIO-VOLUME> - local audio: ${vol}`);
 
 					// 
 					remote_stream.forEach((item) =>
@@ -236,7 +236,7 @@ function joinChan(appid, chanid, userid)
 						{
 							// 
 							const rVol = item.getAudioLevel();
-							console.log(`<AUDIO-VOLUME> - remote audio: ${rVol}`);
+							;// console.log(`<demo> <AUDIO-VOLUME> - remote audio: ${rVol}`);
 						}
 					});
 				}
