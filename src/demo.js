@@ -7,7 +7,8 @@ const pkg = require('../package.json');
 
 // 
 let demoVersion = pkg.version;
-let sdkVersion = RTCObj.getVersion();
+
+let sdkVersion = TTTRtcWeb.getVersion();
 
 document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVersion}`;
 
@@ -164,8 +165,10 @@ function joinChan(appid, chanid, userid)
 		}
 	}
 
-	// RTCObj.setIpLocationAddress('xiaoyao1.3ttech.cn');
-	// RTCObj.setIpLocationPort(8443);
+	TTTRtcWeb.setIpLocationAddress('xiaoyao1.3ttech.cn');
+	TTTRtcWeb.setIpLocationPort(8443);
+
+	TTTRtcWeb.setServerUrl('xiaoyao2.3ttech.cn')
 
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
@@ -195,33 +198,32 @@ function joinChan(appid, chanid, userid)
 			intv = setInterval(() => {
 				// stream_net_info.value = `${JSON.stringify(client.getNetState())}`;
 				// 
-				client.getRemoteAudioStats((audioStats) => {
-					audioStats.forEach((value, key) => {
-						;// console.log(`<demo> <STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
-					});
-				});
-				// 
-				client.getRemoteVideoStats((videoStats) => {
-					videoStats.forEach((value, key) => {
-						;// console.log(`<demo> <STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
-					});
-				});
-				// 
-				client.getLocalAudioStats((audioStats) => {
-					audioStats.forEach((value, key) => {
-						;// console.log(`<demo> <STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
-					});
-				});
-				// 
-				client.getLocalVideoStats((videoStats) => {
-					videoStats.forEach((value, key) => {
-						;// console.log(`<demo> <STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
-					});
+				const rAudioStats = client.remoteAudioStats();
+				rAudioStats.forEach((value, key) => {
+					console.log(`<demo> <STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
 				// 
-				const rtcStats = RTCObj.getStats();
-				;// console.log(`<demo> <STAT> rtcStats -- ${JSON.stringify(rtcStats)}`);
+				const rVideoStats = client.remoteVideoStats();
+				rVideoStats.forEach((value, key) => {
+					console.log(`<demo> <STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+				});
+
+				// 
+				const lAudioStats = client.localAudioStats();
+				lAudioStats.forEach((value, key) => {
+					console.log(`<demo> <STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+				});
+
+				// 
+				const lVideoStats = client.localVideoStats();
+				lVideoStats.forEach((value, key) => {
+					console.log(`<demo> <STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+				});
+
+				// 
+				const rtcStats = client.getStats();
+				console.log(`<demo> <STAT> rtcStats -- ${JSON.stringify(rtcStats)}`);
 
 				// for volume
 				if (!!gStream)
@@ -1212,6 +1214,36 @@ if (!!unpublishStreamEle)
 	})
 }
 
+// 
+let isCameraStoped = false;
+let ctrlCameraEle = document.getElementById('ctrlCamera');
+if (!!ctrlCameraEle)
+{
+	ctrlCameraEle.addEventListener('click', () => {
+		if (!client)
+		{
+			return;
+		}
+		if (!gStream)
+		{
+			return;
+		}
+
+		if (isCameraStoped)
+		{
+			gStream.openCamera();
+		}
+		else
+		{
+			gStream.closeCamera();
+		}
+
+		isCameraStoped = !isCameraStoped;
+
+		ctrlCameraEle.innerHTML = isCameraStoped ? 'startCamera' : 'stopCamera';
+	})
+}
+
 let isVideoPaused = false;
 let pauseVideoEle = document.getElementById('pauseVideo');
 if (!!pauseVideoEle)
@@ -1394,7 +1426,7 @@ if (!!micVolumeSliderEle)
 function getDevices(callback) {
 	let message = '';
 	
-    RTCObj.getDevices((devices) => {
+    TTTRtcWeb.listDevices((devices) => {
 		let micLastDev = 'default';
 		// 
         devices.forEach(function (deviceInfo) {
