@@ -165,10 +165,10 @@ function joinChan(appid, chanid, userid)
 		}
 	}
 
-	TTTRtcWeb.setIpLocationAddress('xiaoyao1.3ttech.cn');
-	TTTRtcWeb.setIpLocationPort(8443);
+	// TTTRtcWeb.setIpLocationAddress('xiaoyao1.3ttech.cn');
+	// TTTRtcWeb.setIpLocationPort(8443);
 
-	TTTRtcWeb.setServerUrl('xiaoyao2.3ttech.cn')
+	// TTTRtcWeb.setServerUrl('xiaoyao2.3ttech.cn')
 
 	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
 	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
