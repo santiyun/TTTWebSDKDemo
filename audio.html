@@ -157,7 +157,7 @@
 						</tr>
 						<tr>
 							<td>
-								<button id="publishStream">发布流</button>
+								<button id="publishAudioStream">发布音频流</button>
 							</td>
 							<td>
 								<button id="unpublishStream">取消发布流</button>
@@ -181,6 +181,17 @@
 								<input id="micVolumeSlider" type="range" min="0" max="15" value="10" size="5"/>
 							</td>
 							<td><span id="micVolumeSliderValue">1</span></td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="micPlayback">micPlayback</input>
+							</td>
+							<td>
+								<label for="switchSpeaker">切换Speaker : </label>
+							</td>
+							<td>
+								<select id="speakerDev"></select>
+							</td>
 						</tr>
 					</table>
 				</td>

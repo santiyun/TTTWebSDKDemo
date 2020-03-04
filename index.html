@@ -73,7 +73,6 @@
             <tr>
                 <td>房间ID : </td>
                 <td><input type="text" value="666777000" id="chanid" /></td>
-                
 			</tr>
 			<tr>
 				<td>用户ID : </td>
@@ -92,14 +91,18 @@
 			<tr>
 				<td></td>
 				<td>
-					注 -- 1 : 主播；2 : 副播；3 : 观众 -- 同一个房间内只允许有一个主播
+					注 -- 1 : 主播；2 : 副播；3 : 观众<br/>
+					注 -- 同一个房间内只允许有一个主播<br/>
+					注 -- [主播]、[副播] 可以推流/拉流；[观众] 只能拉流；
 				</td>
 			</tr>
 			<tr>
 				<td>CDN 推流地址 : </td>
 				<td>
 					<input type="text" value="" id="rtmpUrl" />
+					<!--
 					<input type="checkbox" id="disableRtmpVideo">只推音频</input>
+					-->
 					<button id="setRtmpUrl">切换CDN</button>
 				</td>
 			</tr>
@@ -124,10 +127,6 @@
 					<td></td>
 					<td>登录状态 : </td>
 					<td><p id = "loginStatus">未登录</p></td>
-				</table>
-			</tr>
-			<tr>
-				<table>
 					<td><p id = "loginInfo"> - </p></td>
 				</table>
 			</tr>
@@ -136,7 +135,7 @@
 	<div id="info" style="display: block; margin: 10px;">
 		<table>
 			<td>
-				<textarea id="text_info" type="text" rows="8" cols="90" readonly="readonly"></textarea>
+				<textarea id="text_info" type="text" rows="6" cols="90" readonly="readonly"></textarea>
 			</td>
 			<!--
 			<td>
@@ -162,12 +161,6 @@
 					<tr>
 						<td> - </td>
 						<td>
-							<button id="getDevices">获取设备</button>
-						</td>
-					</tr>
-					<tr>
-						<td> - </td>
-						<td>
 							<label for="cameraDev">摄像头 : </label>
 							<select id="cameraDev"></select>
 						</td>
@@ -181,6 +174,8 @@
 							<label for="speakerDev">Speaker : </label>
 							<select id="speakerDev"></select>
 						</td>
+					</tr>
+					<tr>
 						<td> - </td>
 						<td>
 							<label for="audioProfile">AudioProfile : </label>
@@ -223,10 +218,10 @@
 								</div>
 							</td>
 							<td>
-								<input type="checkbox" id="onlyAudio">纯音频</input>
+								<button id="publishAudioStream">发布纯音频流</button>
 							</td>
 							<td>
-								<button id="publishStream">发布流</button>
+								<button id="publishStream">发布音视频流</button>
 							</td>
 							<td>
 								<button id="unpublishStream">取消发布流</button>
@@ -235,19 +230,25 @@
 							<td><p id = "publishStreamStatus">未推流</p></td>
 						</tr>
 						<tr>
-							<td> - </td>
+							<!--
 							<td>
 								<button id="ctrlCamera">stopCamera</button>
 							</td>
+							-->
+							<td> - </td>
 							<td>
 								<button id="pauseVideo">pauseVideo</button>
 							</td>
 							<td>
 								<button id="pauseAudio">pauseAudio</button>
 							</td>
+							<!--
 							<td>
 								<button id="disableAudio">disableAudio</button>
 							</td>
+							-->
+							<td> - </td>
+							<td>音量调节 : </td>
 							<td>
 								<input id="micVolumeSlider" type="range" min="0" max="15" value="10"/>
 							</td>
@@ -258,6 +259,16 @@
 							</td>
 							-->
 						</tr>
+						<!--
+						<tr>
+							<td>
+								<button id="testOpenCamera">testOpenCamera</button>
+							</td>
+							<td>
+								<button id="testCtrlCamera">testCtrlCamera</button>
+							</td>
+						</tr>
+						-->
 					</table>
 				</td>
 			</tr>
@@ -293,8 +304,9 @@
         </table>
 	</div>
 	<div id="screen" class="grid-container-video"></div>
-
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#000000 SIZE=1>
+
+	<!--
 	<div>
 		<table>
 			<tr>
@@ -326,8 +338,9 @@
 		<source src="./res/chrome.webm" type="video/webm"/>
 		<source src="./res/video/chrome.mp4" type="video/mp4"/>
 		<p>This browser does not support the video element.</p>
-	</video>	
+	</video>
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="95%"color=#987cb9 SIZE=3>
+	-->
 
     <!-- <script src='https://stech.3ttech.cn/websdk/prod/tttwebsdk.js'></script> -->
     <!-- <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script> -->

@@ -41,6 +41,7 @@ const userRoleSelect = document.getElementById('userRole');
 
 let cameraDevId = 'default';
 let micDevId = 'default';
+let speakerDevId = 'default';
 let audioProfile = 'default';
 
 const appIdEle = document.getElementById('appID');
@@ -57,7 +58,6 @@ if (!!userIdEle)
 const roomIdEle = document.getElementById('chanid');
 
 const rtmpUrlEle = document.getElementById('rtmpUrl');
-const disableRtmpVideoEle = document.getElementById("disableRtmpVideo");
 // 
 let screenEle = document.getElementById('screen');
 let videoEle = document.getElementById('video');
@@ -95,6 +95,8 @@ let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab813165133
 let xSpecMic = getQueryVariable('m');
 let xSpecServer = getQueryVariable('h');
 
+getDevices();
+
 autoPublish();
 
 function autoPublish()
@@ -112,17 +114,7 @@ function autoPublish()
 			userIdEle.value = xUserId;
 		}
 
-		if (xSpecMic)
-		{
-			getDevices((dev) => {
-				micDevId = dev;
-				joinChan(xAppId, xRoomId, xUserId);
-			});
-		}
-		else
-		{
-			joinChan(xAppId, xRoomId, xUserId);
-		}
+		joinChan(xAppId, xRoomId, xUserId);
 	}
 	else
 	{
@@ -150,7 +142,6 @@ function joinChan(appid, chanid, userid)
 	// 
 	if (tttStatus === 1)
 	{
-		// Swal.fire('已在房间内，无需重复登录');
 		text_info.value = text_info.value + '已在房间内，无需重复登录' + '\n';
 
 		return;
@@ -161,25 +152,14 @@ function joinChan(appid, chanid, userid)
 	{
 		if (xSpecServer !== '')
 		{
-			RTCObj.setServerUrl(xSpecServer);
+			TTTRtcWeb.setServerUrl(xSpecServer);
 		}
 	}
 
-	// TTTRtcWeb.setIpLocationAddress('xiaoyao1.3ttech.cn');
-	// TTTRtcWeb.setIpLocationPort(8443);
-
-	// TTTRtcWeb.setServerUrl('xiaoyao2.3ttech.cn')
-
-	// RTCObj.setServerUrl('112_125_27_215.3ttech.cn');
-	// RTCObj.setServerUrl('gzeduservice.3ttech.cn');
-	// RTCObj.setServerUrl('webmedia6.3ttech.cn');
-
-	const disableRtmpVideo = (!!disableRtmpVideoEle) ? disableRtmpVideoEle.checked : false;
 	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
     client = RTCObj.createClient({
 		role: userRole,
-		rtmpUrl: cdnUrl,
-		disableRtmpVideo });
+		rtmpUrl: cdnUrl });
  
     client.init(appid, userid, () => {
         client.join(chanid, () => {
@@ -187,8 +167,6 @@ function joinChan(appid, chanid, userid)
 
 			console.log(`<demo> 成功加入房间!! userid: ${userid}`);
 
-			// Swal.fire('成功加入房间!!');
-			
 			tttStatus = 1; // 状态标注为: 登录成功
 
 			document.getElementById('loginStatus').innerHTML = `<font color="green">登录成功</font>`;
@@ -200,30 +178,30 @@ function joinChan(appid, chanid, userid)
 				// 
 				const rAudioStats = client.remoteAudioStats();
 				rAudioStats.forEach((value, key) => {
-					console.log(`<demo> <STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+					; // console.log(`<demo> <STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
 				// 
 				const rVideoStats = client.remoteVideoStats();
 				rVideoStats.forEach((value, key) => {
-					console.log(`<demo> <STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
+					; // console.log(`<demo> <STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
 				// 
 				const lAudioStats = client.localAudioStats();
 				lAudioStats.forEach((value, key) => {
-					console.log(`<demo> <STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+					; // console.log(`<demo> <STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
 				// 
 				const lVideoStats = client.localVideoStats();
 				lVideoStats.forEach((value, key) => {
-					console.log(`<demo> <STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
+					; // console.log(`<demo> <STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
 				// 
 				const rtcStats = client.getStats();
-				console.log(`<demo> <STAT> rtcStats -- ${JSON.stringify(rtcStats)}`);
+				; // console.log(`<demo> <STAT> rtcStats -- ${JSON.stringify(rtcStats)}`);
 
 				// for volume
 				if (!!gStream)
@@ -250,12 +228,10 @@ function joinChan(appid, chanid, userid)
 			// 
 			if (isAutoPub)
 			{
-				let onlyAudio = document.getElementById('onlyAudio').checked;
-
 				publishStream({
 					userid : xUserId,
 					audio  : true,
-					video  : !Boolean(onlyAudio),
+					video  : true,
 					screen : false,
 					mediasource : false
 				});
@@ -316,45 +292,6 @@ function joinChan(appid, chanid, userid)
 	client.on('connection-state-change', (evt) =>{
 		text_info.value = text_info.value + `<demo> - event [connection-state-change] - ${JSON.stringify(evt)}` + '\n';
 		console.log(`<demo> - event [connection-state-change] - ${JSON.stringify(evt)}`);
-
-		if (evt.curState === 'CONNECTED')
-		{
-			// 
-			if (hasPublishStream)
-			{
-				let onlyAudio = document.getElementById('onlyAudio').checked;
-
-				publishStream({
-					userid : xUserId,
-					audio  : true,
-					video  : !Boolean(onlyAudio),
-					screen : false,
-					mediasource : false
-				});
-			}
-
-			if (hasPublishScreen)
-			{
-				publishStream({
-					userid : xUserId,
-					audio  : false,
-					video  : false,
-					screen : true,
-					mediasource : false
-				});
-			}
-
-			if (hasPublishMediaSource)
-			{
-				publishStream({
-					userid : xUserId,
-					audio  : false,
-					video  : false,
-					screen : false,
-					mediasource : true
-				});
-			}
-		}
 	});
 
 	client.on('disconnected', () => {
@@ -447,9 +384,7 @@ function joinChan(appid, chanid, userid)
         var stream = evt.stream;
 		if (!stream)
 			return;
-
 		text_info.value = text_info.value + `<demo> - event [stream-subscribed] streamId: ${stream.innerStreamID} stream.type: ${stream.type}` + '\n';
-
 		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.innerStreamID} stream.type: ${stream.type}`);
 
 		if (stream.hasAudio())
@@ -458,21 +393,15 @@ function joinChan(appid, chanid, userid)
 				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
-
 		if(stream.type === 'audio')
 		{
-            // play audio
             stream.play();
 		}
 		else
 		{
-			// play video
             var videoId = '3t_remote' + stream.innerStreamID;
-            // if ($('div#video #' + videoId).length === 0) {
 			if(!!videoEle && !document.getElementById(videoId))
 			{
-				// var isIPhone = window.navigator.appVersion.match(/iphone/gi);
-				// <video id="video" autoplay playsinline controls="true"></video>
                 let video = document.createElement('video');
 				video.id = videoId;
 				video.muted = false;
@@ -481,13 +410,10 @@ function joinChan(appid, chanid, userid)
 				video.setAttribute('playsinline', '');
                 video.style.cssText = 'height: 300px; width: 300px; background: black; position:relative; display:inline-block;'
 				videoEle.append(video);
-
-                // $('div#video').append('<video autoplay id="' + videoId + '" style="height: 300px; width: 300px; background: black; position:relative; display:inline-block;"></video>');
             }
 
             stream.play('3t_remote' + stream.innerStreamID, true);
         }
-        
     });
 
     client.on('video-mute', (evt) => {
@@ -631,7 +557,6 @@ function setRtmpUrl(url)
 	// 
 	if (tttStatus !== 1)
 	{
-		// Swal.fire('已在房间内，无需重复登录');
 		text_info.value = text_info.value + '<demo> setRtmpUrl - 请先[加入房间]' + '\n';
 
 		return;
@@ -859,7 +784,6 @@ function publishStream(opts)
 	// 
 	if (tttStatus !== 1)
 	{
-		// Swal.fire('请先[加入房间]');
 		text_info.value = text_info.value + '<demo> publishStream - 请先[加入房间]' + '\n';
 		return;
 	}
@@ -978,6 +902,18 @@ function publishStream(opts)
 
 				mediaStream.play(videoId, true);
 			}
+			// 
+			
+			let micPlaybackEle = document.getElementById('micPlayback');
+			if (!!micPlaybackEle)
+			{
+				let micPlayback = micPlaybackEle.checked;
+				if (Boolean(micPlayback))
+				{
+					mediaStream.play();
+				}
+			}
+
 			streams.set(mediaStream.innerStreamID, mediaStream);
 
 			if (Boolean(screen))
@@ -1169,7 +1105,7 @@ function _innerUnpublishStream(opts)
     }, () => {
 		text_info.value = text_info.value + '<demo> unpublishStream - client.unpublish local stream failed' + '\n';
 		console.log('<demo> unpublishStream - client.unpublish local stream failed');
-	});
+	}, true);
 
 	//
 	if (Boolean(screen))
@@ -1186,16 +1122,30 @@ function _innerUnpublishStream(opts)
 	}
 }
 
+//
+let publishAudioStreamEle = document.getElementById('publishAudioStream');
+if (!!publishAudioStreamEle)
+{
+	publishAudioStreamEle.addEventListener('click', () => {
+		publishStream({
+			userid : xUserId,
+			audio  : true,
+			video  : false,
+			screen : false,
+			mediasource : false
+		});
+	})
+}
+
+// 
 let publishStreamEle = document.getElementById('publishStream');
 if (!!publishStreamEle)
 {
 	publishStreamEle.addEventListener('click', () => {
-		let onlyAudio = document.getElementById('onlyAudio').checked;
-	
 		publishStream({
 			userid : xUserId,
 			audio  : true,
-			video  : !Boolean(onlyAudio),
+			video  : true,
 			screen : false,
 			mediasource : false
 		});
@@ -1211,6 +1161,76 @@ if (!!unpublishStreamEle)
 			screen      : false,
 			mediasource : false
 		});
+	})
+}
+
+let micPlaybackEle = document.getElementById('micPlayback');
+if (!!micPlaybackEle)
+{
+	micPlaybackEle.addEventListener('click', () => {
+		let micPlayback = document.getElementById('micPlayback').checked;
+		if (Boolean(micPlayback))
+		{
+			gStream.play();
+		}
+		else
+		{
+			gStream.stopPlay();
+		}
+	});
+}
+
+// 
+let cloneVideoTrack = null;
+let testMediaStream = null;
+let testOpenCameraEle = document.getElementById('testOpenCamera');
+if (!!testOpenCameraEle)
+{
+	const constraints = {
+		audio: true,
+		video: true
+	}
+	testOpenCameraEle.addEventListener('click', () => {
+		navigator.mediaDevices.getUserMedia(constraints)
+			.then(stream => {
+				testMediaStream = stream;
+
+				let tracks = stream.getVideoTracks();
+				if (tracks.length > 0)
+				{
+					cloneVideoTrack = tracks[0].clone();
+				}
+				//
+				const videoId = 'test_camera';
+				let videoE = document.createElement('video');
+				videoE.id = videoId;
+				videoE.muted = true;
+				videoE.autoplay = true;
+				videoE.controls = true;
+				videoE.setAttribute('playsinline', '');
+				videoE.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;';
+
+				videoE.srcObject = testMediaStream;
+
+				if (!!videoEle)
+				{
+					videoEle.append(videoE);
+				}
+			});
+	})
+}
+
+let testCtrlCameraEle = document.getElementById('testCtrlCamera');
+if (!!testCtrlCameraEle)
+{
+	testCtrlCameraEle.addEventListener('click', () => {
+		testMediaStream.getVideoTracks().forEach((track) => {
+			track.stop();
+			testMediaStream.removeTrack(track);
+		});
+
+		cloneVideoTrack.stop();
+		cloneVideoTrack.stop();
 	})
 }
 
@@ -1264,7 +1284,7 @@ if (!!pauseVideoEle)
 		}
 		else
 		{
-			client.pauseWebcam(gStream);
+			client.pauseWebcam(gStream, true);
 		}
 
 		isVideoPaused = !isVideoPaused;
@@ -1423,63 +1443,82 @@ if (!!micVolumeSliderEle)
 	})
 }
 
-function getDevices(callback) {
+function getDevices()
+{
 	let message = '';
 	
     TTTRtcWeb.listDevices((devices) => {
-		let micLastDev = 'default';
 		// 
-        devices.forEach(function (deviceInfo) {
+        devices.forEach((deviceInfo) => {
             message = '<demo> getDevices - ' + deviceInfo.kind + ': ' + deviceInfo.label + ' id: ' + deviceInfo.deviceId + '\n';
 			text_info.value = text_info.value + message;
 			console.log(message);
 
             let option = document.createElement('option');
             option.value = deviceInfo.deviceId;
-            if (deviceInfo.kind === 'audioinput') {
-                option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
-				audioInputSelect.appendChild(option);
-				
-				// 
-				micLastDev = deviceInfo.deviceId;
-            } else if (deviceInfo.kind === 'audiooutput') {
-                option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
-                audioOutputSelect.appendChild(option);
-            } else if (deviceInfo.kind === 'videoinput') {
-                option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
-                videoSelect.appendChild(option);
-            } else {
+			if (deviceInfo.kind === 'audioinput')
+			{
+				if (!!audioInputSelect)
+				{
+					option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
+					audioInputSelect.appendChild(option);
+				}
+			}
+			else if (deviceInfo.kind === 'audiooutput')
+			{
+				if (!!audioOutputSelect)
+				{
+					option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
+					audioOutputSelect.appendChild(option);
+				}
+			}
+			else if (deviceInfo.kind === 'videoinput')
+			{
+				if (!!videoSelect)
+				{
+					option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
+					videoSelect.appendChild(option);
+				}
+			}
+			else
+			{
                 console.log('<demo> Some other kind of source/device: ', deviceInfo);
             }
 		});
 		
-		// 
-		let option = document.createElement('option');
-		option.value = 'default';
+		if (!!audioInputSelect)
+		{
+			// 
+			let option = document.createElement('option');
+			option.value = 'default';
+			option.text = 'Default';
 
-		option.text = 'Default';
-		audioInputSelect.appendChild(option);
+			audioInputSelect.appendChild(option);
+		}
 
-		option.text = 'Default';
-		audioOutputSelect.appendChild(option);
+		if (!!audioOutputSelect)
+		{
+			// 
+			let option = document.createElement('option');
+			option.value = 'default';
+			option.text = 'Default';
 
-		option.text = 'Default';
-		videoSelect.appendChild(option);
+			audioOutputSelect.appendChild(option);
+		}
 
-		// 
-		callback && callback(micLastDev);
+		if (!!videoSelect)
+		{
+			// 
+			let option = document.createElement('option');
+			option.value = 'default';
+			option.text = 'Default';
+
+			videoSelect.appendChild(option);
+		}
     }, (err) => {
 		const errMsg = err.name + err.message + '\n';
 		text_info.value = text_info.value + errMsg;
     });
-}
-
-let getDevicesEle = document.getElementById('getDevices');
-if (!!getDevicesEle)
-{
-	getDevicesEle.addEventListener('click', () => {
-		getDevices((dev) => {});
-	})
 }
 
 let cameraDevEle = document.getElementById('cameraDev');
@@ -1494,6 +1533,7 @@ if (!!cameraDevEle)
 	})
 }
 
+// 
 let micDevEle = document.getElementById('micDev');
 if (!!micDevEle)
 {
@@ -1506,6 +1546,36 @@ if (!!micDevEle)
 	})
 }
 
+// 
+let speakerDevEle = document.getElementById('speakerDev');
+if (!!speakerDevEle)
+{
+	speakerDevEle.addEventListener('change', () => {
+		let index = audioOutputSelect.selectedIndex;
+	
+		speakerDevId = audioOutputSelect.options[index].value;
+
+		// 
+		remote_stream.forEach((item) =>
+		{
+			if (!!item)
+			{
+				// 
+				item.setAudioOutput(speakerDevId, (e) => {
+					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput succc - ${JSON.stringify(e)}` + '\n';
+					console.log('<demo> switch speaker - Stream.setAudioOutput succc. - ' + e);	
+				}, (e) => {
+					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput fail - ${JSON.stringify(e)}` + '\n';
+					console.log('<demo> switch speaker - Stream.setAudioOutput fail. - ' + e);	
+				});
+			}
+		});
+
+		console.log(`<demo> speakerDev change - speakerDevId: ${speakerDevId}`);
+	})
+}
+
+// 
 let audioProfileEle = document.getElementById('audioProfile');
 if (!!audioProfileEle)
 {
