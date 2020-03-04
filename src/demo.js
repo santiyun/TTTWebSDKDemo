@@ -10,10 +10,8 @@ let demoVersion = pkg.version;
 
 let sdkVersion = RTCObj.getVersion();
 
-/*
 RTCObj.setIpLocationAddress('v1.jkim.ccb.com');
 RTCObj.setIpLocationPort(8443);
-*/
 
 document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVersion}`;
 
