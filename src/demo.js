@@ -8,7 +8,12 @@ const pkg = require('../package.json');
 // 
 let demoVersion = pkg.version;
 
-let sdkVersion = TTTRtcWeb.getVersion();
+let sdkVersion = RTCObj.getVersion();
+
+/*
+RTCObj.setIpLocationAddress('v1.jkim.ccb.com');
+RTCObj.setIpLocationPort(8443);
+*/
 
 document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVersion}`;
 
@@ -18,31 +23,19 @@ let streams = new Map();
 
 let hasPublishStream = false;
 let hasPublishScreen = false;
-let hasPublishMediaSource = false;
 
 let gStream = null;
 let gScreenStream = null;
-let gMediaSourceStream = null;
-
-let intv = null;
 
 let remote_stream = new Map();
 
-// const stream_net_info = document.getElementById('stream_net_info');
 const text_info = document.getElementById('text_info');
 
-let sourceMediaStream;
-
-const audioProfileSelect = document.getElementById('audioProfile');
-const videoSelect = document.getElementById("cameraDev");
-const audioInputSelect = document.getElementById('micDev');
-const audioOutputSelect = document.getElementById('speakerDev');
 const userRoleSelect = document.getElementById('userRole');
 
 let cameraDevId = 'default';
 let micDevId = 'default';
 let speakerDevId = 'default';
-let audioProfile = 'default';
 
 const appIdEle = document.getElementById('appID');
 
@@ -57,13 +50,9 @@ if (!!userIdEle)
 
 const roomIdEle = document.getElementById('chanid');
 
-const rtmpUrlEle = document.getElementById('rtmpUrl');
 // 
 let screenEle = document.getElementById('screen');
 let videoEle = document.getElementById('video');
-
-let audioVolumeProgressEle = document.getElementById('audioVolumeProgress');
-let audioVolumeValueEle = document.getElementById('audioVolumeValue');
 // 
 let userRole = 2;
 
@@ -152,14 +141,14 @@ function joinChan(appid, chanid, userid)
 	{
 		if (xSpecServer !== '')
 		{
-			TTTRtcWeb.setServerUrl(xSpecServer);
+			RTCObj.setServerUrl(xSpecServer);
 		}
 	}
 
-	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
     client = RTCObj.createClient({
 		role: userRole,
-		rtmpUrl: cdnUrl });
+		rtmpUrl: ''
+	});
  
     client.init(appid, userid, () => {
         client.join(chanid, () => {
@@ -173,67 +162,13 @@ function joinChan(appid, chanid, userid)
 			document.getElementById('loginInfo').innerHTML = `-- role: ${userRole}<br>`;
 
 			// 
-			intv = setInterval(() => {
-				// stream_net_info.value = `${JSON.stringify(client.getNetState())}`;
-				// 
-				const rAudioStats = client.remoteAudioStats();
-				rAudioStats.forEach((value, key) => {
-					; // console.log(`<demo> <STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
-				});
-
-				// 
-				const rVideoStats = client.remoteVideoStats();
-				rVideoStats.forEach((value, key) => {
-					; // console.log(`<demo> <STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
-				});
-
-				// 
-				const lAudioStats = client.localAudioStats();
-				lAudioStats.forEach((value, key) => {
-					; // console.log(`<demo> <STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
-				});
-
-				// 
-				const lVideoStats = client.localVideoStats();
-				lVideoStats.forEach((value, key) => {
-					; // console.log(`<demo> <STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
-				});
-
-				// 
-				const rtcStats = client.getStats();
-				; // console.log(`<demo> <STAT> rtcStats -- ${JSON.stringify(rtcStats)}`);
-
-				// for volume
-				if (!!gStream)
-				{
-					const vol = gStream.getAudioLevel();
-					;// console.log(`<demo> <AUDIO-VOLUME> - local audio: ${vol}`);
-
-					// 
-					remote_stream.forEach((item) =>
-					{
-						if (!!item)
-						{
-							// 
-							const rVol = item.getAudioLevel();
-							;// console.log(`<demo> <AUDIO-VOLUME> - remote audio: ${rVol}`);
-						}
-					});
-				}
-
-				// 
-				// for 
-			}, 2000);
-
-			// 
 			if (isAutoPub)
 			{
 				publishStream({
 					userid : xUserId,
 					audio  : true,
 					video  : true,
-					screen : false,
-					mediasource : false
+					screen : false
 				});
 			}
 			// 
@@ -250,48 +185,6 @@ function joinChan(appid, chanid, userid)
     }, (err) => {
 		text_info.value = text_info.value + `<demo> init failed. - error: ${JSON.stringify(err)}` + '\n';
 		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
-	});
-
-	client.on('device-hot-plug', (e) => {
-		console.log(`<demo> - event [device-hot-plug] - ${JSON.stringify(e)}`);
-	})
-	
-	client.on('reinit', () => {
-		text_info.value = text_info.value + '<demo> - event [reinit]' + '\n';
-		console.log('<demo> - event [reinit]');
-		
-		// 
-		remote_stream.forEach((item) =>
-		{
-			if (!item)
-			{
-				// 
-				item.close();
-			}
-		});
-		remote_stream.clear();
-
-		// 
-		_innerUnpublishStream({
-			video       : true,
-			screen      : false,
-			mediasource : false
-		});
-		_innerUnpublishStream({
-			video       : false,
-			screen      : true,
-			mediasource : false
-		});
-		_innerUnpublishStream({
-			video       : false,
-			screen      : false,
-			mediasource : true
-		});
-	});
-
-	client.on('connection-state-change', (evt) =>{
-		text_info.value = text_info.value + `<demo> - event [connection-state-change] - ${JSON.stringify(evt)}` + '\n';
-		console.log(`<demo> - event [connection-state-change] - ${JSON.stringify(evt)}`);
 	});
 
 	client.on('disconnected', () => {
@@ -312,80 +205,56 @@ function joinChan(appid, chanid, userid)
 		_onClose();
 	});
 
-    client.on('peer-join', (evt) => {
-		text_info.value = text_info.value + `<demo> - event [peer-join] uid: ${evt.userID}` + '\n';
+    client.on('peer-join', (peer) => {
+		text_info.value = text_info.value + `<demo> - event [peer-join] uid: ${peer.name}` + '\n';
 
-        console.log(`<demo> - event [peer-join] uid: ${evt.userID}`);
+        console.log(`<demo> - event [peer-join] uid: ${peer.name}`);
     });
 
-    client.on('peer-leave', (evt) => {
-		text_info.value = text_info.value + `<demo> - event [peer-leave] uid: ${evt.userID}` + '\n';
-        console.log(`<demo> - event [peer-leave] uid: ${evt.userID}`);
+    client.on('peer-leave', (peer) => {
+		text_info.value = text_info.value + `<demo> - event [peer-leave] uid: ${peer.name}` + '\n';
+        console.log(`<demo> - event [peer-leave] uid: ${peer.name}`);
 
-        evt.streams.forEach(stream => {
+        peer.streams.forEach(stream => {
 			if (!stream)
 				return;
 
-			let obj = document.getElementById('3t_remote' + stream.innerStreamID);
+			let obj = document.getElementById('3t_remote' + stream.streamID);
 			if (obj)
 			{
 				obj.remove();
 			}
 
             // remove stream from map
-            remote_stream.delete(stream.innerStreamID);
+            remote_stream.delete(stream.streamID);
 
 			stream.close();
         });
 	});
 	
-	client.on('audio-added', (evt) => {
-		var stream = evt.stream;
+	client.on('stream-added', (evt) => {
+		let stream = evt.stream;
 		if (!stream)
 			return;
 			
-		text_info.value = text_info.value + `<demo> - event [audio-added] streamId: ${evt.stream.innerStreamID}` + '\n';
+		text_info.value = text_info.value + `<demo> - event [stream-added] streamId: ${evt.stream.streamID}` + '\n';
 
-		console.log(`<demo> - event [audio-added] streamId: ${evt.stream.innerStreamID}`);
+		console.log('<demo> - event [stream-added] %o', evt.stream);
 
-		remote_stream.set(stream.innerStreamID, stream);
-        let in_stream = remote_stream.get(stream.innerStreamID);
-        client.subscribe(in_stream, (event) => {
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.innerStreamID} type: ${evt.stream.type} succ.` + '\n';
-            // successful doing someting, like play remote video or audio.
+		remote_stream.set(stream.streamID, stream);
+        client.subscribe(stream, (event) => {
+			text_info.value = text_info.value + `<demo> subscribe ${evt.stream.streamID} succ.` + '\n';
         }, (err) => {
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.innerStreamID} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
-            // info.val(info.val() + 'Subscribe stream failed' + err + '\n');
-        });
-	})
-
-	client.on('video-added', (evt) => {
-		var stream = evt.stream;
-		if (!stream)
-			return;
-			
-		text_info.value = text_info.value + `<demo> - event [video-added] streamId: ${evt.stream.innerStreamID}` + '\n';
-
-		console.log(`<demo> - event [video-added] streamId: ${evt.stream.innerStreamID}`);
-
-		remote_stream.set(stream.innerStreamID, stream);
-		// 
-        let in_stream = remote_stream.get(stream.innerStreamID);
-        client.subscribe(in_stream, (event) => {
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.innerStreamID} type: ${evt.stream.type} succ.` + '\n';
-            // successful doing someting, like play remote video or audio.
-        }, (err) => {
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.innerStreamID} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
-            // info.val(info.val() + 'Subscribe stream failed' + err + '\n');
+			text_info.value = text_info.value + `<demo> subscribe ${evt.stream.streamID} failed. - error: ${JSON.stringify(err)}` + '\n';
         });
 	})
 
     client.on('stream-subscribed', (evt) => {
-        var stream = evt.stream;
+        let stream = evt.stream;
 		if (!stream)
 			return;
-		text_info.value = text_info.value + `<demo> - event [stream-subscribed] streamId: ${stream.innerStreamID} stream.type: ${stream.type}` + '\n';
-		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.innerStreamID} stream.type: ${stream.type}`);
+		text_info.value = text_info.value + `<demo> - event [stream-subscribed] streamId: ${stream.streamID}` + '\n';
+		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.streamID}`);
 
 		if (stream.hasAudio())
 		{
@@ -393,13 +262,9 @@ function joinChan(appid, chanid, userid)
 				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
-		if(stream.type === 'audio')
+		
 		{
-            stream.play();
-		}
-		else
-		{
-            var videoId = '3t_remote' + stream.innerStreamID;
+            var videoId = '3t_remote' + stream.streamID;
 			if(!!videoEle && !document.getElementById(videoId))
 			{
                 let video = document.createElement('video');
@@ -412,7 +277,7 @@ function joinChan(appid, chanid, userid)
 				videoEle.append(video);
             }
 
-            stream.play('3t_remote' + stream.innerStreamID, true);
+            stream.play('3t_remote' + stream.streamID, true);
         }
     });
 
@@ -421,15 +286,11 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 
-		text_info.value = text_info.value + `<demo> - event [video-mute] streamId: ${stream.innerStreamID}` + '\n';
-		console.log(`<demo> - event [video-mute] streamId: ${stream.innerStreamID}`);
+		text_info.value = text_info.value + `<demo> - event [video-mute] streamId: ${stream.streamID}` + '\n';
+		console.log(`<demo> - event [video-mute] streamId: ${stream.streamID}`);
 
 		stream._video.style.backgroundColor = 'transparent';
-		// stream._video.srcObject = null;
 		stream._video.poster = 'http://www.3ttech.cn/favicon.ico';
-
-		// visibility: hidden
-		
 	});
 	
 	client.on('video-unmute', (evt) => {
@@ -437,8 +298,8 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 			
-		text_info.value = text_info.value + `<demo> - event [video-unmute] streamId: ${stream.innerStreamID}` + '\n';
-		console.log(`<demo> - event [video-unmute] streamId: ${stream.innerStreamID}`);
+		text_info.value = text_info.value + `<demo> - event [video-unmute] streamId: ${stream.streamID}` + '\n';
+		console.log(`<demo> - event [video-unmute] streamId: ${stream.streamID}`);
 		
 		stream._video.style.backgroundColor = '#000';
 		stream._video.srcObject = stream._streamObj;
@@ -473,7 +334,7 @@ function _onClose()
 		if (!!item)
 		{
 			// 
-			let obj = document.getElementById('3t_remote' + item.innerStreamID);
+			let obj = document.getElementById('3t_remote' + item.streamID);
 			if (obj)
 			{
 				obj.remove();
@@ -487,26 +348,12 @@ function _onClose()
 	// 
 	unpublishStream({
 		video       : true,
-		screen      : false,
-		mediasource : false
+		screen      : false
 		});
 	unpublishStream({
 		video       : false,
-		screen      : true,
-		mediasource : false
+		screen      : true
 		});
-	unpublishStream({
-		video       : false,
-		screen      : false,
-		mediasource : true
-		});
-
-	// 
-	if (intv !== null)
-	{
-		clearInterval(intv);
-		intv = null;
-	}
 
 	// 
 	{
@@ -552,19 +399,6 @@ function _onClose()
 	document.getElementById('loginInfo').innerHTML = '';
 }
 
-function setRtmpUrl(url)
-{
-	// 
-	if (tttStatus !== 1)
-	{
-		text_info.value = text_info.value + '<demo> setRtmpUrl - 请先[加入房间]' + '\n';
-
-		return;
-    }
-
-	client.setRtmpUrl(url);
-}
-
 let joinChanEle = document.getElementById('joinChan');
 if (!!joinChanEle)
 {
@@ -583,115 +417,6 @@ if (!!leaveChanEle)
 		leaveChan();
 	})
 }
-
-let setRtmpUrlEle = document.getElementById('setRtmpUrl');
-if (!!setRtmpUrlEle)
-{
-	setRtmpUrlEle.addEventListener('click', () => {
-		if (!!rtmpUrlEle)
-		{
-			const cdnUrl = rtmpUrlEle.value;
-			setRtmpUrl(cdnUrl);
-		}
-	})
-}
-
-/*
-function setStreamSEI(mid, isScreen)
-{
-	if(client._role !== "1")
-		return;
-
-	let sei = {
-		'ts': '',
-		'ver': '20161227',
-		'canvas': {
-			'bgrad': [
-				232,
-				230,
-				232
-			],
-			'h': 640,
-			'w': 368
-		},
-		'mid': '',
-		'pos': []
-	}
-
-    sei.mid = mid;
-	sei.ts = + new Date();
-
-	let nCnt = remote_stream.size;
-
-	if (!!gStream)
-	{
-		nCnt++;
-	}
-	
-	if (!!gScreenStream)
-	{
-		nCnt++;
-	}
-
-	let isSplit = nCnt > 1;
-	
-	let nIndex = 0;
-	if (!!gStream)
-	{
-		let position = {};
-
-		position.id = gStream.innerStreamID;
-		position.x = 0;
-		position.y = 0;
-		position.w = isSplit ? 0.5 : 1;
-		position.h = isSplit ? 0.5 : 1;
-		position.z = 0;
-
-		sei.pos.push(position);
-
-		nIndex++;
-	}
-	
-	if (!!gScreenStream)
-	{
-		let position = {};
-
-		position.id = gScreenStream.innerStreamID;
-		position.x = (isSplit && nIndex === 1) ? 0.5 : 0;
-		position.y = 0;
-		position.w = isSplit ? 0.5 : 1;
-		position.h = isSplit ? 0.5 : 1;
-		position.z = 0;
-
-		sei.pos.push(position);
-
-		nIndex++;
-	}
-
-	// 
-	remote_stream.forEach((item) =>
-	{
-		if (Boolean(item))
-		{
-			let position = {};
-			// 
-			position.id = item.innerStreamID;
-			position.x = (isSplit && (nIndex === 3)) ? 0 : 0.5;
-			position.y = (isSplit && nIndex > 0) ? 0.5 : 0;
-			position.w = isSplit ? 0.5 : 1;
-			position.h = isSplit ? 0.5 : 1;
-			position.z = 0;
-
-			sei.pos.push(position);
-	
-			nIndex++;
-		}
-	});
-
-	// 
-    client.setSEI(mid, 'add', isScreen, sei);
-};
-*/
 
 function setStreamSEI(userid, mid, type, isScreen)
  {
@@ -728,7 +453,7 @@ function setStreamSEI(userid, mid, type, isScreen)
 	sei.pos = [];
 	sei.pos.push(position);
 
-    client.setSEI(userid, type, isScreen, sei, mid);
+    client.setSEI(userid, type, isScreen, sei);
 };
 
 function setVideoProfile(prof)
@@ -748,36 +473,6 @@ function setVideoProfile(prof)
 	});
 }
 
-function createMediaSourceStream()
-{
-	if (!!sourceMediaStream)
-	{
-		return;
-	}
-
-	//
-	const mediaSource = document.getElementById('mediaSource');
-	if (!mediaSource)
-	{
-		return;
-	}
-
-	if (mediaSource.captureStream)
-	{
-		sourceMediaStream = mediaSource.captureStream();
-		console.log('Captured sourceMediaStream from mediaSource with captureStream', sourceMediaStream);
-	}
-	else if (mediaSource.mozCaptureStream)
-	{
-		sourceMediaStream = mediaSource.mozCaptureStream();
-		console.log('Captured sourceMediaStream from mediaSource with mozCaptureStream()', sourceMediaStream);
-	}
-	else
-	{
-		console.log('captureStream() not supported');
-	}
-}
-  
 // 
 function publishStream(opts)
 {
@@ -792,11 +487,10 @@ function publishStream(opts)
 		userid,
 		audio,
 		video,
-		screen,
-		mediasource
+		screen
 	} = opts;
 
-	let v = (+video) + (+screen) + (+mediasource);
+	let v = (+video) + (+screen);
 	if (v > 1)
 	{
 		text_info.value = text_info.value + '<demo> publishStream - video/screen/mediasouce 三个参数，仅允许一个取 true' + '\n';
@@ -808,10 +502,6 @@ function publishStream(opts)
 	if (Boolean(screen))
 	{
 		mediaStream = gScreenStream;
-	}
-	else if (Boolean(mediasource))
-	{
-		mediaStream = gMediaSourceStream;
 	}
 	else if (Boolean(video) || Boolean(audio))
 	{
@@ -829,37 +519,15 @@ function publishStream(opts)
 		console.log(`<demo> publishStream() userid: ${userid} cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
 
 		// 
-		// 
-		let audioSource = null;
-		let videoSource = null;
-		if (mediasource)
-		{
-			createMediaSourceStream();
-
-			if (!!sourceMediaStream)
-			{
-				const audioTracks = sourceMediaStream.getVideoTracks();
-				if (audioTracks.length > 0)
-					audioSource = audioTracks[0];
-				const videoTracks = sourceMediaStream.getAudioTracks();
-				if (videoTracks.length > 0)
-					videoSource = videoTracks[0];
-			}
-		}
-
 		mediaStream = RTCObj.createStream({
 			streamID,
 			userID: userid,
 			audio: Boolean(audio),
 			video: Boolean(video),
 			screen: Boolean(screen),
-			mediasource: Boolean(mediasource),
-			audioSource,
-			videoSource,
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
-			attributes: { videoProfile : resolution },
-			openAudioCtx: true
+			attributes: { videoProfile : resolution }
 		});
 
 		if (!mediaStream)
@@ -867,14 +535,8 @@ function publishStream(opts)
 
 		window.ls = mediaStream;
 
-		// 
-		if (audioProfile !== 'default')
-		{
-			mediaStream.setAudioProfile(audioProfile);
-		}
-
 		mediaStream.init(() => {
-			if (!Boolean(mediasource) && (Boolean(video) || Boolean(screen)))
+			if (Boolean(video) || Boolean(screen))
 			{
 				const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
 				let videoE = document.createElement('video');
@@ -903,26 +565,12 @@ function publishStream(opts)
 				mediaStream.play(videoId, true);
 			}
 			// 
-			
-			let micPlaybackEle = document.getElementById('micPlayback');
-			if (!!micPlaybackEle)
-			{
-				let micPlayback = micPlaybackEle.checked;
-				if (Boolean(micPlayback))
-				{
-					mediaStream.play();
-				}
-			}
 
 			streams.set(mediaStream.innerStreamID, mediaStream);
 
 			if (Boolean(screen))
 			{
 				gScreenStream = mediaStream;
-			}
-			else if (Boolean(mediasource))
-			{
-				gMediaSourceStream = mediaStream;
 			}
 			else if (Boolean(video) || Boolean(audio))
 			{
@@ -935,11 +583,6 @@ function publishStream(opts)
 					document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
 					hasPublishScreen = true;
 				}
-				else if (Boolean(mediasource))
-				{
-					document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="green">已推流</font>`;
-					hasPublishMediaSource = true;
-				}
 				else if (Boolean(video) || Boolean(audio))
 				{
 					document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
@@ -949,10 +592,6 @@ function publishStream(opts)
 				if (Boolean(screen))
 				{
 					document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
-				}
-				else if (Boolean(mediasource))
-				{
-					document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="black">未推流</font>`;
 				}
 				else if (Boolean(video) || Boolean(audio))
 				{
@@ -974,13 +613,6 @@ function publishStream(opts)
 
 			return;
 		}
-		else if (Boolean(mediasource) && hasPublishMediaSource)
-		{
-			text_info.value = text_info.value + `<demo> publishStream - hasPublishMediaSource: ${hasPublishMediaSource} mediaStream: ${mediaStream.innerStreamID}` + '\n';
-			console.log(`<demo> publishStream - hasPublishMediaSource: ${hasPublishMediaSource}  mediaStream: ${mediaStream.innerStreamID}`);
-	
-			return;
-		}
 		else if ((Boolean(video) || Boolean(audio)) && hasPublishStream)
 		{
 			text_info.value = text_info.value + `<demo> publishStream - hasPublishStream: ${hasPublishStream} mediaStream: ${mediaStream.innerStreamID}` + '\n';
@@ -996,11 +628,6 @@ function publishStream(opts)
 				document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
 				hasPublishScreen = true;
 			}
-			else if (Boolean(mediasource))
-			{
-				document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="green">已推流</font>`;
-				hasPublishMediaSource = true;
-			}
 			else if (Boolean(video) || Boolean(audio))
 			{
 				document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
@@ -1010,10 +637,6 @@ function publishStream(opts)
 			if (Boolean(screen))
 			{
 				document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
-			}
-			else if (Boolean(mediasource))
-			{
-				document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="black">未推流</font>`;
 			}
 			else if (Boolean(video) || Boolean(audio))
 			{
@@ -1051,10 +674,6 @@ function _publishStream(userid, mediaStream, onSuccess, onFailure)
 		if (mediaStream.hasAudio())
 		{
 			mediaStream.on('volume-change', e => {
-				if (!!audioVolumeProgressEle)
-					audioVolumeProgressEle.value = e.volume;
-				if (!!audioVolumeValueEle)
-					audioVolumeValueEle.innerHTML = e.volume;
 				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
@@ -1073,18 +692,13 @@ function unpublishStream(opts)
 
 function _innerUnpublishStream(opts)
 {
-	const { video, screen, mediasource } = opts;
+	const { video, screen } = opts;
 	let mediaStream = null;
 
 	if (Boolean(screen))
 	{
 		mediaStream = gScreenStream;
 		hasPublishScreen = false;
-	}
-	else if (Boolean(mediasource))
-	{
-		mediaStream = gMediaSourceStream;
-		hasPublishMediaSource = false;
 	}
 	else if (Boolean(video) || Boolean(audio))
 	{
@@ -1112,10 +726,6 @@ function _innerUnpublishStream(opts)
 	{
 		document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
 	}
-	else if (Boolean(mediasource))
-	{
-		document.getElementById('publishMediaSourceStatus').innerHTML = `<font color="black">未推流</font>`;
-	}
 	else if (Boolean(video) || Boolean(audio))
 	{
 		document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
@@ -1131,8 +741,7 @@ if (!!publishAudioStreamEle)
 			userid : xUserId,
 			audio  : true,
 			video  : false,
-			screen : false,
-			mediasource : false
+			screen : false
 		});
 	})
 }
@@ -1146,8 +755,7 @@ if (!!publishStreamEle)
 			userid : xUserId,
 			audio  : true,
 			video  : true,
-			screen : false,
-			mediasource : false
+			screen : false
 		});
 	})
 }
@@ -1158,109 +766,8 @@ if (!!unpublishStreamEle)
 	unpublishStreamEle.addEventListener('click', () => {
 		unpublishStream({
 			video       : true,
-			screen      : false,
-			mediasource : false
+			screen      : false
 		});
-	})
-}
-
-let micPlaybackEle = document.getElementById('micPlayback');
-if (!!micPlaybackEle)
-{
-	micPlaybackEle.addEventListener('click', () => {
-		let micPlayback = document.getElementById('micPlayback').checked;
-		if (Boolean(micPlayback))
-		{
-			gStream.play();
-		}
-		else
-		{
-			gStream.stopPlay();
-		}
-	});
-}
-
-// 
-let cloneVideoTrack = null;
-let testMediaStream = null;
-let testOpenCameraEle = document.getElementById('testOpenCamera');
-if (!!testOpenCameraEle)
-{
-	const constraints = {
-		audio: true,
-		video: true
-	}
-	testOpenCameraEle.addEventListener('click', () => {
-		navigator.mediaDevices.getUserMedia(constraints)
-			.then(stream => {
-				testMediaStream = stream;
-
-				let tracks = stream.getVideoTracks();
-				if (tracks.length > 0)
-				{
-					cloneVideoTrack = tracks[0].clone();
-				}
-				//
-				const videoId = 'test_camera';
-				let videoE = document.createElement('video');
-				videoE.id = videoId;
-				videoE.muted = true;
-				videoE.autoplay = true;
-				videoE.controls = true;
-				videoE.setAttribute('playsinline', '');
-				videoE.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;';
-
-				videoE.srcObject = testMediaStream;
-
-				if (!!videoEle)
-				{
-					videoEle.append(videoE);
-				}
-			});
-	})
-}
-
-let testCtrlCameraEle = document.getElementById('testCtrlCamera');
-if (!!testCtrlCameraEle)
-{
-	testCtrlCameraEle.addEventListener('click', () => {
-		testMediaStream.getVideoTracks().forEach((track) => {
-			track.stop();
-			testMediaStream.removeTrack(track);
-		});
-
-		cloneVideoTrack.stop();
-		cloneVideoTrack.stop();
-	})
-}
-
-// 
-let isCameraStoped = false;
-let ctrlCameraEle = document.getElementById('ctrlCamera');
-if (!!ctrlCameraEle)
-{
-	ctrlCameraEle.addEventListener('click', () => {
-		if (!client)
-		{
-			return;
-		}
-		if (!gStream)
-		{
-			return;
-		}
-
-		if (isCameraStoped)
-		{
-			gStream.openCamera();
-		}
-		else
-		{
-			gStream.closeCamera();
-		}
-
-		isCameraStoped = !isCameraStoped;
-
-		ctrlCameraEle.innerHTML = isCameraStoped ? 'startCamera' : 'stopCamera';
 	})
 }
 
@@ -1322,89 +829,6 @@ if (!!pauseAudioEle)
 	})	
 }
 
-let isAudioDisabled = false;
-let disableAudioEle = document.getElementById('disableAudio');
-if (!!disableAudioEle)
-{
-	disableAudioEle.addEventListener('click', () => {
-		if (!client)
-		{
-			return;
-		}
-		if (!gStream)
-		{
-			return;
-		}
-
-		if (isAudioDisabled)
-		{
-			gStream.enableAudio();
-		}
-		else
-		{
-			gStream.disableAudio();
-		}
-
-		isAudioDisabled = !isAudioDisabled;
-
-		disableAudioEle.innerHTML = isAudioDisabled ? 'enableAudio' : 'disableAudio';
-	})
-}
-
-// 
-let publishScreenEle = document.getElementById('publishScreen');
-if (!!publishScreenEle)
-{
-	publishScreenEle.addEventListener('click', () => {
-		publishStream({
-			userid : xUserId,
-			audio  : false,
-			video  : false,
-			screen : true,
-			mediasource : false
-		});
-	})	
-}
-
-let unpublishScreenEle = document.getElementById('unpublishScreen');
-if (!!unpublishScreenEle)
-{
-	unpublishScreenEle.addEventListener('click', () => {
-		unpublishStream({
-			video       : false,
-			screen      : true,
-			mediasource : false
-		});
-	})
-}
-
-// 
-let publishMediaSourceEle = document.getElementById('publishMediaSource');
-if (!!publishMediaSourceEle)
-{
-	publishMediaSourceEle.addEventListener('click', () => {
-		publishStream({
-			userid : xUserId,
-			audio  : false,
-			video  : false,
-			screen : false,
-			mediasource : true
-		});
-	})	
-}
-
-let unpublishMediaSourceEle = document.getElementById('unpublishMediaSource');
-if (!!unpublishMediaSourceEle)
-{
-	unpublishMediaSourceEle.addEventListener('click', () => {
-		unpublishStream({
-			video       : false,
-			screen      : false,
-			mediasource : true
-		});
-	})
-}
-
 let resolutionEle = document.getElementById('resolution');
 if (!!resolutionEle)
 {
@@ -1415,177 +839,21 @@ if (!!resolutionEle)
 	})
 }
 
-let micVolumeSliderEle = document.getElementById('micVolumeSlider');
-if (!!micVolumeSliderEle)
-{
-	micVolumeSliderEle.addEventListener('change', () => {
-		var value = (micVolumeSliderEle.value) / 10;
-		let micVolumeSliderValueEle = document.getElementById('micVolumeSliderValue');
-		if (!!micVolumeSliderValueEle)
-		{
-			micVolumeSliderValueEle.innerHTML = (value);
-		}
-		
-		if (!!gStream)
-		{
-			gStream.setInputVolume(+value);
-		}
-
-		// 
-		remote_stream.forEach((item) =>
-		{
-			if (!!item)
-			{
-				// 
-				item.setAudioVolume(+value);
-			}
-		});
-	})
-}
-
 function getDevices()
 {
 	let message = '';
 	
-    TTTRtcWeb.listDevices((devices) => {
+    RTCObj.getDevices((devices) => {
 		// 
         devices.forEach((deviceInfo) => {
             message = '<demo> getDevices - ' + deviceInfo.kind + ': ' + deviceInfo.label + ' id: ' + deviceInfo.deviceId + '\n';
 			text_info.value = text_info.value + message;
 			console.log(message);
-
-            let option = document.createElement('option');
-            option.value = deviceInfo.deviceId;
-			if (deviceInfo.kind === 'audioinput')
-			{
-				if (!!audioInputSelect)
-				{
-					option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
-					audioInputSelect.appendChild(option);
-				}
-			}
-			else if (deviceInfo.kind === 'audiooutput')
-			{
-				if (!!audioOutputSelect)
-				{
-					option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
-					audioOutputSelect.appendChild(option);
-				}
-			}
-			else if (deviceInfo.kind === 'videoinput')
-			{
-				if (!!videoSelect)
-				{
-					option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
-					videoSelect.appendChild(option);
-				}
-			}
-			else
-			{
-                console.log('<demo> Some other kind of source/device: ', deviceInfo);
-            }
 		});
-		
-		if (!!audioInputSelect)
-		{
-			// 
-			let option = document.createElement('option');
-			option.value = 'default';
-			option.text = 'Default';
-
-			audioInputSelect.appendChild(option);
-		}
-
-		if (!!audioOutputSelect)
-		{
-			// 
-			let option = document.createElement('option');
-			option.value = 'default';
-			option.text = 'Default';
-
-			audioOutputSelect.appendChild(option);
-		}
-
-		if (!!videoSelect)
-		{
-			// 
-			let option = document.createElement('option');
-			option.value = 'default';
-			option.text = 'Default';
-
-			videoSelect.appendChild(option);
-		}
     }, (err) => {
 		const errMsg = err.name + err.message + '\n';
 		text_info.value = text_info.value + errMsg;
     });
-}
-
-let cameraDevEle = document.getElementById('cameraDev');
-if (!!cameraDevEle)
-{
-	cameraDevEle.addEventListener('change', () => {
-		let index = videoSelect.selectedIndex;
-	
-		cameraDevId = videoSelect.options[index].value;
-	
-		console.log(`<demo> cameraDev change - cameraDevId: ${cameraDevId}`);
-	})
-}
-
-// 
-let micDevEle = document.getElementById('micDev');
-if (!!micDevEle)
-{
-	micDevEle.addEventListener('change', () => {
-		let index = audioInputSelect.selectedIndex;
-	
-		micDevId = audioInputSelect.options[index].value;
-		
-		console.log(`<demo> micDev change - micDevId: ${micDevId}`);
-	})
-}
-
-// 
-let speakerDevEle = document.getElementById('speakerDev');
-if (!!speakerDevEle)
-{
-	speakerDevEle.addEventListener('change', () => {
-		let index = audioOutputSelect.selectedIndex;
-	
-		speakerDevId = audioOutputSelect.options[index].value;
-
-		// 
-		remote_stream.forEach((item) =>
-		{
-			if (!!item)
-			{
-				// 
-				item.setAudioOutput(speakerDevId, (e) => {
-					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput succc - ${JSON.stringify(e)}` + '\n';
-					console.log('<demo> switch speaker - Stream.setAudioOutput succc. - ' + e);	
-				}, (e) => {
-					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput fail - ${JSON.stringify(e)}` + '\n';
-					console.log('<demo> switch speaker - Stream.setAudioOutput fail. - ' + e);	
-				});
-			}
-		});
-
-		console.log(`<demo> speakerDev change - speakerDevId: ${speakerDevId}`);
-	})
-}
-
-// 
-let audioProfileEle = document.getElementById('audioProfile');
-if (!!audioProfileEle)
-{
-	audioProfileEle.addEventListener('change', () => {
-		let index = audioProfileSelect.selectedIndex;
-	
-		audioProfile = audioProfileSelect.options[index].value;
-		
-		console.log(`<demo> audioProfile change - audioProfile: ${audioProfile}`);
-	})
 }
 
 let userRoleEle = document.getElementById('userRole');

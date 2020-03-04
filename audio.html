@@ -136,36 +136,15 @@
 				<td>
 					<table>
 						<tr>
+							<td> - </td>
 							<td>
-								<input type="checkbox" id="onlyAudio" checked disabled>纯音频</input>
-							</td>
-							<td>
-								<label for="audioProfile">AudioProfile : </label>
-							</td>
-							<td>
-								<select id="audioProfile">
-									<option value="default" selected>default</option>
-									<option value="isac32">isac32</option>
-									<option value="speech_low_quality">speech_low_quality(24kbps)</option>
-									<option value="speech_standard">speech_standard(24kbps)</option>
-									<option value="music_standard">music_standard(40kbps)</option>
-									<option value="standard_stereo">standard_stereo(64kbps)</option>
-									<option value="high_quality">high_quality(128kbps)</option>
-									<option value="high_quality_stereo">high_quality_stereo(192kbps)</option>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<button id="publishAudioStream">发布音频流</button>
+								<button id="publishAudioStream">发布纯音频流</button>
 							</td>
 							<td>
 								<button id="unpublishStream">取消发布流</button>
 							</td>
 							<td>当前推流状态 : </td>
 							<td><p id = "publishStreamStatus">未推流</p></td>
-							<td> - </td>
-							<td>MIC音量 : <span id="audioVolumeValue">0</span><progress id = "audioVolumeProgress" value="0" max="10"></progress></td>
 						</tr>
 						<tr>
 							<td> - </td>
@@ -176,22 +155,6 @@
 								<button id="disableAudio">disableAudio</button>
 							</td>
 							<td> - </td>
-							<td> - </td>
-							<td>音量调节 : 
-								<input id="micVolumeSlider" type="range" min="0" max="15" value="10" size="5"/>
-							</td>
-							<td><span id="micVolumeSliderValue">1</span></td>
-						</tr>
-						<tr>
-							<td>
-								<input type="checkbox" id="micPlayback">micPlayback</input>
-							</td>
-							<td>
-								<label for="switchSpeaker">切换Speaker : </label>
-							</td>
-							<td>
-								<select id="speakerDev"></select>
-							</td>
 						</tr>
 					</table>
 				</td>
