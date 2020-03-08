@@ -1,11 +1,9 @@
-import TTTRtcWeb from '../lib/tttwebsdk';
-// import TTTRtcWeb from 'tttwebsdk'
+import TTTRtcWeb from '../lib/tttwebsdk'; // import from local tttwebsdk.js
+// import TTTRtcWeb from 'tttwebsdk'; // npm install tttwebsdk@latest
 
 let RTCObj = new TTTRtcWeb();
 
 const pkg = require('../package.json');
-
-// 
 let demoVersion = pkg.version;
 
 let sdkVersion = TTTRtcWeb.getVersion();
@@ -33,7 +31,6 @@ const text_info = document.getElementById('text_info');
 
 let sourceMediaStream;
 
-const audioProfileSelect = document.getElementById('audioProfile');
 const videoSelect = document.getElementById("cameraDev");
 const audioInputSelect = document.getElementById('micDev');
 const audioOutputSelect = document.getElementById('speakerDev');
@@ -393,6 +390,7 @@ function joinChan(appid, chanid, userid)
 				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
+
 		if(stream.type === 'audio')
 		{
             stream.play();
@@ -413,7 +411,7 @@ function joinChan(appid, chanid, userid)
             }
 
             stream.play('3t_remote' + stream.innerStreamID, true);
-        }
+		}
     });
 
     client.on('video-mute', (evt) => {
@@ -1580,9 +1578,9 @@ let audioProfileEle = document.getElementById('audioProfile');
 if (!!audioProfileEle)
 {
 	audioProfileEle.addEventListener('change', () => {
-		let index = audioProfileSelect.selectedIndex;
+		let index = audioProfileEle.selectedIndex;
 	
-		audioProfile = audioProfileSelect.options[index].value;
+		audioProfile = audioProfileEle.options[index].value;
 		
 		console.log(`<demo> audioProfile change - audioProfile: ${audioProfile}`);
 	})

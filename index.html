@@ -87,9 +87,6 @@
 						<option value=3>观众</option>
 					</select>
 				</td>
-			</tr>
-			<tr>
-				<td></td>
 				<td>
 					注 -- 1 : 主播；2 : 副播；3 : 观众<br/>
 					注 -- 同一个房间内只允许有一个主播<br/>
@@ -97,38 +94,53 @@
 				</td>
 			</tr>
 			<tr>
+				<td></td>
+			</tr>
+			<tr>
 				<td>CDN 推流地址 : </td>
 				<td>
 					<input type="text" value="" id="rtmpUrl" />
+				</td>
+			</tr>
+			<tr>
+				<td> - </td>
+				<td>
 					<!--
 					<input type="checkbox" id="disableRtmpVideo">只推音频</input>
 					-->
 					<button id="setRtmpUrl">切换CDN</button>
 				</td>
+				<td>
+					注 -- 如果要设置推流地址，要确保 [用户角色] 为 [主播]
+				</td>
 			</tr>
 			<tr>
 				<td></td>
-				<td>
-					注 -- 如果要设置推流地址，要确保 [用户角色] 为 [主播]
-				</td>				
 			</tr>
 			<tr><td></td></tr>
 			<tr><td></td></tr>
 			<tr>
-				<table>
-					<td>首先请登录 : </td>
-					<td></td>
-					<td>
-						<button id="joinChan"><font color="red">加入房间</font></button>
-					</td>
-					<td>
-						<button id="leaveChan">离开房间</button>
-					</td>
-					<td></td>
-					<td>登录状态 : </td>
-					<td><p id = "loginStatus">未登录</p></td>
-					<td><p id = "loginInfo"> - </p></td>
-				</table>
+				<td>首先请登录 : </td>
+				<td>
+					<table>
+						<td></td>
+						<td></td>
+						<td>
+							<button id="joinChan"><font color="red">加入房间</font></button>
+						</td>
+						<td>
+							<button id="leaveChan">离开房间</button>
+						</td>
+					</table>
+				</td>
+				<td>
+					<table>
+						<td></td>
+						<td>登录状态 : </td>
+						<td><p id = "loginStatus">未登录</p></td>
+						<td><p id = "loginInfo"> - </p></td>
+					</table>
+				</td>
 			</tr>
 		</table>
 	</div>
@@ -175,6 +187,7 @@
 							<select id="speakerDev"></select>
 						</td>
 					</tr>
+					<!--
 					<tr>
 						<td> - </td>
 						<td>
@@ -191,6 +204,7 @@
 							</select>
 						</td>
 					</tr>
+					-->
 				</table>
 			</tr>
 		</table>
@@ -344,7 +358,7 @@
 
     <!-- <script src='https://stech.3ttech.cn/websdk/prod/tttwebsdk.js'></script> -->
     <!-- <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script> -->
-    <script type='text/javascript' src='./dist/pagedemo-bundle.js' charset="utf-8"></script>
+    <script type='text/javascript' src='./dist/websdkdemo-bundle.js' charset="utf-8"></script>
 </body>
 
 </html>

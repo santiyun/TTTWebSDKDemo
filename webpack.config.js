@@ -4,7 +4,7 @@ const webpack = require('webpack');
 module.exports = {
     cache: true,
     entry: {
-        pagedemo: './src/demo.js'
+        websdkdemo: './src/websdkdemo.js'
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
