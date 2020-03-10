@@ -87,7 +87,16 @@ let tttStatus = 0;
 // url: https://...../?auto=1&r=666777&u=111111&h=webmedia4.3ttech.cn
 let isAutoPub = getQueryVariable('auto');
 let xRoomId = getQueryVariable('r');
-let xUserId = getQueryVariable('u') || userId;
+if (!!xRoomId)
+{
+	roomIdEle.value = xRoomId;
+}
+
+let xUserId = getQueryVariable('u');
+if (!!xUserId)
+{
+	userIdEle.value = xUserId;
+}
 let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab8131651339518
 let xSpecMic = getQueryVariable('m');
 let xSpecServer = getQueryVariable('h');
@@ -98,24 +107,11 @@ autoPublish();
 
 function autoPublish()
 {
-	console.log(`<demo> Load. isAutoPub: ${isAutoPub} xRoomId: ${xRoomId} xUserId: ${xUserId}`);
+	console.log(`<demo> Load. isAutoPub: ${isAutoPub} roomId: ${roomIdEle.value} userId: ${userIdEle.value}`);
 
-	if (!!xRoomId && !!xUserId && isAutoPub)
+	if (!!roomIdEle.value && !!userIdEle.value && isAutoPub)
 	{
-		if (!!roomIdEle)
-		{
-			roomIdEle.value = xRoomId;
-		}
-		if (!!userIdEle)
-		{
-			userIdEle.value = xUserId;
-		}
-
-		joinChan(xAppId, xRoomId, xUserId);
-	}
-	else
-	{
-		isAutoPub = false;
+		joinChan(xAppId, roomIdEle.value, userIdEle.value);
 	}
 }
 
@@ -152,6 +148,15 @@ function joinChan(appid, chanid, userid)
 			TTTRtcWeb.setServerUrl(xSpecServer);
 		}
 	}
+
+	// 
+	// 
+	// TTTRtcWeb.setIpLocationAddress('webdispatch.3ttech.cn');
+	// TTTRtcWeb.setServerUrl('v3.jkim.ccb.com');
+	// TTTRtcWeb.setServerUrl('v7.jkim.ccb.com');
+	TTTRtcWeb.setServerUrl('gzeduservice.3ttech.cn');
+	TTTRtcWeb.setPrivate(true);
+	TTTRtcWeb.setLogSubmit(false);
 
 	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
     client = RTCObj.createClient({
@@ -226,7 +231,7 @@ function joinChan(appid, chanid, userid)
 			if (isAutoPub)
 			{
 				publishStream({
-					userid : xUserId,
+					userid : userIdEle.value,
 					audio  : true,
 					video  : true,
 					screen : false,
@@ -247,6 +252,8 @@ function joinChan(appid, chanid, userid)
     }, (err) => {
 		text_info.value = text_info.value + `<demo> init failed. - error: ${JSON.stringify(err)}` + '\n';
 		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
+
+		return;
 	});
 
 	client.on('device-hot-plug', (e) => {
@@ -775,17 +782,9 @@ function createMediaSourceStream()
 		console.log('captureStream() not supported');
 	}
 }
-  
-// 
-function publishStream(opts)
-{
-	// 
-	if (tttStatus !== 1)
-	{
-		text_info.value = text_info.value + '<demo> publishStream - 请先[加入房间]' + '\n';
-		return;
-	}
 
+function previewLocalStream(opts)
+{
 	const {
 		userid,
 		audio,
@@ -797,7 +796,7 @@ function publishStream(opts)
 	let v = (+video) + (+screen) + (+mediasource);
 	if (v > 1)
 	{
-		text_info.value = text_info.value + '<demo> publishStream - video/screen/mediasouce 三个参数，仅允许一个取 true' + '\n';
+		text_info.value = text_info.value + '<demo> previewLocalStream() - video/screen/mediasouce 三个参数，仅允许一个取 true' + '\n';
 		return;
 	}
 
@@ -824,7 +823,7 @@ function publishStream(opts)
 
 		const streamID = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
-		console.log(`<demo> publishStream() userid: ${userid} cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
+		console.log(`<demo> previewLocalStream() userid: ${userid} cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
 
 		// 
 		// 
@@ -902,6 +901,160 @@ function publishStream(opts)
 			}
 			// 
 			
+			streams.set(mediaStream.innerStreamID, mediaStream);
+
+			if (Boolean(screen))
+			{
+				gScreenStream = mediaStream;
+			}
+			else if (Boolean(mediasource))
+			{
+				gMediaSourceStream = mediaStream;
+			}
+			else if (Boolean(video) || Boolean(audio))
+			{
+				gStream = mediaStream;
+			}
+			// 
+		}, (evt) => {
+			text_info.value = text_info.value + `<demo> publishStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
+			console.log('<demo> publishStream - Stream.init failed. - error: ' + evt);
+		});
+	}
+	else
+	{
+		const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
+		mediaStream.play(videoId, true);
+	}
+}
+  
+// 
+function publishStream(opts)
+{
+	// 
+	if (tttStatus !== 1)
+	{
+		text_info.value = text_info.value + '<demo> publishStream - 请先[加入房间]' + '\n';
+		return;
+	}
+
+	const {
+		userid,
+		audio,
+		video,
+		screen,
+		mediasource
+	} = opts;
+
+	let v = (+video) + (+screen) + (+mediasource);
+	if (v > 1)
+	{
+		text_info.value = text_info.value + '<demo> publishStream - video/screen/mediasouce 三个参数，仅允许一个取 true' + '\n';
+		return;
+	}
+
+	let mediaStream = null;
+	
+	if (Boolean(screen))
+	{
+		mediaStream = gScreenStream;
+	}
+	else if (Boolean(mediasource))
+	{
+		mediaStream = gMediaSourceStream;
+	}
+	else if (Boolean(video) || Boolean(audio))
+	{
+		mediaStream = gStream;
+	}
+
+	if (mediaStream === null)
+	{
+		let resolutionEle = document.getElementById('resolution');
+		let specRes = (!!resolutionEle) ? resolutionEle.value : '480p';
+		let resolution = Boolean(screen) ? '1080p' : specRes;
+
+		const streamID = Boolean(screen) ? `${userid}-screen` : `${userid}`;
+
+		console.log(`<demo> publishStream() userid: ${userid} video: ${video} cameraDevId: ${cameraDevId} audio: ${audio} micDevId: ${micDevId} resolution: ${resolution}`);
+
+		// 
+		// 
+		let audioSource = null;
+		let videoSource = null;
+		if (mediasource)
+		{
+			createMediaSourceStream();
+
+			if (!!sourceMediaStream)
+			{
+				const audioTracks = sourceMediaStream.getVideoTracks();
+				if (audioTracks.length > 0)
+					audioSource = audioTracks[0];
+				const videoTracks = sourceMediaStream.getAudioTracks();
+				if (videoTracks.length > 0)
+					videoSource = videoTracks[0];
+			}
+		}
+
+		mediaStream = RTCObj.createStream({
+			streamID,
+			userID: userid,
+			audio: Boolean(audio),
+			video: Boolean(video),
+			screen: Boolean(screen),
+			mediasource: Boolean(mediasource),
+			audioSource,
+			videoSource,
+			cameraId: cameraDevId === 'default' ? null : cameraDevId,
+			microphoneId: micDevId === 'default' ? null : micDevId,
+			attributes: { videoProfile : resolution },
+			openAudioCtx: true
+		});
+
+		if (!mediaStream)
+			return;
+
+		window.ls = mediaStream;
+
+		// 
+		if (audioProfile !== 'default')
+		{
+			mediaStream.setAudioProfile(audioProfile);
+		}
+
+		mediaStream.init(() => {
+			/*
+			if (!Boolean(mediasource) && (Boolean(video) || Boolean(screen)))
+			{
+				const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
+				let videoE = document.createElement('video');
+				videoE.id = videoId;
+				videoE.muted = true;
+				videoE.autoplay = true;
+				videoE.controls = true;
+				videoE.setAttribute('playsinline', '');
+				videoE.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;'
+
+				if (Boolean(screen))
+				{
+					if (!!screenEle)
+					{
+						screenEle.append(videoE);
+					}
+				}
+				else
+				{
+					if (!!videoEle)
+					{
+						videoEle.append(videoE);
+					}
+				}
+
+				mediaStream.play(videoId, true);
+			}
+			// 
+			
 			let micPlaybackEle = document.getElementById('micPlayback');
 			if (!!micPlaybackEle)
 			{
@@ -911,6 +1064,7 @@ function publishStream(opts)
 					mediaStream.play();
 				}
 			}
+			*/
 
 			streams.set(mediaStream.innerStreamID, mediaStream);
 
@@ -1121,12 +1275,27 @@ function _innerUnpublishStream(opts)
 }
 
 //
+let previewLocalEle = document.getElementById('previewLocal');
+if (!!previewLocalEle)
+{
+	previewLocalEle.addEventListener('click', () => {
+		previewLocalStream({
+			userid : userIdEle.value,
+			audio  : true,
+			video  : true,
+			screen : false,
+			mediasource : false
+		});
+	})
+}
+
+//
 let publishAudioStreamEle = document.getElementById('publishAudioStream');
 if (!!publishAudioStreamEle)
 {
 	publishAudioStreamEle.addEventListener('click', () => {
 		publishStream({
-			userid : xUserId,
+			userid : userIdEle.value,
 			audio  : true,
 			video  : false,
 			screen : false,
@@ -1141,7 +1310,7 @@ if (!!publishStreamEle)
 {
 	publishStreamEle.addEventListener('click', () => {
 		publishStream({
-			userid : xUserId,
+			userid : userIdEle.value,
 			audio  : true,
 			video  : true,
 			screen : false,
@@ -1278,11 +1447,19 @@ if (!!pauseVideoEle)
 
 		if (isVideoPaused)
 		{
-			client.resumeWebcam(gStream);
+			client.resumeWebcam(gStream, () => {
+				console.log('<demo> client.resumeWebcam succ.');
+			}, (e) => {
+				console.log(`<demo> client.resumeWebcam fail - ${e.toString()}`);
+			});
 		}
 		else
 		{
-			client.pauseWebcam(gStream, true);
+			client.pauseWebcam(gStream, true, () => {
+				console.log('<demo> client.pauseWebcam succ.');
+			}, (e) => {
+				console.log(`<demo> client.pauseWebcam fail - ${e.toString()}`);
+			});
 		}
 
 		isVideoPaused = !isVideoPaused;
@@ -1307,11 +1484,19 @@ if (!!pauseAudioEle)
 	
 		if (isAudioPaused)
 		{
-			client.resumeMic(gStream);
+			client.resumeMic(gStream, () => {
+				console.log('<demo> client.resumeMic succ.');
+			}, (e) => {
+				console.log(`<demo> client.resumeMic fail - ${e.toString()}`);
+			});
 		}
 		else
 		{
-			client.pauseMic(gStream);
+			client.pauseMic(gStream, () => {
+				console.log('<demo> client.pauseMic succ.');
+			}, (e) => {
+				console.log(`<demo> client.pauseMic fail - ${e.toString()}`);
+			});
 		}
 	
 		isAudioPaused = !isAudioPaused;
@@ -1355,7 +1540,7 @@ if (!!publishScreenEle)
 {
 	publishScreenEle.addEventListener('click', () => {
 		publishStream({
-			userid : xUserId,
+			userid : userIdEle.value,
 			audio  : false,
 			video  : false,
 			screen : true,
@@ -1382,7 +1567,7 @@ if (!!publishMediaSourceEle)
 {
 	publishMediaSourceEle.addEventListener('click', () => {
 		publishStream({
-			userid : xUserId,
+			userid : userIdEle.value,
 			audio  : false,
 			video  : false,
 			screen : false,
