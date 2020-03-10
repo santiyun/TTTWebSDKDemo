@@ -157,6 +157,7 @@ function joinChan(appid, chanid, userid)
 	// TTTRtcWeb.setServerUrl('gzeduservice.3ttech.cn');
 	// TTTRtcWeb.setPrivate(true);
 	// TTTRtcWeb.setLogSubmit(false);
+	// TTTRtcWeb.setServerUrl('xiaoyao1.3ttech.cn');
 
 	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
     client = RTCObj.createClient({
