@@ -1024,7 +1024,6 @@ function publishStream(opts)
 		}
 
 		mediaStream.init(() => {
-			/*
 			if (!Boolean(mediasource) && (Boolean(video) || Boolean(screen)))
 			{
 				const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
@@ -1064,7 +1063,6 @@ function publishStream(opts)
 					mediaStream.play();
 				}
 			}
-			*/
 
 			streams.set(mediaStream.innerStreamID, mediaStream);
 
@@ -1688,52 +1686,60 @@ function getDevices()
 
 			audioOutputSelect.appendChild(option);
 		}
-
-		if (!!videoSelect)
-		{
-			// 
-			let option = document.createElement('option');
-			option.value = 'default';
-			option.text = 'Default';
-
-			videoSelect.appendChild(option);
-		}
     }, (err) => {
 		const errMsg = err.name + err.message + '\n';
 		text_info.value = text_info.value + errMsg;
     });
 }
 
-let cameraDevEle = document.getElementById('cameraDev');
-if (!!cameraDevEle)
+// 
+if (!!videoSelect)
 {
-	cameraDevEle.addEventListener('change', () => {
+	videoSelect.addEventListener('change', () => {
 		let index = videoSelect.selectedIndex;
 	
 		cameraDevId = videoSelect.options[index].value;
 	
 		console.log(`<demo> cameraDev change - cameraDevId: ${cameraDevId}`);
+
+		// switch device for Stream
+		if (!!gStream)
+		{
+			gStream.switchDevice('video', cameraDevId, () => {
+				console.log(`<demo> switchDevice succ - deviceId: ${cameraDevId}`);
+			}, (e) =>{
+				console.log(`<demo> switchDevice fail - deviceId: ${cameraDevId} - ${e.toString()}`);
+			});
+		}
 	})
 }
 
 // 
-let micDevEle = document.getElementById('micDev');
-if (!!micDevEle)
+if (!!audioInputSelect)
 {
-	micDevEle.addEventListener('change', () => {
+	audioInputSelect.addEventListener('change', () => {
 		let index = audioInputSelect.selectedIndex;
 	
 		micDevId = audioInputSelect.options[index].value;
 		
 		console.log(`<demo> micDev change - micDevId: ${micDevId}`);
+
+		// switch device for Stream
+		if (!!gStream)
+		{
+			gStream.switchDevice('audio', micDevId, () => {
+				console.log(`<demo> switchDevice succ - deviceId: ${micDevId}`);
+			}, (e) =>{
+				console.log(`<demo> switchDevice fail - deviceId: ${micDevId} - ${e.toString()}`);
+			});
+		}
 	})
 }
 
 // 
-let speakerDevEle = document.getElementById('speakerDev');
-if (!!speakerDevEle)
+if (!!audioOutputSelect)
 {
-	speakerDevEle.addEventListener('change', () => {
+	audioOutputSelect.addEventListener('change', () => {
 		let index = audioOutputSelect.selectedIndex;
 	
 		speakerDevId = audioOutputSelect.options[index].value;
