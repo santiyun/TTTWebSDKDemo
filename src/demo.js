@@ -12,6 +12,7 @@ let sdkVersion = RTCObj.getVersion();
 
 RTCObj.setIpLocationAddress('v1.jkim.ccb.com');
 RTCObj.setIpLocationPort(8443);
+RTCObj.setServerUrl('v7.jkim.ccb.com');
 
 document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVersion}`;
 
