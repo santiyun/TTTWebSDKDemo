@@ -154,9 +154,9 @@ function joinChan(appid, chanid, userid)
 	// TTTRtcWeb.setIpLocationAddress('webdispatch.3ttech.cn');
 	// TTTRtcWeb.setServerUrl('v3.jkim.ccb.com');
 	// TTTRtcWeb.setServerUrl('v7.jkim.ccb.com');
-	TTTRtcWeb.setServerUrl('gzeduservice.3ttech.cn');
-	TTTRtcWeb.setPrivate(true);
-	TTTRtcWeb.setLogSubmit(false);
+	// TTTRtcWeb.setServerUrl('gzeduservice.3ttech.cn');
+	// TTTRtcWeb.setPrivate(true);
+	// TTTRtcWeb.setLogSubmit(false);
 
 	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
     client = RTCObj.createClient({
