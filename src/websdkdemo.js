@@ -52,6 +52,7 @@ let cameraDevId = 'default';
 let micDevId = 'default';
 let speakerDevId = 'default';
 let audioProfile = 'default';
+let audioCodec = 'isac';
 
 const appIdEle = document.getElementById('appID');
 
@@ -179,7 +180,8 @@ function joinChan(appid, chanid, userid)
     client = RTCObj.createClient({
 		role: userRole,
 		rtmpUrl: cdnUrl,
-		videoMixerBGIUrl: 'http://3ttech.cn/res/tpl/default/images/test.png'
+		videoMixerBGIUrl: 'http://3ttech.cn/res/tpl/default/images/test.png',
+		audioCodec
 	});
  
     client.init(appid, userid, () => {
@@ -584,9 +586,12 @@ function setRtmpUrl(url)
 		text_info.value = text_info.value + '<demo> setRtmpUrl - 请先[加入房间]' + '\n';
 
 		return;
-    }
+	}
+	
+	// 
+	const pureAudioEle = document.getElementById('pureAudio');
 
-	client.setRtmpUrl(url);
+	client.setRtmpUrl({ url, avMode: pureAudioEle.checked ? 'audio' : 'av' } );
 }
 
 let joinChanEle = document.getElementById('joinChan');
@@ -1789,6 +1794,18 @@ if (!!audioOutputSelect)
 	})
 }
 
+// 
+let audioCodecEle = document.getElementById('audioCodec');
+if (!!audioCodecEle)
+{
+	audioCodecEle.addEventListener('change', () => {
+		let index = audioCodecEle.selectedIndex;
+
+		audioCodec = audioCodecEle.options[index].value;
+
+		console.log(`<demo> audioCodec change - audioCodec: ${audioCodec}`);
+	})
+}
 // 
 let audioProfileEle = document.getElementById('audioProfile');
 if (!!audioProfileEle)
