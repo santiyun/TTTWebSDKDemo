@@ -4,11 +4,12 @@ import TTTRtcWeb from '../lib/tttwebsdk'; // import from local tttwebsdk.js
 // 
 // TTTRtcWeb.setPrivate(true);
 // TTTRtcWeb.setIpLocationAddress('v1.jkim.ccb.com');
-// TTTRtcWeb.setServerUrl('webmedia7.3ttech.cn');
+// TTTRtcWeb.setServerUrl('114_115_172_21.3ttech.cn'); 
 // TTTRtcWeb.setServerUrl('v7.jkim.ccb.com');
 // TTTRtcWeb.setServerUrl('gzeduservice.3ttech.cn');
 // TTTRtcWeb.setLogSubmit(false);
 // TTTRtcWeb.setServerUrl('xiaoyao1.3ttech.cn');
+// TTTRtcWeb.setServerUrl('webmedia7.3ttech.cn');
 
 const isSupp = TTTRtcWeb.isSystemSupported();
 console.log(`isSupp: ${isSupp}`);
@@ -180,7 +181,7 @@ function joinChan(appid, chanid, userid)
     client = RTCObj.createClient({
 		role: userRole,
 		rtmpUrl: cdnUrl,
-		videoMixerBGIUrl: 'http://3ttech.cn/res/tpl/default/images/test.png',
+		videoMixerBGIUrl: '',
 		audioCodec
 	});
  
@@ -363,6 +364,10 @@ function joinChan(appid, chanid, userid)
 			stream.close();
         });
 	});
+
+	client.on('rtmp-success', (evt) => {
+		console.log(`<demo> - event [rtmp-success] - ${JSON.stringify(evt)}`);
+	});
 	
 	client.on('audio-added', (evt) => {
 		var stream = evt.stream;
@@ -410,7 +415,7 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 		text_info.value = text_info.value + `<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type}` + '\n';
-		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type}`);
+		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type} stream.videoType: ${stream.videoType}`);
 
 		if (stream.hasAudio())
 		{
@@ -587,6 +592,11 @@ function setRtmpUrl(url)
 
 		return;
 	}
+
+	if (!client)
+	{
+		return;
+	}
 	
 	// 
 	const pureAudioEle = document.getElementById('pureAudio');
@@ -594,6 +604,130 @@ function setRtmpUrl(url)
 	client.setRtmpUrl({ url, avMode: pureAudioEle.checked ? 'audio' : 'av' } );
 }
 
+const splitWnd1 = [{x: 0, y: 0}];
+const splitWnd4 = [{x: 0, y: 0}, {x: 0.5, y: 0}, {x: 0, y: 0.5}, {x: 0.5, y: 0.5}];
+const splitWnd9 = [{x: 0, y: 0}, {x: 0.33, y: 0}, {x: 0.66, y: 0}, {x: 0, y: 0.33}, {x: 0.33, y: 0.33}, {x: 0.66, y: 0.33}, {x: 0, y: 0.66}, {x: 0.33, y: 0.66}, {x: 0.66, y: 0.66}];
+
+function setLiveMixerLayout()
+{
+	// 
+	if (tttStatus !== 1)
+	{
+		text_info.value = text_info.value + '<demo> setLiveMixerLayout - 请先[加入房间]' + '\n';
+
+		return;
+	}
+
+	if (!client)
+	{
+		return;
+	}
+	
+	// 
+	let liveMixerLayout = {
+		backgroundColor: 0x000000,
+		width: 640,
+		height: 360,
+		users: []
+	}
+
+	let nCnt = remote_stream.size;
+
+	if (!!gStream)
+	{
+		nCnt++;
+	}
+	
+	if (!!gScreenStream)
+	{
+		nCnt++;
+	}
+
+	let wh = 1;
+	let splitWnd = [];
+	if (nCnt <= 1)
+	{
+		wh = 1;
+		splitWnd = splitWnd1;
+	}
+	if (nCnt <= 4)
+	{
+		wh = 0.5
+		splitWnd = splitWnd4;
+	}
+	else if (nCnt <= 9)
+	{
+		wh = 0.33
+		splitWnd = splitWnd9;
+	}
+	else
+		; // TODO : 
+	
+	let nIndex = 0;
+	if (!!gStream)
+	{
+		let user = {};
+
+		user.userId = gStream.userId;
+		user.streamId = gStream.getId();
+		user.x = splitWnd[nIndex].x;
+		user.y = splitWnd[nIndex].y;
+		user.w = wh;
+		user.h = wh;
+		user.z = 0;
+
+		liveMixerLayout.users.push(user);
+
+		nIndex++;
+	}
+	
+	if (!!gScreenStream)
+	{
+		let user = {};
+
+		user.userId = gScreenStream.userId;
+		user.streamId = gScreenStream.getId();
+		user.x = splitWnd[nIndex].x;
+		user.y = splitWnd[nIndex].y;
+		user.w = wh;
+		user.h = wh;
+		user.z = 0;
+
+		liveMixerLayout.users.push(user);
+
+		nIndex++;
+	}
+
+	// 
+	if (!!remote_stream)
+	{
+		remote_stream.forEach((item) =>
+		{
+			if (Boolean(item))
+			{
+				let user = {};
+				// 
+				user.userId = item.userId;
+				user.streamId = item.getId();
+				user.x = splitWnd[nIndex].x;
+				user.y = splitWnd[nIndex].y;
+				user.w = wh;
+				user.h = wh;
+				user.z = 0;
+
+				liveMixerLayout.users.push(user);
+		
+				nIndex++;
+			}
+		});
+	}
+
+	text_info.value = text_info.value + `<demo> setLiveMixerLayout ...liveMixerLayout: ${JSON.stringify(liveMixerLayout)}` + '\n';
+
+	client.setLiveMixerLayout(liveMixerLayout, () => {}, () => {});
+}
+
+// 
 let joinChanEle = document.getElementById('joinChan');
 if (!!joinChanEle)
 {
@@ -610,6 +744,14 @@ if (!!leaveChanEle)
 {
 	leaveChanEle.addEventListener('click', () => {
 		leaveChan();
+	})
+}
+
+let setLiveMixerLayoutEle = document.getElementById('setLiveMixerLayout');
+if (!!setLiveMixerLayoutEle)
+{
+	setLiveMixerLayoutEle.addEventListener('click', () => {
+		setLiveMixerLayout();
 	})
 }
 
@@ -1224,8 +1366,8 @@ function _publishStream(userid, mediaStream, onSuccess, onFailure)
 		onSuccess && onSuccess();
 
 		// 
-		const streamId = mediaStream.getId();
-		setStreamSEI(userid, streamId, 'add', false);
+		// const streamId = mediaStream.getId();
+		// setStreamSEI(userid, streamId, 'add', false);
 
 		// 
 		if (mediaStream.hasAudio())
