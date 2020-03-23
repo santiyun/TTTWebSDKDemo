@@ -181,7 +181,7 @@ function joinChan(appid, chanid, userid)
     client = RTCObj.createClient({
 		role: userRole,
 		rtmpUrl: cdnUrl,
-		videoMixerBGIUrl: '',
+		videoMixerBGIUrl: 'http://3ttech.cn/res/tpl/default/images/black.jpg',
 		audioCodec
 	});
  
