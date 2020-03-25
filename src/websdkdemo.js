@@ -133,6 +133,7 @@ if (!!xSpecIploc)
 {
 	if (xSpecIploc !== '')
 	{
+		TTTRtcWeb.setPrivate(true);
 		TTTRtcWeb.setIpLocationAddress(xSpecIploc);
 	}
 }
