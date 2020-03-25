@@ -2007,3 +2007,14 @@ if (!!userRoleEle)
 		}
 	})
 }
+
+// 
+let submitLogEle = document.getElementById('submitLog');
+if (!!submitLogEle)
+{
+	submitLogEle.addEventListener('click', () => {
+		const isSubmitLog = submitLogEle.checked;
+		TTTRtcWeb.setLogSubmit(isSubmitLog);
+		console.log(`<demo> submitLog: ${isSubmitLog}`);
+	})
+}
