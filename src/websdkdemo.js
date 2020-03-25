@@ -126,6 +126,25 @@ if (!!xUserId)
 let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab8131651339518
 let xSpecMic = getQueryVariable('m');
 let xSpecServer = getQueryVariable('h');
+let xSpecIploc = getQueryVariable('l');
+let xSpecIplocPort = getQueryVariable('p');
+// 
+if (!!xSpecIploc)
+{
+	if (xSpecIploc !== '')
+	{
+		TTTRtcWeb.setIpLocationAddress(xSpecIploc);
+	}
+}
+// 
+if (!!xSpecIplocPort)
+{
+	const port = parseInt(xSpecIplocPort, 10);
+	if (!!port)
+	{
+		TTTRtcWeb.setIpLocationPort(port);
+	}
+}
 
 getDevices();
 
@@ -175,6 +194,11 @@ function joinChan(appid, chanid, userid)
 		}
 	}
 
+	// 
+	const submitLogEle = document.getElementById('submitLog');
+	TTTRtcWeb.setLogSubmit(submitLogEle.checked);
+
+	// 
 	RTCObj = new TTTRtcWeb();
 
 	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
@@ -597,7 +621,7 @@ function setRtmpUrl(url)
 	{
 		return;
 	}
-	
+
 	// 
 	const pureAudioEle = document.getElementById('pureAudio');
 
