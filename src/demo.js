@@ -10,10 +10,6 @@ let demoVersion = pkg.version;
 
 let sdkVersion = RTCObj.getVersion();
 
-RTCObj.setIpLocationAddress('v1.jkim.ccb.com');
-RTCObj.setIpLocationPort(8443);
-RTCObj.setServerUrl('v7.jkim.ccb.com');
-
 document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVersion}`;
 
 // 
@@ -82,7 +78,27 @@ let xUserId = getQueryVariable('u') || userId;
 let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab8131651339518
 let xSpecMic = getQueryVariable('m');
 let xSpecServer = getQueryVariable('h');
+let xSpecIploc = getQueryVariable('l');
+let xSpecIplocPort = getQueryVariable('p');
+// 
+if (!!xSpecIploc)
+{
+	if (xSpecIploc !== '')
+	{
+		RTCObj.setIpLocationAddress(xSpecIploc); // 'v7.jkim.ccb.com'
+	}
+}
+// 
+if (!!xSpecIplocPort)
+{
+	const port = parseInt(xSpecIplocPort, 10);
+	if (!!port)
+	{
+		RTCObj.setIpLocationPort(port);
+	}
+}
 
+// 
 getDevices();
 
 autoPublish();
