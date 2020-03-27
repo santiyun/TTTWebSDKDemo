@@ -419,9 +419,9 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 			
-		text_info.value = text_info.value + `<demo> - event [video-added] streamId: ${evt.stream.getId()}` + '\n';
+		text_info.value = text_info.value + `<demo> - event [video-added] streamId: ${stream.getId()}` + '\n';
 
-		console.log(`<demo> - event [video-added] streamId: ${evt.stream.getId()}`);
+		console.log(`<demo> - event [video-added] streamId: ${stream.getId()} videoType: ${stream.videoType}`);
 
 		remote_stream.set(stream.getId(), stream);
 		// 
@@ -464,7 +464,7 @@ function joinChan(appid, chanid, userid)
 				video.autoplay = true;
 				video.controls = true;
 				video.setAttribute('playsinline', '');
-                video.style.cssText = 'height: 300px; width: 300px; background: black; position:relative; display:inline-block;'
+                video.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;';
 				videoEle.append(video);
             }
 
