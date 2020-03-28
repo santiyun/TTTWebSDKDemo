@@ -1055,8 +1055,8 @@ function previewLocalStream(opts)
 			microphoneId: micDevId === 'default' ? null : micDevId,
 			attributes: { videoProfile : resolution },
 			codecOptions: {
-				startBitrate: videoBitrate,
-				maxBitrate: videoBitrate + 100,
+				startBitrate: videoBitrate - 50,
+				maxBitrate: videoBitrate,
 				minBitrate: videoBitrate - 100
 			},
 			openAudioCtx: true
@@ -1223,8 +1223,8 @@ function publishStream(opts)
 			microphoneId: micDevId === 'default' ? null : micDevId,
 			attributes: { videoProfile : resolution },
 			codecOptions: {
-				startBitrate: videoBitrate,
-				maxBitrate: videoBitrate + 100,
+				startBitrate: videoBitrate - 50,
+				maxBitrate: videoBitrate,
 				minBitrate: videoBitrate - 100
 			},
 			openAudioCtx: true
