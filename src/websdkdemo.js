@@ -435,6 +435,13 @@ function joinChan(appid, chanid, userid)
         });
 	})
 
+	client.on('video-update', (evt) => {
+		const {userId, streamId, videoType } = evt;
+
+		text_info.value = text_info.value + `<demo> - event [video-update] userId: ${userId} streamId: ${streamId} videoType: ${videoType}` + '\n';
+		console.log(`<demo> - event [video-update] userId: ${userId} streamId: ${streamId} videoType: ${videoType}`);
+	})
+
     client.on('stream-subscribed', (evt) => {
         var stream = evt.stream;
 		if (!stream)
