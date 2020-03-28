@@ -1009,6 +1009,16 @@ function previewLocalStream(opts)
 		let specRes = (!!resolutionEle) ? resolutionEle.value : '480p';
 		let resolution = Boolean(screen) ? '1080p' : specRes;
 
+		let videoBitrate = 400;
+		const videoBitrateEle = document.getElementById('videoBitrate');
+		if (!!videoBitrateEle)
+		{
+			videoBitrate = videoBitrateEle.value;
+		}
+		videoBitrate = +videoBitrate;
+		if (videoBitrate < 150)
+			videoBitrate = 150;
+
 		const streamId = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
 		console.log(`<demo> previewLocalStream() userid: ${userid} cameraDevId: ${cameraDevId} micDevId: ${micDevId} resolution: ${resolution}`);
@@ -1044,6 +1054,11 @@ function previewLocalStream(opts)
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
 			attributes: { videoProfile : resolution },
+			codecOptions: {
+				startBitrate: videoBitrate,
+				maxBitrate: videoBitrate + 100,
+				minBitrate: videoBitrate - 100
+			},
 			openAudioCtx: true
 		});
 
@@ -1162,6 +1177,16 @@ function publishStream(opts)
 		let specRes = (!!resolutionEle) ? resolutionEle.value : '480p';
 		let resolution = Boolean(screen) ? '1080p' : specRes;
 
+		let videoBitrate = 400;
+		const videoBitrateEle = document.getElementById('videoBitrate');
+		if (!!videoBitrateEle)
+		{
+			videoBitrate = videoBitrateEle.value;
+		}
+		videoBitrate = +videoBitrate;
+		if (videoBitrate < 150)
+			videoBitrate = 150;
+
 		const streamId = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
 		console.log(`<demo> publishStream() userid: ${userid} video: ${video} cameraDevId: ${cameraDevId} audio: ${audio} micDevId: ${micDevId} resolution: ${resolution}`);
@@ -1197,6 +1222,11 @@ function publishStream(opts)
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
 			attributes: { videoProfile : resolution },
+			codecOptions: {
+				startBitrate: videoBitrate,
+				maxBitrate: videoBitrate + 100,
+				minBitrate: videoBitrate - 100
+			},
 			openAudioCtx: true
 		});
 
