@@ -432,7 +432,10 @@ function joinChan(appid, chanid, userid)
         }, (err) => {
 			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
             // info.val(info.val() + 'Subscribe stream failed' + err + '\n');
-        });
+		});
+		
+		// 
+		setLiveMixerLayout();
 	})
 
 	client.on('video-update', (evt) => {
@@ -1016,15 +1019,25 @@ function previewLocalStream(opts)
 		let specRes = (!!resolutionEle) ? resolutionEle.value : '480p';
 		let resolution = Boolean(screen) ? '1080p' : specRes;
 
-		let videoBitrate = 400;
+		let codecOptions = undefined;
+		let videoBitrate = 0;
 		const videoBitrateEle = document.getElementById('videoBitrate');
 		if (!!videoBitrateEle)
 		{
 			videoBitrate = videoBitrateEle.value;
 		}
 		videoBitrate = +videoBitrate;
-		if (videoBitrate < 150)
-			videoBitrate = 150;
+		if (videoBitrate > 0)
+		{
+			if (videoBitrate < 150)
+				videoBitrate = 150;
+
+			codecOptions = {
+				startBitrate: videoBitrate - 50,
+				maxBitrate: videoBitrate,
+				minBitrate: videoBitrate - 100
+			};
+		}
 
 		const streamId = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
@@ -1061,11 +1074,7 @@ function previewLocalStream(opts)
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
 			attributes: { videoProfile : resolution },
-			codecOptions: {
-				startBitrate: videoBitrate - 50,
-				maxBitrate: videoBitrate,
-				minBitrate: videoBitrate - 100
-			},
+			codecOptions,
 			openAudioCtx: true
 		});
 
@@ -1184,15 +1193,26 @@ function publishStream(opts)
 		let specRes = (!!resolutionEle) ? resolutionEle.value : '480p';
 		let resolution = Boolean(screen) ? '1080p' : specRes;
 
-		let videoBitrate = 400;
+		let codecOptions = undefined;
+
+		let videoBitrate = 0;
 		const videoBitrateEle = document.getElementById('videoBitrate');
 		if (!!videoBitrateEle)
 		{
 			videoBitrate = videoBitrateEle.value;
 		}
 		videoBitrate = +videoBitrate;
-		if (videoBitrate < 150)
-			videoBitrate = 150;
+		if (videoBitrate > 0)
+		{
+			if (videoBitrate < 150)
+				videoBitrate = 150;
+
+			codecOptions = {
+				startBitrate: videoBitrate - 50,
+				maxBitrate: videoBitrate,
+				minBitrate: videoBitrate - 100
+			};
+		}
 
 		const streamId = Boolean(screen) ? `${userid}-screen` : `${userid}`;
 
@@ -1229,11 +1249,7 @@ function publishStream(opts)
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
 			attributes: { videoProfile : resolution },
-			codecOptions: {
-				startBitrate: videoBitrate - 50,
-				maxBitrate: videoBitrate,
-				minBitrate: videoBitrate - 100
-			},
+			codecOptions,
 			openAudioCtx: true
 		});
 
@@ -1426,6 +1442,17 @@ function _publishStream(userid, mediaStream, onSuccess, onFailure)
 
 		// 
 		onSuccess && onSuccess();
+
+		// 
+		let url = rtmpUrlEle.value.trim();
+		if (url === '')
+		{
+			url = `rtmp://push.3ttest.cn/sdk2/${roomIdEle.value.trim()}`;
+		}
+		client.setRtmpUrl({ url, avMode: 'av' });
+
+		// 
+		setLiveMixerLayout();
 
 		// 
 		// const streamId = mediaStream.getId();
