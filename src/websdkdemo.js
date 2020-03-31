@@ -91,22 +91,6 @@ let audioVolumeValueEle = document.getElementById('audioVolumeValue');
 let userRole = 2;
 
 // 
-let sei = {
-    // ts: '',
-    // ver: '20161227',
-    canvas: {
-        bgrad: [
-            232,
-            230,
-            232
-        ],
-        h: 480,
-        w: 640
-    },
-    mid: '',
-    pos: []
-}
-// 
 let tttStatus = 0;
 
 // 
@@ -345,13 +329,23 @@ function joinChan(appid, chanid, userid)
 		console.log(`<demo> - event [connection-state-change] - ${JSON.stringify(evt)}`);
 	});
 
-	client.on('disconnected', () => {
+	client.on('disconnected', (e) => {
 		tttStatus = 0;
 
-		text_info.value = text_info.value + '<demo> - event [disconnected]' + '\n';
-		console.log('<demo> - event [disconnected]');
+		text_info.value = text_info.value + `<demo> - event [disconnected] - ${JSON.stringify(e)}` + '\n';
+		console.log(`<demo> - event [disconnected] - ${JSON.stringify(e)}`);
 		
+		if (e.code !== 1000)
+		{
+			isAutoPub = hasPublishStream;
+		}
+
 		_onClose();
+
+		if (e.code !== 1000)
+		{
+			joinChan(xAppId, roomIdEle.value, userIdEle.value);
+		}
 	});
 
 	client.on('kickout', (evt) => {
