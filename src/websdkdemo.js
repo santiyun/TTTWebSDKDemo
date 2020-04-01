@@ -1029,7 +1029,7 @@ function previewLocalStream(opts)
 			codecOptions = {
 				startBitrate: videoBitrate - 50,
 				maxBitrate: videoBitrate,
-				minBitrate: videoBitrate - 100
+				minBitrate: 20
 			};
 		}
 
@@ -1204,7 +1204,7 @@ function publishStream(opts)
 			codecOptions = {
 				startBitrate: videoBitrate - 50,
 				maxBitrate: videoBitrate,
-				minBitrate: videoBitrate - 100
+				minBitrate: 20
 			};
 		}
 
@@ -1758,6 +1758,37 @@ if (!!pauseAudioEle)
 	})	
 }
 
+// 
+let isVideoDisabled = false;
+let disableVideoEle = document.getElementById('disableVideo');
+if (!!disableVideoEle)
+{
+	disableVideoEle.addEventListener('click', () => {
+		if (!client)
+		{
+			return;
+		}
+		if (!gStream)
+		{
+			return;
+		}
+
+		if (isVideoDisabled)
+		{
+			gStream.enableVideo();
+		}
+		else
+		{
+			gStream.disableVideo();
+		}
+
+		isVideoDisabled = !isVideoDisabled;
+
+		disableVideoEle.innerHTML = isVideoDisabled ? 'enableVideo' : 'disableVideo';
+	})
+}
+
+// 
 let isAudioDisabled = false;
 let disableAudioEle = document.getElementById('disableAudio');
 if (!!disableAudioEle)
