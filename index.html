@@ -105,6 +105,23 @@
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="audioProfile">AudioProfile : </label>
+				</td>
+				<td>
+					<select id="audioProfile">
+						<option value="default" selected>default</option>
+						<option value="isac32">isac32</option>
+						<option value="speech_low_quality">speech_low_quality(24kbps)</option>
+						<option value="speech_standard">speech_standard(24kbps)</option>
+						<option value="music_standard">music_standard(40kbps)</option>
+						<option value="standard_stereo">standard_stereo(64kbps)</option>
+						<option value="high_quality">high_quality(128kbps)</option>
+						<option value="high_quality_stereo">high_quality_stereo(192kbps)</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
 				<td></td>
 			</tr>
 			<tr>
@@ -186,6 +203,7 @@
 		<table>
 			<tr>
 				<table>
+					<!--
 					<tr>
 						<td> - </td>
 						<td>
@@ -203,6 +221,7 @@
 							<select id="speakerDev"></select>
 						</td>
 					</tr>
+					-->
 					<!--
 					<tr>
 						<td> - </td>
@@ -250,7 +269,7 @@
 							<td>
 								<div>
 									<span>视频码率：</span>
-									<td><input type="text" value="400" id="videoBitrate" />kbps</td>
+									<td><input type="text" value="400" id="videoBitrate" /> kbps</td>
 								</div>
 							</td>
 						</tr>
@@ -300,6 +319,35 @@
 								<input id="setInputVolume" type="range" min="0" max="1.5" step="0.01" value="1"/>
 							</td>
 							-->
+						</tr>
+						<tr>
+							<td> - </td>
+							<td>
+								<label for="switchCamera">切换摄像头 : </label>
+							</td>
+							<td>
+								<select id="cameraDev"></select>
+							</td>
+						</tr>
+						<tr>
+							<td> - </td>
+							<td>
+								<label for="switchMic">切换Mic : </label>
+							</td>
+							<td>
+								<select id="micDev"></select>
+							</td>	
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="micPlayback">micPlayback</input>
+							</td>
+							<td>
+								<label for="switchSpeaker">切换Speaker : </label>
+							</td>
+							<td>
+								<select id="speakerDev"></select>
+							</td>
 						</tr>
 						<!--
 						<tr>

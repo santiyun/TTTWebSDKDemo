@@ -1267,6 +1267,15 @@ function publishStream(opts)
 					mediasource : false
 				});
 			});
+			//
+
+			let micPlayback = false;
+			let micPlaybackEle = document.getElementById('micPlayback');
+			if (!!micPlaybackEle)
+			{
+				micPlayback = micPlaybackEle.checked;
+			}
+
 			// 
 			if (!Boolean(mediasource) && (Boolean(video) || Boolean(screen)))
 			{
@@ -1294,19 +1303,14 @@ function publishStream(opts)
 					}
 				}
 
-				mediaStream.play(videoId, true);
+				mediaStream.play(videoId, true, micPlayback);
+			}
+			//
+			if(mediaStream.type === 'audio')
+			{
+				mediaStream.play();
 			}
 			// 
-			
-			let micPlaybackEle = document.getElementById('micPlayback');
-			if (!!micPlaybackEle)
-			{
-				let micPlayback = micPlaybackEle.checked;
-				if (Boolean(micPlayback))
-				{
-					mediaStream.play();
-				}
-			}
 
 			streams.set(mediaStream.getId(), mediaStream);
 
@@ -1591,11 +1595,18 @@ if (!!micPlaybackEle)
 		let micPlayback = document.getElementById('micPlayback').checked;
 		if (Boolean(micPlayback))
 		{
-			gStream.play();
+			gStream.play('3t_local', true, true);
 		}
 		else
 		{
-			gStream.stopPlay();
+			if(gStream.type === 'audio')
+			{
+				gStream.stopPlay();
+			}
+			else
+			{
+				gStream.play('3t_local', true, false);
+			}
 		}
 	});
 }
