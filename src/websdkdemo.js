@@ -131,8 +131,6 @@ if (!!xSpecIplocPort)
 	}
 }
 
-getDevices();
-
 autoPublish();
 
 function autoPublish()
@@ -1924,6 +1922,30 @@ if (!!micVolumeSliderEle)
 function getDevices()
 {
 	let message = '';
+
+	// 首先
+	for (let index = 0; index < audioInputSelect.childNodes.length; index++)
+	{
+		audioInputSelect.removeChild(audioInputSelect.options[0]);
+		audioInputSelect.remove(0);
+		audioInputSelect.options[0] = null;
+	}
+
+	// 
+	for (let index = 0; index < audioOutputSelect.childNodes.length; index++)
+	{
+		audioOutputSelect.removeChild(audioOutputSelect.options[0]);
+		audioOutputSelect.remove(0);
+		audioOutputSelect.options[0] = null;
+	}
+	
+	// 
+	for (let index = 0; index < videoSelect.childNodes.length; index++)
+	{
+		videoSelect.removeChild(videoSelect.options[0]);
+		videoSelect.remove(0);
+		videoSelect.options[0] = null;
+	}
 	
     TTTRtcWeb.listDevices((devices) => {
 		// 
@@ -1964,6 +1986,7 @@ function getDevices()
             }
 		});
 		
+		/*
 		if (!!audioInputSelect)
 		{
 			// 
@@ -1983,6 +2006,7 @@ function getDevices()
 
 			audioOutputSelect.appendChild(option);
 		}
+		*/
     }, (err) => {
 		const errMsg = err.name + err.message + '\n';
 		text_info.value = text_info.value + errMsg;
@@ -2116,5 +2140,14 @@ if (!!submitLogEle)
 		const isSubmitLog = submitLogEle.checked;
 		TTTRtcWeb.setLogSubmit(isSubmitLog);
 		console.log(`<demo> submitLog: ${isSubmitLog}`);
+	})
+}
+
+// 
+let refreshDevicesEle = document.getElementById('refreshDevices');
+if (!!refreshDevicesEle)
+{
+	refreshDevicesEle.addEventListener('click', () => {
+		getDevices();
 	})
 }

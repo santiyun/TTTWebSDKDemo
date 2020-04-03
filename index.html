@@ -244,35 +244,42 @@
 			</tr>
 		</table>
 	</div>
+	<!--
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#987cb9 SIZE=3>
+		-->
 	<div>
 		<table>
+			<tr>
+				<td> - </td>
+				<td>
+					<table>
+						<td>
+							<div>
+								<span>视频分辨率：</span>
+								<select id="resolution">
+									<option value="240p">240p</option>
+									<option value="360p">360p</option>
+									<option value="480p">480p</option>
+									<option value="720p">720p</option>
+									<option value="1080p">1080p</option>
+								</select>
+							</div>
+						</td>
+						<td>
+							<div>
+								<span>视频码率：</span>
+								<td><input type="text" value="400" id="videoBitrate" /> kbps</td>
+							</div>
+						</td>
+					</table>
+				</td>
+			</tr>
 			<tr>
 				<td>
 					场景1 : 摄像头流 -- 
 				</td>
 				<td>
 					<table>
-						<tr>
-							<td>
-								<div>
-									<span>视频分辨率：</span>
-									<select id="resolution">
-										<option value="240p">240p</option>
-										<option value="360p">360p</option>
-										<option value="480p">480p</option>
-										<option value="720p">720p</option>
-										<option value="1080p">1080p</option>
-									</select>
-								</div>
-							</td>
-							<td>
-								<div>
-									<span>视频码率：</span>
-									<td><input type="text" value="400" id="videoBitrate" /> kbps</td>
-								</div>
-							</td>
-						</tr>
 						<tr>
 							<td>
 								<button id="previewLocal">本地视频预览</button>
@@ -321,7 +328,9 @@
 							-->
 						</tr>
 						<tr>
-							<td> - </td>
+							<td>
+								<button id="refreshDevices">获取设备</button>
+							</td>
 							<td>
 								<label for="switchCamera">切换摄像头 : </label>
 							</td>
