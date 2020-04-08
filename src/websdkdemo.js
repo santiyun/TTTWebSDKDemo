@@ -1512,7 +1512,7 @@ function _innerUnpublishStream(opts)
     }, () => {
 		text_info.value = text_info.value + '<demo> unpublishStream - client.unpublish local stream failed' + '\n';
 		console.log('<demo> unpublishStream - client.unpublish local stream failed');
-	}, true);
+	}, false/*true*/);
 
 	//
 	if (Boolean(screen))
