@@ -178,8 +178,7 @@ function joinChan(appid, chanid, userid)
 	}
 
 	// 
-	const submitLogEle = document.getElementById('submitLog');
-	TTTRtcWeb.setLogSubmit(submitLogEle.checked);
+	TTTRtcWeb.setLogSubmit(true);
 
 	// 
 	RTCObj = new TTTRtcWeb();
@@ -774,14 +773,6 @@ if (!!leaveChanEle)
 	})
 }
 
-let setLiveMixerLayoutEle = document.getElementById('setLiveMixerLayout');
-if (!!setLiveMixerLayoutEle)
-{
-	setLiveMixerLayoutEle.addEventListener('click', () => {
-		setLiveMixerLayout();
-	})
-}
-
 let setRtmpUrlEle = document.getElementById('setRtmpUrl');
 if (!!setRtmpUrlEle)
 {
@@ -1025,7 +1016,7 @@ function previewLocalStream(opts)
 				videoBitrate = 150;
 
 			codecOptions = {
-				startBitrate: videoBitrate - 50,
+				startBitrate: videoBitrate / 2,
 				maxBitrate: videoBitrate,
 				minBitrate: 20
 			};
@@ -1200,7 +1191,7 @@ function publishStream(opts)
 				videoBitrate = 150;
 
 			codecOptions = {
-				startBitrate: videoBitrate - 50,
+				startBitrate: videoBitrate / 2,
 				maxBitrate: videoBitrate,
 				minBitrate: 20
 			};
@@ -1607,90 +1598,6 @@ if (!!micPlaybackEle)
 			}
 		}
 	});
-}
-
-// 
-let cloneVideoTrack = null;
-let testMediaStream = null;
-let testOpenCameraEle = document.getElementById('testOpenCamera');
-if (!!testOpenCameraEle)
-{
-	const constraints = {
-		audio: true,
-		video: true
-	}
-	testOpenCameraEle.addEventListener('click', () => {
-		navigator.mediaDevices.getUserMedia(constraints)
-			.then(stream => {
-				testMediaStream = stream;
-
-				let tracks = stream.getVideoTracks();
-				if (tracks.length > 0)
-				{
-					cloneVideoTrack = tracks[0].clone();
-				}
-				//
-				const videoId = 'test_camera';
-				let videoE = document.createElement('video');
-				videoE.id = videoId;
-				videoE.muted = true;
-				videoE.autoplay = true;
-				videoE.controls = true;
-				videoE.setAttribute('playsinline', '');
-				videoE.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;';
-
-				videoE.srcObject = testMediaStream;
-
-				if (!!videoEle)
-				{
-					videoEle.append(videoE);
-				}
-			});
-	})
-}
-
-let testCtrlCameraEle = document.getElementById('testCtrlCamera');
-if (!!testCtrlCameraEle)
-{
-	testCtrlCameraEle.addEventListener('click', () => {
-		testMediaStream.getVideoTracks().forEach((track) => {
-			track.stop();
-			testMediaStream.removeTrack(track);
-		});
-
-		cloneVideoTrack.stop();
-		cloneVideoTrack.stop();
-	})
-}
-
-// 
-let isCameraStoped = false;
-let ctrlCameraEle = document.getElementById('ctrlCamera');
-if (!!ctrlCameraEle)
-{
-	ctrlCameraEle.addEventListener('click', () => {
-		if (!client)
-		{
-			return;
-		}
-		if (!gStream)
-		{
-			return;
-		}
-
-		if (isCameraStoped)
-		{
-			gStream.openCamera();
-		}
-		else
-		{
-			gStream.closeCamera();
-		}
-
-		isCameraStoped = !isCameraStoped;
-
-		ctrlCameraEle.innerHTML = isCameraStoped ? 'startCamera' : 'stopCamera';
-	})
 }
 
 let isVideoPaused = false;
