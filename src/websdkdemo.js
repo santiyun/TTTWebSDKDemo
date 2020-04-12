@@ -155,7 +155,7 @@ function getQueryVariable(variable)
 			return pair[1];
 		}
 	}
-	return(false);
+	return (false);
 }
 
 function joinChan(appid, chanid, userid)
@@ -166,7 +166,7 @@ function joinChan(appid, chanid, userid)
 		text_info.value = text_info.value + '已在房间内，无需重复登录' + '\n';
 
 		return;
-    }
+	}
 
 	// 
 	if (!!xSpecServer)
@@ -184,15 +184,17 @@ function joinChan(appid, chanid, userid)
 	RTCObj = new TTTRtcWeb();
 
 	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
-    client = RTCObj.createClient({
+	client = RTCObj.createClient({
 		role: userRole,
 		rtmpUrl: cdnUrl,
 		videoMixerBGIUrl: 'http://3ttech.cn/res/tpl/default/images/black.jpg',
 		audioCodec
 	});
- 
-    client.init(appid, userid, () => {
-        client.join('', chanid, () => {
+
+	client.init(appid, userid, () =>
+	{
+		client.join('', chanid, () =>
+		{
 			text_info.value = `<demo> 成功加入房间!! userid: ${userid}` + '\n';
 
 			console.log(`<demo> 成功加入房间!! userid: ${userid}`);
@@ -203,29 +205,34 @@ function joinChan(appid, chanid, userid)
 			document.getElementById('loginInfo').innerHTML = `-- role: ${userRole}<br>`;
 
 			// 
-			intv = setInterval(() => {
+			intv = setInterval(() =>
+			{
 				// stream_net_info.value = `${JSON.stringify(client.getNetState())}`;
 				// 
 				const rAudioStats = client.remoteAudioStats();
-				rAudioStats.forEach((value, key) => {
+				rAudioStats.forEach((value, key) =>
+				{
 					; // console.log(`<demo> <STAT> audioDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
 				// 
 				const rVideoStats = client.remoteVideoStats();
-				rVideoStats.forEach((value, key) => {
+				rVideoStats.forEach((value, key) =>
+				{
 					; // console.log(`<demo> <STAT> videoDownStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
 				// 
 				const lAudioStats = client.localAudioStats();
-				lAudioStats.forEach((value, key) => {
+				lAudioStats.forEach((value, key) =>
+				{
 					; // console.log(`<demo> <STAT> audioUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
 				// 
 				const lVideoStats = client.localVideoStats();
-				lVideoStats.forEach((value, key) => {
+				lVideoStats.forEach((value, key) =>
+				{
 					; // console.log(`<demo> <STAT> videoUpStat -- streamId: ${key} ${JSON.stringify(value)}`);
 				});
 
@@ -259,15 +266,16 @@ function joinChan(appid, chanid, userid)
 			if (isAutoPub)
 			{
 				publishStream({
-					userid : userIdEle.value,
-					audio  : true,
-					video  : true,
-					screen : false,
-					mediasource : false
+					userid: userIdEle.value,
+					audio: true,
+					video: true,
+					screen: false,
+					mediasource: false
 				});
 			}
 			// 
-        }, (err) => {
+		}, (err) =>
+		{
 			tttStatus = 0;
 
 			text_info.value = text_info.value + `<demo> login failed. - error: ${JSON.stringify(err)}` + '\n';
@@ -276,22 +284,25 @@ function joinChan(appid, chanid, userid)
 
 			document.getElementById('loginStatus').innerHTML = '<font color="red">登录失败</font>';
 			document.getElementById('loginInfo').innerHTML = '';
-        });
-    }, (err) => {
+		});
+	}, (err) =>
+	{
 		text_info.value = text_info.value + `<demo> init failed. - error: ${JSON.stringify(err)}` + '\n';
 		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
 
 		return;
 	});
 
-	client.on('device-hot-plug', (e) => {
+	client.on('device-hot-plug', (e) =>
+	{
 		console.log(`<demo> - event [device-hot-plug] - ${JSON.stringify(e)}`);
 	})
-	
-	client.on('reinit', () => {
+
+	client.on('reinit', () =>
+	{
 		text_info.value = text_info.value + '<demo> - event [reinit]' + '\n';
 		console.log('<demo> - event [reinit]');
-		
+
 		// 
 		remote_stream.forEach((item) =>
 		{
@@ -305,33 +316,35 @@ function joinChan(appid, chanid, userid)
 
 		// 
 		_innerUnpublishStream({
-			video       : true,
-			screen      : false,
-			mediasource : false
+			video: true,
+			screen: false,
+			mediasource: false
 		});
 		_innerUnpublishStream({
-			video       : false,
-			screen      : true,
-			mediasource : false
+			video: false,
+			screen: true,
+			mediasource: false
 		});
 		_innerUnpublishStream({
-			video       : false,
-			screen      : false,
-			mediasource : true
+			video: false,
+			screen: false,
+			mediasource: true
 		});
 	});
 
-	client.on('connection-state-change', (evt) =>{
+	client.on('connection-state-change', (evt) =>
+	{
 		text_info.value = text_info.value + `<demo> - event [connection-state-change] - ${JSON.stringify(evt)}` + '\n';
 		console.log(`<demo> - event [connection-state-change] - ${JSON.stringify(evt)}`);
 	});
 
-	client.on('disconnected', (e) => {
+	client.on('disconnected', (e) =>
+	{
 		tttStatus = 0;
 
 		text_info.value = text_info.value + `<demo> - event [disconnected] - ${JSON.stringify(e)}` + '\n';
 		console.log(`<demo> - event [disconnected] - ${JSON.stringify(e)}`);
-		
+
 		if (e.code !== 1000)
 		{
 			isAutoPub = hasPublishStream;
@@ -339,32 +352,38 @@ function joinChan(appid, chanid, userid)
 
 		_onClose();
 
+		/*
 		if (e.code !== 1000)
 		{
 			joinChan(xAppId, roomIdEle.value, userIdEle.value);
 		}
+		*/
 	});
 
-	client.on('kickout', (evt) => {
+	client.on('kickout', (evt) =>
+	{
 		tttStatus = 0;
 
 		text_info.value = text_info.value + `<demo> - event [kickout] ${JSON.stringify(evt)}` + '\n';
 		console.log(`<demo> - event [kickout] ${JSON.stringify(evt)}`);
-		
+
 		_onClose();
 	});
 
-    client.on('peer-join', (evt) => {
+	client.on('peer-join', (evt) =>
+	{
 		text_info.value = text_info.value + `<demo> - event [peer-join] uid: ${evt.userID}` + '\n';
 
-        console.log(`<demo> - event [peer-join] uid: ${evt.userID}`);
-    });
+		console.log(`<demo> - event [peer-join] uid: ${evt.userID}`);
+	});
 
-    client.on('peer-leave', (evt) => {
+	client.on('peer-leave', (evt) =>
+	{
 		text_info.value = text_info.value + `<demo> - event [peer-leave] uid: ${evt.userID}` + '\n';
-        console.log(`<demo> - event [peer-leave] uid: ${evt.userID}`);
+		console.log(`<demo> - event [peer-leave] uid: ${evt.userID}`);
 
-        evt.streams.forEach(stream => {
+		evt.streams.forEach(stream =>
+		{
 			if (!stream)
 				return;
 
@@ -374,70 +393,79 @@ function joinChan(appid, chanid, userid)
 				obj.remove();
 			}
 
-            // remove stream from map
-            remote_stream.delete(stream.getId());
+			// remove stream from map
+			remote_stream.delete(stream.getId());
 
 			stream.close();
-        });
+		});
 	});
 
-	client.on('rtmp-success', (evt) => {
+	client.on('rtmp-success', (evt) =>
+	{
 		console.log(`<demo> - event [rtmp-success] - ${JSON.stringify(evt)}`);
 	});
-	
-	client.on('audio-added', (evt) => {
+
+	client.on('audio-added', (evt) =>
+	{
 		var stream = evt.stream;
 		if (!stream)
 			return;
-			
+
 		text_info.value = text_info.value + `<demo> - event [audio-added] streamId: ${evt.stream.getId()}` + '\n';
 
 		console.log(`<demo> - event [audio-added] streamId: ${evt.stream.getId()}`);
 
 		remote_stream.set(stream.getId(), stream);
-        let in_stream = remote_stream.get(stream.getId());
-        client.subscribe(in_stream, (event) => {
+		let in_stream = remote_stream.get(stream.getId());
+		client.subscribe(in_stream, (event) =>
+		{
 			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
-            // successful doing someting, like play remote video or audio.
-        }, (err) => {
+			// successful doing someting, like play remote video or audio.
+		}, (err) =>
+		{
 			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
-            // info.val(info.val() + 'Subscribe stream failed' + err + '\n');
-        });
+			// info.val(info.val() + 'Subscribe stream failed' + err + '\n');
+		});
 	})
 
-	client.on('video-added', (evt) => {
+	client.on('video-added', (evt) =>
+	{
 		var stream = evt.stream;
 		if (!stream)
 			return;
-			
+
 		text_info.value = text_info.value + `<demo> - event [video-added] streamId: ${stream.getId()}` + '\n';
 
 		console.log(`<demo> - event [video-added] streamId: ${stream.getId()} videoType: ${stream.videoType}`);
 
 		remote_stream.set(stream.getId(), stream);
 		// 
-        let in_stream = remote_stream.get(stream.getId());
-        client.subscribe(in_stream, (event) => {
+		let in_stream = remote_stream.get(stream.getId());
+		client.subscribe(in_stream, (event) =>
+		{
 			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
-            // successful doing someting, like play remote video or audio.
-        }, (err) => {
+			// successful doing someting, like play remote video or audio.
+		}, (err) =>
+		{
 			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
-            // info.val(info.val() + 'Subscribe stream failed' + err + '\n');
+			// info.val(info.val() + 'Subscribe stream failed' + err + '\n');
 		});
-		
+
 		// 
 		setLiveMixerLayout();
 	})
 
-	client.on('video-update', (evt) => {
-		const {userId, streamId, videoType } = evt;
+	client.on('video-update', (evt) =>
+	{
+		const { userId, streamId, videoType } = evt;
 
 		text_info.value = text_info.value + `<demo> - event [video-update] userId: ${userId} streamId: ${streamId} videoType: ${videoType}` + '\n';
 		console.log(`<demo> - event [video-update] userId: ${userId} streamId: ${streamId} videoType: ${videoType}`);
 	})
 
-    client.on('stream-subscribed', (evt) => {
-        var stream = evt.stream;
+	client.on('stream-subscribed', (evt) =>
+	{
+		var stream = evt.stream;
 		if (!stream)
 			return;
 		text_info.value = text_info.value + `<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type}` + '\n';
@@ -445,35 +473,37 @@ function joinChan(appid, chanid, userid)
 
 		if (stream.hasAudio())
 		{
-			stream.on('volume-change', e => {
+			stream.on('volume-change', e =>
+			{
 				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
 
-		if(stream.type === 'audio')
+		if (stream.type === 'audio')
 		{
-            stream.play();
+			stream.play();
 		}
 		else
 		{
-            var videoId = '3t_remote' + stream.getId();
-			if(!!videoEle && !document.getElementById(videoId))
+			var videoId = '3t_remote' + stream.getId();
+			if (!!videoEle && !document.getElementById(videoId))
 			{
-                let video = document.createElement('video');
+				let video = document.createElement('video');
 				video.id = videoId;
 				video.muted = false;
 				video.autoplay = true;
 				video.controls = true;
 				video.setAttribute('playsinline', '');
-                video.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;';
+				video.style.cssText = 'height: 300px; width: 300px; background: black; position: relative; display: inline-block;';
 				videoEle.append(video);
-            }
+			}
 
-            stream.play('3t_remote' + stream.getId(), true);
+			stream.play('3t_remote' + stream.getId(), true);
 		}
-    });
+	});
 
-    client.on('video-mute', (evt) => {
+	client.on('video-mute', (evt) =>
+	{
 		var stream = evt.stream;
 		if (!stream)
 			return;
@@ -486,17 +516,18 @@ function joinChan(appid, chanid, userid)
 		stream._video.poster = 'http://www.3ttech.cn/favicon.ico';
 
 		// visibility: hidden
-		
+
 	});
-	
-	client.on('video-unmute', (evt) => {
+
+	client.on('video-unmute', (evt) =>
+	{
 		var stream = evt.stream;
 		if (!stream)
 			return;
-			
+
 		text_info.value = text_info.value + `<demo> - event [video-unmute] streamId: ${stream.getId()}` + '\n';
 		console.log(`<demo> - event [video-unmute] streamId: ${stream.getId()}`);
-		
+
 		stream._video.style.backgroundColor = '#000';
 		stream._video.srcObject = stream._streamObj;
 		stream._video.poster = '';
@@ -510,13 +541,13 @@ function leaveChan()
 		text_info.value = text_info.value + 'leaveChan while tttStatus is not 1?' + '\n';
 		return;
 	}
-	
+
 	_onClose();
 
 	if (client)
 	{
-        client.leave(() => { }, () => { });
-        client.close();
+		client.leave(() => { }, () => { });
+		client.close();
 	}
 
 	text_info.value = text_info.value + 'leaveChan OK' + '\n';
@@ -543,20 +574,20 @@ function _onClose()
 
 	// 
 	unpublishStream({
-		video       : true,
-		screen      : false,
-		mediasource : false
-		});
+		video: true,
+		screen: false,
+		mediasource: false
+	});
 	unpublishStream({
-		video       : false,
-		screen      : true,
-		mediasource : false
-		});
+		video: false,
+		screen: true,
+		mediasource: false
+	});
 	unpublishStream({
-		video       : false,
-		screen      : false,
-		mediasource : true
-		});
+		video: false,
+		screen: false,
+		mediasource: true
+	});
 
 	// 
 	if (intv !== null)
@@ -577,7 +608,7 @@ function _onClose()
 		if (!!gScreenStream)
 		{
 			streams.delete(gScreenStream.getId());
-			
+
 			gScreenStream.close();
 			gScreenStream = null;
 		}
@@ -595,13 +626,13 @@ function _onClose()
 		if (!!gStream)
 		{
 			streams.delete(gStream.getId());
-			
+
 			gStream.close();
 			gStream = null;
 		}
 	}
 	// 
-	
+
 	tttStatus = 0;
 
 	// 
@@ -627,12 +658,12 @@ function setRtmpUrl(url)
 	// 
 	const pureAudioEle = document.getElementById('pureAudio');
 
-	client.setRtmpUrl({ url, avMode: pureAudioEle.checked ? 'audio' : 'av' } );
+	client.setRtmpUrl({ url, avMode: pureAudioEle.checked ? 'audio' : 'av' });
 }
 
-const splitWnd1 = [{x: 0, y: 0}];
-const splitWnd4 = [{x: 0, y: 0}, {x: 0.5, y: 0}, {x: 0, y: 0.5}, {x: 0.5, y: 0.5}];
-const splitWnd9 = [{x: 0, y: 0}, {x: 0.33, y: 0}, {x: 0.66, y: 0}, {x: 0, y: 0.33}, {x: 0.33, y: 0.33}, {x: 0.66, y: 0.33}, {x: 0, y: 0.66}, {x: 0.33, y: 0.66}, {x: 0.66, y: 0.66}];
+const splitWnd1 = [{ x: 0, y: 0 }];
+const splitWnd4 = [{ x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 0, y: 0.5 }, { x: 0.5, y: 0.5 }];
+const splitWnd9 = [{ x: 0, y: 0 }, { x: 0.33, y: 0 }, { x: 0.66, y: 0 }, { x: 0, y: 0.33 }, { x: 0.33, y: 0.33 }, { x: 0.66, y: 0.33 }, { x: 0, y: 0.66 }, { x: 0.33, y: 0.66 }, { x: 0.66, y: 0.66 }];
 
 function setLiveMixerLayout()
 {
@@ -648,7 +679,7 @@ function setLiveMixerLayout()
 	{
 		return;
 	}
-	
+
 	// 
 	let liveMixerLayout = {
 		backgroundColor: 0x000000,
@@ -663,7 +694,7 @@ function setLiveMixerLayout()
 	{
 		nCnt++;
 	}
-	
+
 	if (!!gScreenStream)
 	{
 		nCnt++;
@@ -688,7 +719,7 @@ function setLiveMixerLayout()
 	}
 	else
 		; // TODO : 
-	
+
 	let nIndex = 0;
 	if (!!gStream)
 	{
@@ -706,7 +737,7 @@ function setLiveMixerLayout()
 
 		nIndex++;
 	}
-	
+
 	if (!!gScreenStream)
 	{
 		let user = {};
@@ -742,7 +773,7 @@ function setLiveMixerLayout()
 				user.z = 0;
 
 				liveMixerLayout.users.push(user);
-		
+
 				nIndex++;
 			}
 		});
@@ -750,14 +781,15 @@ function setLiveMixerLayout()
 
 	text_info.value = text_info.value + `<demo> setLiveMixerLayout ...liveMixerLayout: ${JSON.stringify(liveMixerLayout)}` + '\n';
 
-	client.setLiveMixerLayout(liveMixerLayout, () => {}, () => {});
+	client.setLiveMixerLayout(liveMixerLayout, () => { }, () => { });
 }
 
 // 
 let joinChanEle = document.getElementById('joinChan');
 if (!!joinChanEle)
 {
-	joinChanEle.addEventListener('click', () => {
+	joinChanEle.addEventListener('click', () =>
+	{
 		let appId = appIdEle.value;
 		let rid = roomIdEle.value;
 		let uid = userIdEle.value;
@@ -768,7 +800,8 @@ if (!!joinChanEle)
 let leaveChanEle = document.getElementById('leaveChan');
 if (!!leaveChanEle)
 {
-	leaveChanEle.addEventListener('click', () => {
+	leaveChanEle.addEventListener('click', () =>
+	{
 		leaveChan();
 	})
 }
@@ -776,7 +809,8 @@ if (!!leaveChanEle)
 let setRtmpUrlEle = document.getElementById('setRtmpUrl');
 if (!!setRtmpUrlEle)
 {
-	setRtmpUrlEle.addEventListener('click', () => {
+	setRtmpUrlEle.addEventListener('click', () =>
+	{
 		if (!!rtmpUrlEle)
 		{
 			const cdnUrl = rtmpUrlEle.value;
@@ -788,7 +822,7 @@ if (!!setRtmpUrlEle)
 // 
 function setStreamSEI(userid, streamId, type, isScreen)
 {
-	if(+userRole !== 1)
+	if (+userRole !== 1)
 		return;
 
 	let sei = {
@@ -807,7 +841,7 @@ function setStreamSEI(userid, streamId, type, isScreen)
 		pos: []
 	}
 
-    sei.mid = userIdEle.value; // userIdEle.value 为 主播ID
+	sei.mid = userIdEle.value; // userIdEle.value 为 主播ID
 	// sei.ts = + new Date();
 
 	let nCnt = remote_stream.size;
@@ -816,14 +850,14 @@ function setStreamSEI(userid, streamId, type, isScreen)
 	{
 		nCnt++;
 	}
-	
+
 	if (!!gScreenStream)
 	{
 		nCnt++;
 	}
 
 	let isSplit = nCnt > 1;
-	
+
 	let nIndex = 0;
 	if (!!gStream)
 	{
@@ -840,7 +874,7 @@ function setStreamSEI(userid, streamId, type, isScreen)
 
 		nIndex++;
 	}
-	
+
 	if (!!gScreenStream)
 	{
 		let position = {};
@@ -872,13 +906,13 @@ function setStreamSEI(userid, streamId, type, isScreen)
 			position.z = 0;
 
 			sei.pos.push(position);
-	
+
 			nIndex++;
 		}
 	});
 
 	// 
-    client.setSEI(userid, type, isScreen, sei, streamId);
+	client.setSEI(userid, type, isScreen, sei, streamId);
 };
 
 /*
@@ -920,10 +954,12 @@ function setVideoProfile(prof)
 	}
 
 	// set video profile
-	gStream.setVideoProfile(prof, (msg) => {
+	gStream.setVideoProfile(prof, (msg) =>
+	{
 		text_info.value = text_info.value + `<demo> setVideoProfile - gStream.setVideoProfile succ. ${prof}` + '\n';
 		console.log(`<demo> setVideoProfile - gStream.setVideoProfile succ: ${prof}`);
-	}, (e) => {
+	}, (e) =>
+	{
 		text_info.value = text_info.value + `<demo> setVideoProfile - gStream.setVideoProfile failed. - error: ${JSON.stringify(e)}` + '\n';
 		console.log('<demo> setVideoProfile - gStream.setVideoProfile - error: ' + e);
 	});
@@ -982,7 +1018,7 @@ function previewLocalStream(opts)
 	}
 
 	let mediaStream = null;
-	
+
 	if (Boolean(screen))
 	{
 		mediaStream = gScreenStream;
@@ -1056,7 +1092,7 @@ function previewLocalStream(opts)
 			videoSource,
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
-			attributes: { videoProfile : resolution },
+			attributes: { videoProfile: resolution },
 			codecOptions,
 			openAudioCtx: true
 		});
@@ -1072,7 +1108,8 @@ function previewLocalStream(opts)
 			mediaStream.setAudioProfile(audioProfile);
 		}
 
-		mediaStream.init(() => {
+		mediaStream.init(() =>
+		{
 			if (!Boolean(mediasource) && (Boolean(video) || Boolean(screen)))
 			{
 				const videoId = Boolean(screen) ? '3t_local_screen' : '3t_local';
@@ -1102,7 +1139,7 @@ function previewLocalStream(opts)
 				mediaStream.play(videoId, true);
 			}
 			// 
-			
+
 			streams.set(mediaStream.getId(), mediaStream);
 
 			if (Boolean(screen))
@@ -1118,7 +1155,8 @@ function previewLocalStream(opts)
 				gStream = mediaStream;
 			}
 			// 
-		}, (evt) => {
+		}, (evt) =>
+		{
 			text_info.value = text_info.value + `<demo> publishStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
 			console.log('<demo> publishStream - Stream.init failed. - error: ' + evt);
 		});
@@ -1129,7 +1167,7 @@ function previewLocalStream(opts)
 		mediaStream.play(videoId, true);
 	}
 }
-  
+
 // 
 function publishStream(opts)
 {
@@ -1156,7 +1194,7 @@ function publishStream(opts)
 	}
 
 	let mediaStream = null;
-	
+
 	if (Boolean(screen))
 	{
 		mediaStream = gScreenStream;
@@ -1231,7 +1269,7 @@ function publishStream(opts)
 			videoSource,
 			cameraId: cameraDevId === 'default' ? null : cameraDevId,
 			microphoneId: micDevId === 'default' ? null : micDevId,
-			attributes: { videoProfile : resolution },
+			attributes: { videoProfile: resolution },
 			codecOptions,
 			openAudioCtx: true
 		});
@@ -1247,13 +1285,15 @@ function publishStream(opts)
 			mediaStream.setAudioProfile(audioProfile);
 		}
 
-		mediaStream.init(() => {
-			mediaStream.on('screen-close', (e) => {
+		mediaStream.init(() =>
+		{
+			mediaStream.on('screen-close', (e) =>
+			{
 				console.log(`<demo> event [screen-close] - ${JSON.stringify(e)}`);
 				unpublishStream({
-					video       : false,
-					screen      : true,
-					mediasource : false
+					video: false,
+					screen: true,
+					mediasource: false
 				});
 			});
 			//
@@ -1295,7 +1335,7 @@ function publishStream(opts)
 				mediaStream.play(videoId, true, micPlayback);
 			}
 			//
-			if(mediaStream.type === 'audio')
+			if (mediaStream.type === 'audio')
 			{
 				mediaStream.play();
 			}
@@ -1316,7 +1356,8 @@ function publishStream(opts)
 				gStream = mediaStream;
 			}
 
-			_publishStream(userid, mediaStream, () => {
+			_publishStream(userid, mediaStream, () =>
+			{
 				if (Boolean(screen))
 				{
 					document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
@@ -1332,7 +1373,8 @@ function publishStream(opts)
 					document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
 					hasPublishStream = true;
 				}
-			}, () => {
+			}, () =>
+			{
 				if (Boolean(screen))
 				{
 					document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
@@ -1347,7 +1389,8 @@ function publishStream(opts)
 				}
 			});
 			// 
-		}, (evt) => {
+		}, (evt) =>
+		{
 			text_info.value = text_info.value + `<demo> publishStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
 			console.log('<demo> publishStream - Stream.init failed. - error: ' + evt);
 		});
@@ -1365,19 +1408,20 @@ function publishStream(opts)
 		{
 			text_info.value = text_info.value + `<demo> publishStream - hasPublishMediaSource: ${hasPublishMediaSource} mediaStream: ${mediaStream.getId()}` + '\n';
 			console.log(`<demo> publishStream - hasPublishMediaSource: ${hasPublishMediaSource}  mediaStream: ${mediaStream.getId()}`);
-	
+
 			return;
 		}
 		else if ((Boolean(video) || Boolean(audio)) && hasPublishStream)
 		{
 			text_info.value = text_info.value + `<demo> publishStream - hasPublishStream: ${hasPublishStream} mediaStream: ${mediaStream.getId()}` + '\n';
 			console.log(`<demo> publishStream - hasPublishStream: ${hasPublishStream}  mediaStream: ${mediaStream.getId()}`);
-	
+
 			return;
 		}
 
 		// 
-		_publishStream(userid, mediaStream, () => {
+		_publishStream(userid, mediaStream, () =>
+		{
 			if (Boolean(screen))
 			{
 				document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
@@ -1393,7 +1437,8 @@ function publishStream(opts)
 				document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
 				hasPublishStream = true;
 			}
-		}, () => {
+		}, () =>
+		{
 			if (Boolean(screen))
 			{
 				document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
@@ -1422,7 +1467,8 @@ function _publishStream(userid, mediaStream, onSuccess, onFailure)
 	}
 
 	// 
-	client.publish(mediaStream, () => {
+	client.publish(mediaStream, () =>
+	{
 		// 
 		text_info.value = text_info.value + `<demo> _publishStream - client.publish succ. mediaStream: ${mediaStream.getId()}` + '\n';
 		console.log(`<demo> _publishStream - client.publish succ. mediaStream: ${mediaStream.getId()}`);
@@ -1448,7 +1494,8 @@ function _publishStream(userid, mediaStream, onSuccess, onFailure)
 		// 
 		if (mediaStream.hasAudio())
 		{
-			mediaStream.on('volume-change', e => {
+			mediaStream.on('volume-change', e =>
+			{
 				if (!!audioVolumeProgressEle)
 					audioVolumeProgressEle.value = e.volume;
 				if (!!audioVolumeValueEle)
@@ -1456,7 +1503,8 @@ function _publishStream(userid, mediaStream, onSuccess, onFailure)
 				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
 		}
-	}, (evt) => {
+	}, (evt) =>
+	{
 		text_info.value = text_info.value + `_publishStream - client.publish failed. - error: ${JSON.stringify(evt)}` + '\n';
 		console.log(`<demo> _publishStream - client.publish failed. - error: ${JSON.stringify(evt)}`);
 
@@ -1497,10 +1545,12 @@ function _innerUnpublishStream(opts)
 		return;
 	}
 
-    client.unpublish(mediaStream, () => {
+	client.unpublish(mediaStream, () =>
+	{
 		text_info.value = text_info.value + `<demo> unpublishStream - client.unpublish local stream ${mediaStream.getId()} success.` + '\n';
-        console.log(`<demo> unpublishStream - client.unpublish local stream ${mediaStream.getId()} success.`);
-    }, () => {
+		console.log(`<demo> unpublishStream - client.unpublish local stream ${mediaStream.getId()} success.`);
+	}, () =>
+	{
 		text_info.value = text_info.value + '<demo> unpublishStream - client.unpublish local stream failed' + '\n';
 		console.log('<demo> unpublishStream - client.unpublish local stream failed');
 	}, false/*true*/);
@@ -1524,13 +1574,14 @@ function _innerUnpublishStream(opts)
 let previewLocalEle = document.getElementById('previewLocal');
 if (!!previewLocalEle)
 {
-	previewLocalEle.addEventListener('click', () => {
+	previewLocalEle.addEventListener('click', () =>
+	{
 		previewLocalStream({
-			userid : userIdEle.value,
-			audio  : true,
-			video  : true,
-			screen : false,
-			mediasource : false
+			userid: userIdEle.value,
+			audio: true,
+			video: true,
+			screen: false,
+			mediasource: false
 		});
 	})
 }
@@ -1539,13 +1590,14 @@ if (!!previewLocalEle)
 let publishAudioStreamEle = document.getElementById('publishAudioStream');
 if (!!publishAudioStreamEle)
 {
-	publishAudioStreamEle.addEventListener('click', () => {
+	publishAudioStreamEle.addEventListener('click', () =>
+	{
 		publishStream({
-			userid : userIdEle.value,
-			audio  : true,
-			video  : false,
-			screen : false,
-			mediasource : false
+			userid: userIdEle.value,
+			audio: true,
+			video: false,
+			screen: false,
+			mediasource: false
 		});
 	})
 }
@@ -1554,13 +1606,14 @@ if (!!publishAudioStreamEle)
 let publishStreamEle = document.getElementById('publishStream');
 if (!!publishStreamEle)
 {
-	publishStreamEle.addEventListener('click', () => {
+	publishStreamEle.addEventListener('click', () =>
+	{
 		publishStream({
-			userid : userIdEle.value,
-			audio  : true,
-			video  : true,
-			screen : false,
-			mediasource : false
+			userid: userIdEle.value,
+			audio: true,
+			video: true,
+			screen: false,
+			mediasource: false
 		});
 	})
 }
@@ -1568,11 +1621,12 @@ if (!!publishStreamEle)
 let unpublishStreamEle = document.getElementById('unpublishStream');
 if (!!unpublishStreamEle)
 {
-	unpublishStreamEle.addEventListener('click', () => {
+	unpublishStreamEle.addEventListener('click', () =>
+	{
 		unpublishStream({
-			video       : true,
-			screen      : false,
-			mediasource : false
+			video: true,
+			screen: false,
+			mediasource: false
 		});
 	})
 }
@@ -1580,7 +1634,8 @@ if (!!unpublishStreamEle)
 let micPlaybackEle = document.getElementById('micPlayback');
 if (!!micPlaybackEle)
 {
-	micPlaybackEle.addEventListener('click', () => {
+	micPlaybackEle.addEventListener('click', () =>
+	{
 		let micPlayback = document.getElementById('micPlayback').checked;
 		if (Boolean(micPlayback))
 		{
@@ -1588,7 +1643,7 @@ if (!!micPlaybackEle)
 		}
 		else
 		{
-			if(gStream.type === 'audio')
+			if (gStream.type === 'audio')
 			{
 				gStream.stopPlay();
 			}
@@ -1604,7 +1659,8 @@ let isVideoPaused = false;
 let pauseVideoEle = document.getElementById('pauseVideo');
 if (!!pauseVideoEle)
 {
-	pauseVideoEle.addEventListener('click', () => {
+	pauseVideoEle.addEventListener('click', () =>
+	{
 		if (!client)
 		{
 			return;
@@ -1616,17 +1672,21 @@ if (!!pauseVideoEle)
 
 		if (isVideoPaused)
 		{
-			client.resumeWebcam(gStream, () => {
+			client.resumeWebcam(gStream, () =>
+			{
 				console.log('<demo> client.resumeWebcam succ.');
-			}, (e) => {
+			}, (e) =>
+			{
 				console.log(`<demo> client.resumeWebcam fail - ${e.toString()}`);
 			});
 		}
 		else
 		{
-			client.pauseWebcam(gStream, false, () => {
+			client.pauseWebcam(gStream, false, () =>
+			{
 				console.log('<demo> client.pauseWebcam succ.');
-			}, (e) => {
+			}, (e) =>
+			{
 				console.log(`<demo> client.pauseWebcam fail - ${e.toString()}`);
 			});
 		}
@@ -1641,7 +1701,8 @@ let isAudioPaused = false;
 let pauseAudioEle = document.getElementById('pauseAudio');
 if (!!pauseAudioEle)
 {
-	pauseAudioEle.addEventListener('click', () => {
+	pauseAudioEle.addEventListener('click', () =>
+	{
 		if (!client)
 		{
 			return;
@@ -1650,28 +1711,32 @@ if (!!pauseAudioEle)
 		{
 			return;
 		}
-	
+
 		if (isAudioPaused)
 		{
-			client.resumeMic(gStream, () => {
+			client.resumeMic(gStream, () =>
+			{
 				console.log('<demo> client.resumeMic succ.');
-			}, (e) => {
+			}, (e) =>
+			{
 				console.log(`<demo> client.resumeMic fail - ${e.toString()}`);
 			});
 		}
 		else
 		{
-			client.pauseMic(gStream, () => {
+			client.pauseMic(gStream, () =>
+			{
 				console.log('<demo> client.pauseMic succ.');
-			}, (e) => {
+			}, (e) =>
+			{
 				console.log(`<demo> client.pauseMic fail - ${e.toString()}`);
 			});
 		}
-	
+
 		isAudioPaused = !isAudioPaused;
-	
+
 		pauseAudioEle.innerHTML = isAudioPaused ? 'resumeAudio' : 'pauseAudio';
-	})	
+	})
 }
 
 // 
@@ -1679,7 +1744,8 @@ let isVideoDisabled = false;
 let disableVideoEle = document.getElementById('disableVideo');
 if (!!disableVideoEle)
 {
-	disableVideoEle.addEventListener('click', () => {
+	disableVideoEle.addEventListener('click', () =>
+	{
 		if (!client)
 		{
 			return;
@@ -1709,7 +1775,8 @@ let isAudioDisabled = false;
 let disableAudioEle = document.getElementById('disableAudio');
 if (!!disableAudioEle)
 {
-	disableAudioEle.addEventListener('click', () => {
+	disableAudioEle.addEventListener('click', () =>
+	{
 		if (!client)
 		{
 			return;
@@ -1738,25 +1805,27 @@ if (!!disableAudioEle)
 let publishScreenEle = document.getElementById('publishScreen');
 if (!!publishScreenEle)
 {
-	publishScreenEle.addEventListener('click', () => {
+	publishScreenEle.addEventListener('click', () =>
+	{
 		publishStream({
-			userid : userIdEle.value,
-			audio  : false,
-			video  : false,
-			screen : true,
-			mediasource : false
+			userid: userIdEle.value,
+			audio: false,
+			video: false,
+			screen: true,
+			mediasource: false
 		});
-	})	
+	})
 }
 
 let unpublishScreenEle = document.getElementById('unpublishScreen');
 if (!!unpublishScreenEle)
 {
-	unpublishScreenEle.addEventListener('click', () => {
+	unpublishScreenEle.addEventListener('click', () =>
+	{
 		unpublishStream({
-			video       : false,
-			screen      : true,
-			mediasource : false
+			video: false,
+			screen: true,
+			mediasource: false
 		});
 	})
 }
@@ -1765,25 +1834,27 @@ if (!!unpublishScreenEle)
 let publishMediaSourceEle = document.getElementById('publishMediaSource');
 if (!!publishMediaSourceEle)
 {
-	publishMediaSourceEle.addEventListener('click', () => {
+	publishMediaSourceEle.addEventListener('click', () =>
+	{
 		publishStream({
-			userid : userIdEle.value,
-			audio  : false,
-			video  : false,
-			screen : false,
-			mediasource : true
+			userid: userIdEle.value,
+			audio: false,
+			video: false,
+			screen: false,
+			mediasource: true
 		});
-	})	
+	})
 }
 
 let unpublishMediaSourceEle = document.getElementById('unpublishMediaSource');
 if (!!unpublishMediaSourceEle)
 {
-	unpublishMediaSourceEle.addEventListener('click', () => {
+	unpublishMediaSourceEle.addEventListener('click', () =>
+	{
 		unpublishStream({
-			video       : false,
-			screen      : false,
-			mediasource : true
+			video: false,
+			screen: false,
+			mediasource: true
 		});
 	})
 }
@@ -1791,9 +1862,10 @@ if (!!unpublishMediaSourceEle)
 let resolutionEle = document.getElementById('resolution');
 if (!!resolutionEle)
 {
-	resolutionEle.addEventListener('change', () => {
+	resolutionEle.addEventListener('change', () =>
+	{
 		let prof = resolutionEle.value;
-	
+
 		setVideoProfile(prof);
 	})
 }
@@ -1801,14 +1873,15 @@ if (!!resolutionEle)
 let micVolumeSliderEle = document.getElementById('micVolumeSlider');
 if (!!micVolumeSliderEle)
 {
-	micVolumeSliderEle.addEventListener('change', () => {
+	micVolumeSliderEle.addEventListener('change', () =>
+	{
 		var value = (micVolumeSliderEle.value) / 10;
 		let micVolumeSliderValueEle = document.getElementById('micVolumeSliderValue');
 		if (!!micVolumeSliderValueEle)
 		{
 			micVolumeSliderValueEle.innerHTML = (value);
 		}
-		
+
 		if (!!gStream)
 		{
 			gStream.setInputVolume(+value);
@@ -1845,7 +1918,7 @@ function getDevices()
 		audioOutputSelect.remove(0);
 		audioOutputSelect.options[0] = null;
 	}
-	
+
 	// 
 	for (let index = 0; index < videoSelect.childNodes.length; index++)
 	{
@@ -1853,16 +1926,18 @@ function getDevices()
 		videoSelect.remove(0);
 		videoSelect.options[0] = null;
 	}
-	
-    TTTRtcWeb.listDevices((devices) => {
+
+	TTTRtcWeb.listDevices((devices) =>
+	{
 		// 
-        devices.forEach((deviceInfo) => {
-            message = '<demo> getDevices - ' + deviceInfo.kind + ': ' + deviceInfo.label + ' id: ' + deviceInfo.deviceId + '\n';
+		devices.forEach((deviceInfo) =>
+		{
+			message = '<demo> getDevices - ' + deviceInfo.kind + ': ' + deviceInfo.label + ' id: ' + deviceInfo.deviceId + '\n';
 			text_info.value = text_info.value + message;
 			console.log(message);
 
-            let option = document.createElement('option');
-            option.value = deviceInfo.deviceId;
+			let option = document.createElement('option');
+			option.value = deviceInfo.deviceId;
 			if (deviceInfo.kind === 'audioinput')
 			{
 				if (!!audioInputSelect)
@@ -1889,10 +1964,10 @@ function getDevices()
 			}
 			else
 			{
-                console.log('<demo> Some other kind of source/device: ', deviceInfo);
-            }
+				console.log('<demo> Some other kind of source/device: ', deviceInfo);
+			}
 		});
-		
+
 		/*
 		if (!!audioInputSelect)
 		{
@@ -1914,28 +1989,32 @@ function getDevices()
 			audioOutputSelect.appendChild(option);
 		}
 		*/
-    }, (err) => {
+	}, (err) =>
+	{
 		const errMsg = err.name + err.message + '\n';
 		text_info.value = text_info.value + errMsg;
-    });
+	});
 }
 
 // 
 if (!!videoSelect)
 {
-	videoSelect.addEventListener('change', () => {
+	videoSelect.addEventListener('change', () =>
+	{
 		let index = videoSelect.selectedIndex;
-	
+
 		cameraDevId = videoSelect.options[index].value;
-	
+
 		console.log(`<demo> cameraDev change - cameraDevId: ${cameraDevId}`);
 
 		// switch device for Stream
 		if (!!gStream)
 		{
-			gStream.switchDevice('video', cameraDevId, () => {
+			gStream.switchDevice('video', cameraDevId, () =>
+			{
 				console.log(`<demo> switchDevice succ - deviceId: ${cameraDevId}`);
-			}, (e) =>{
+			}, (e) =>
+			{
 				console.log(`<demo> switchDevice fail - deviceId: ${cameraDevId} - ${e.toString()}`);
 			});
 		}
@@ -1945,19 +2024,22 @@ if (!!videoSelect)
 // 
 if (!!audioInputSelect)
 {
-	audioInputSelect.addEventListener('change', () => {
+	audioInputSelect.addEventListener('change', () =>
+	{
 		let index = audioInputSelect.selectedIndex;
-	
+
 		micDevId = audioInputSelect.options[index].value;
-		
+
 		console.log(`<demo> micDev change - micDevId: ${micDevId}`);
 
 		// switch device for Stream
 		if (!!gStream)
 		{
-			gStream.switchDevice('audio', micDevId, () => {
+			gStream.switchDevice('audio', micDevId, () =>
+			{
 				console.log(`<demo> switchDevice succ - deviceId: ${micDevId}`);
-			}, (e) =>{
+			}, (e) =>
+			{
 				console.log(`<demo> switchDevice fail - deviceId: ${micDevId} - ${e.toString()}`);
 			});
 		}
@@ -1967,9 +2049,10 @@ if (!!audioInputSelect)
 // 
 if (!!audioOutputSelect)
 {
-	audioOutputSelect.addEventListener('change', () => {
+	audioOutputSelect.addEventListener('change', () =>
+	{
 		let index = audioOutputSelect.selectedIndex;
-	
+
 		speakerDevId = audioOutputSelect.options[index].value;
 
 		// 
@@ -1978,12 +2061,14 @@ if (!!audioOutputSelect)
 			if (!!item)
 			{
 				// 
-				item.setAudioOutput(speakerDevId, (e) => {
+				item.setAudioOutput(speakerDevId, (e) =>
+				{
 					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput succc - ${JSON.stringify(e)}` + '\n';
-					console.log('<demo> switch speaker - Stream.setAudioOutput succc. - ' + e);	
-				}, (e) => {
+					console.log('<demo> switch speaker - Stream.setAudioOutput succc. - ' + e);
+				}, (e) =>
+				{
 					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput fail - ${JSON.stringify(e)}` + '\n';
-					console.log('<demo> switch speaker - Stream.setAudioOutput fail. - ' + e);	
+					console.log('<demo> switch speaker - Stream.setAudioOutput fail. - ' + e);
 				});
 			}
 		});
@@ -1996,7 +2081,8 @@ if (!!audioOutputSelect)
 let audioCodecEle = document.getElementById('audioCodec');
 if (!!audioCodecEle)
 {
-	audioCodecEle.addEventListener('change', () => {
+	audioCodecEle.addEventListener('change', () =>
+	{
 		let index = audioCodecEle.selectedIndex;
 
 		audioCodec = audioCodecEle.options[index].value;
@@ -2008,11 +2094,12 @@ if (!!audioCodecEle)
 let audioProfileEle = document.getElementById('audioProfile');
 if (!!audioProfileEle)
 {
-	audioProfileEle.addEventListener('change', () => {
+	audioProfileEle.addEventListener('change', () =>
+	{
 		let index = audioProfileEle.selectedIndex;
-	
+
 		audioProfile = audioProfileEle.options[index].value;
-		
+
 		console.log(`<demo> audioProfile change - audioProfile: ${audioProfile}`);
 	})
 }
@@ -2020,19 +2107,22 @@ if (!!audioProfileEle)
 let userRoleEle = document.getElementById('userRole');
 if (!!userRoleEle)
 {
-	userRoleEle.addEventListener('change', () => {
+	userRoleEle.addEventListener('change', () =>
+	{
 		let index = userRoleSelect.selectedIndex;
 
 		userRole = userRoleSelect.options[index].value;
-		
+
 		console.log(`<demo> userRole change - userRole: ${userRole}`);
 
 		// 
 		if (!!client)
 		{
-			client.setUserRole(userRole, () => {
+			client.setUserRole(userRole, () =>
+			{
 				console.log(`<demo> setUserRole() succ. - role: ${userRole}`);
-			}, (e) => {
+			}, (e) =>
+			{
 				console.log(`<demo> setUserRole() fail - ${e.toString()}`);
 			});
 		}
@@ -2043,7 +2133,8 @@ if (!!userRoleEle)
 let submitLogEle = document.getElementById('submitLog');
 if (!!submitLogEle)
 {
-	submitLogEle.addEventListener('click', () => {
+	submitLogEle.addEventListener('click', () =>
+	{
 		const isSubmitLog = submitLogEle.checked;
 		TTTRtcWeb.setLogSubmit(isSubmitLog);
 		console.log(`<demo> submitLog: ${isSubmitLog}`);
@@ -2054,7 +2145,8 @@ if (!!submitLogEle)
 let refreshDevicesEle = document.getElementById('refreshDevices');
 if (!!refreshDevicesEle)
 {
-	refreshDevicesEle.addEventListener('click', () => {
+	refreshDevicesEle.addEventListener('click', () =>
+	{
 		getDevices();
 	})
 }
