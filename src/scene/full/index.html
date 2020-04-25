@@ -5,51 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
-    <link rel='shortcut icon' href='https://www.3ttech.cn/res/tpl/default/img/logo-white.png' />
 
-    <style>
-        .grid-container {
-            display: grid;
-            grid-template-columns: auto auto auto auto auto auto;
-            grid-gap: 5px;
-            background-color: #ffffff;
-            padding: 5px;
-        }
-
-        .grid-container>div {
-            background-color: rgba(255, 255, 255, 0.8);
-            text-align: center;
-            padding: 5px 0;
-            font-size: 10px;
-        }
-
-        .grid-container-video {
-            display: grid;
-            grid-template-columns: auto auto auto auto;
-            grid-gap: 5px;
-            background-color: #ffffff;
-            padding: 5px;
-        }
-
-        .grid-container-video>video {
-            background-color: #000000;
-            text-align: center;
-            padding: 5px 0;
-        }
-
-        .grid-container-video>div {
-            background-color: #ffffff;
-            text-align: left;
-            padding: 5px 0;
-            font-size: 10px;
-        }
-
-		video {
-			background-image: url(https://www.3ttech.cn/res/tpl/default/img/logo-white.png);
-			background-repeat: no-repeat;
-			background-position: center;
-		}
-    </style>
+    <link rel="stylesheet" href="../../css/main.css"/>
 </head>
 
 <body>
@@ -64,7 +21,7 @@
 		</table>
 	</div>
     <div id='userInfo'>
-		<table>
+        <table>
 			<tr>
 				<td>
 					<table>
@@ -91,7 +48,6 @@
 								</select>
 							</td>
 						</tr>
-						<!--
 						<tr>
 							<td>
 								<label for="audioCodec">audioCodec : </label>
@@ -120,7 +76,6 @@
 								</select>
 							</td>
 						</tr>
-						-->
 						<tr>
 							<td></td>
 						</tr>
@@ -130,19 +85,13 @@
 								<input type="text" value="" id="rtmpUrl" />
 							</td>
 						</tr>
-						<!--
 						<tr>
 							<td> - </td>
 							<td>
 								<input type="checkbox" id="pureAudio">只推音频</input>
 								<button id="setRtmpUrl">切换CDN</button>
-								<button id="setLiveMixerLayout">推流视频合屏</button>
-							</td>
-							<td>
-								注 -- 如果要设置推流地址，要确保 [用户角色] 为 [主播]
 							</td>
 						</tr>
-						-->
 						<tr>
 							<td></td>
 						</tr>
@@ -170,11 +119,9 @@
 				<td><font color="green"><b>首先请登录 : </b></font></td>
 				<td>
 					<table>
-						<!--
 						<tr>
 							<input type="checkbox" id="submitLog" checked >提交日志</input>
 						</tr>
-						-->
 						<tr>
 							<td></td>
 							<td>
@@ -274,7 +221,6 @@
 		-->
 	<div>
 		<table>
-			<!--
 			<tr>
 				<td> - </td>
 				<td>
@@ -300,7 +246,6 @@
 					</table>
 				</td>
 			</tr>
-			-->
 			<tr>
 				<td>
 					场景1 : <br/>摄像头流 -- 
@@ -308,26 +253,27 @@
 				<td>
 					<table>
 						<tr>
-							<!--
 							<td>
 								<button id="previewLocal">本地视频预览</button>
 							</td>
-							-->
 							<td>
 								<button id="publishStream">发布 音视频流</button>
 							</td>
 							<td>
+								<button id="publishAudioStream">发布 <font color="red">[纯]</font> 音频</button>
+							</td>
+							<td>
 								<button id="unpublishStream">取消</button>
 							</td>
-							<td> - </td>
 							<td>状态 : </td>
 							<td><p id = "publishStreamStatus">未推流</p></td>
 						</tr>
-						<!--
 						<tr>
+							<!--
 							<td>
 								<button id="ctrlCamera">stopCamera</button>
 							</td>
+							-->
 							<td> - </td>
 							<td>
 								<button id="pauseVideo">pauseVideo</button>
@@ -341,13 +287,13 @@
 							<td>
 								<button id="disableAudio">disableAudio</button>
 							</td>
+							<!--
 							<td>
 								<input id="setInputVolume" type="range" min="0" max="1.5" step="0.01" value="1"/>
 							</td>
+							-->
 						</tr>
-						-->
 					</table>
-					<!--
 					<table>
 						<tr>
 							<td>
@@ -391,7 +337,6 @@
 							</td>
 						</tr>
 					</table>
-					-->
 				</td>
 			</tr>
 		</table>
@@ -399,11 +344,40 @@
 	<div id="video" class="grid-container-video"></div>
 
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#000000 SIZE=1>
+		<div>
+			<table>
+				<tr>
+					<td>
+						场景2 : <br/>屏幕流发布CDN -- 
+					</td>
+					<td></td>
+					<td>
+						<table>
+							<tr>
+								<td> - </td>
+								<td>
+									<button id="publishScreenCDN">屏幕流发布CDN</button>
+								</td>
+								<td>
+									<button id="unpublishScreenCDN">取消</button>
+								</td>
+								<td> - </td>
+								<td>状态 : </td>
+								<td><p id = "publishScreenCDNStatus">未推流</p></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	<div id="screenRec" class="grid-container-video"></div>
+	
+	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#000000 SIZE=1>
 	<div>
 		<table>
 			<tr>
 				<td>
-					场景2 : <br/>屏幕流 -- 
+					场景3 : <br/>屏幕流 -- 
 				</td>
 				<td></td>
 				<td>
@@ -426,6 +400,7 @@
         </table>
 	</div>
 	<div id="screen" class="grid-container-video"></div>
+
 	<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#000000 SIZE=1>
 
 	<!--
@@ -467,7 +442,8 @@
     <!-- <script src='https://stech.3ttech.cn/websdk/prod/tttwebsdk.js'></script> -->
 	<!-- <script type='text/javascript' src='./lib/tttwebsdk.js' charset="utf-8"></script> -->
 	<!-- <script src='./screen/getScreenId.js'></script> -->
-    <script type='text/javascript' src='./dist/websdkdemo-bundle.js' charset="utf-8"></script>
+    <script type='text/javascript' src='../../../dist/websdkwrap.js' charset="utf-8"></script>
+    <script type='text/javascript' src='./js/main.js' charset="utf-8"></script>
 </body>
 
 </html>

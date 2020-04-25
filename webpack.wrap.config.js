@@ -4,11 +4,11 @@ const webpack = require('webpack');
 module.exports = {
     cache: true,
     entry: {
-        websdkdemo: './src/js/websdkdemo.js'
+        websdkwrap: './src/js/tttwebsdkwrap.js'
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: '[name]-bundle.js',
+        filename: '[name].js',
         publicPath: '/dist'
     },
     mode: 'development',

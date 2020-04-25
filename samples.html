@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!--
+ *  Copyright (c) 2020 3ttech.cn All Rights Reserved.
+ *
+-->
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="description" content="TTTWebSDK code samples">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <meta itemprop="description" content="Client-side TTTWebSDK code samples">
+    <meta itemprop="image" content="https://www.3ttech.cn/res/tpl/default/img/logo-white.png">
+    <meta itemprop="name" content="TTTWebSDK code samples">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta id="theme-color" name="theme-color" content="#ffffff">
+
+    <base target="_blank">
+
+    <title>TTTWebSDK samples</title>
+
+    <link rel="icon" sizes="192x192" href="https://www.3ttech.cn/res/tpl/default/img/logo-white.png">
+    <link rel="stylesheet" href="src/css/main.css"/>
+
+    <style>
+        h2 {
+            font-size: 1.5em;
+            font-weight: 500;
+        }
+
+        h3 {
+            border-top: none;
+        }
+
+        section {
+            border-bottom: 1px solid #eee;
+            margin: 0 0 1.5em 0;
+            padding: 0 0 1.5em 0;
+        }
+
+        section:last-child {
+            border-bottom: none;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div id="container">
+
+    <h1>TTTWebSDK samples</h1>
+
+    <section>
+
+        <p>
+            如下示例代码，展示了 TTTWebRTC API 的使用，供开发者参考。
+        </p>
+
+        <p>注：TTTWebRTC API 详细说明，请参考 <a href="https://www.3ttech.cn/index.php?menu=105&type=Web">TTTWebRTC API</a></p>
+
+    </section>
+
+    <section>
+
+        <h2 id="join">加入房间(join)</h2>
+        <p class="description">web端加入 3T 房间</p>
+        <ul>
+            <li><a href="src/scene/join/index.html">join - 加入3T房间</a></li>
+        </ul>
+
+        <h2 id="preview">创建本地流 & 预览</h2>
+        <p class="description">createStream 创建本地流</p>
+        <ul>
+            <li><a href="src/scene/preview/index.html">createStream - 创建流</a></li>
+        </ul>
+
+        <h2 id="publish">RTC推流</h2>
+        <p class="description">publish - 向 3T RTC 推流</p>
+        <ul>
+            <li><a href="src/scene/publish/index.html">publish - 音视频RTC推流</a></li>
+
+            <li><a href="src/scene/publish_pure_audio/index.html">publish - 纯音频RTC推流</a></li>
+
+            <li><a href="src/scene/publish_screen/index.html">publish - 屏幕流RTC推流</a></li>
+
+            <li><a href="src/scene/publish_multistream/index.html">publish - 向RTC推流 - 多路视频流</a></li>
+		</ul>
+		
+        <h2 id="publish-cdn">RTC推流-CDN</h2>
+        <p class="description">RTC推流，经由 3T RTC 旁路推 CDN</p>
+        <ul>
+            <li><a href="src/scene/push_to_cdn/index.html">publish - rtmp - 房间内流经 RTC 推CDN</a></li>
+
+            <li><a href="src/scene/screen_rec_cdn/index.html">publishScreen - rtmp - 屏幕流经 RTC 推CDN</a></li>
+        </ul>
+
+        <h2 id="subscribe">订阅媒体流</h2>
+        <p class="description">从 3T RTN 订阅房间内其他用户已发布的媒体流</p>
+        <ul>
+            <li><a href="src/scene/subscribe/index.html">subscribe - 订阅 RTC 流</a></li>
+        </ul>
+    </section>
+
+</div>
+
+<script src="src/js/lib/ga.js"></script>
+
+</body>
+</html>
