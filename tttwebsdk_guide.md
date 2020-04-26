@@ -11,7 +11,7 @@
 我们在 [GitHub](https://github.com/santiyun/TTTWebSDKDemo) 上提供一个开源的基础视频互动直播示例项目，在开始开发之前你可以通过该示例项目体验互动直播效果。
 示例代码包括两部分：
 1. [demo](https://stech.3ttech.cn/webdemo/index.html) - 用户可使用该 demo 体验 websdk 的基本音视频功能；
-2. [samples](https://stech.3ttech.cn/samples/index.html) - 开发者可以参考其中一系列的 sample ，基于 TTTWebSDKDemo 开发。
+2. [samples](https://stech.3ttech.cn/webdemo/samples.html) - 开发者可以参考其中一系列的 sample ，基于 TTTWebSDKDemo 开发。
 
 _注：以上 demo | samples ，源代码均位于 [GitHub](https://github.com/santiyun/TTTWebSDKDemo)_
 
