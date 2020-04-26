@@ -68,14 +68,14 @@ function joinChan(appid, chanid, userid)
 		{
 			tttStatus = 0;
 
-			console.log(`<demo> login failed. - error: ${JSON.stringify(err)}`);
+			console.log(`<demo> login fail - ${err}`);
 
 			document.getElementById('loginStatus').innerHTML = '<font color="red">登录失败</font>';
 			document.getElementById('loginInfo').innerHTML = '';
 		});
 	}, (err) =>
 	{
-		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
+		console.log(`<demo> init fail - ${err}`);
 
 		return;
 	});
@@ -135,7 +135,14 @@ if (!!publishStreamEle)
 {
 	publishStreamEle.addEventListener('click', () =>
 	{
-		publishStream();
+		if (!!gStream)
+		{
+			publishStream();
+		}
+		else
+		{
+			createPublishStream();
+		}
 	})
 }
 
@@ -144,17 +151,17 @@ if (!!unpublishStreamEle)
 {
 	unpublishStreamEle.addEventListener('click', () =>
 	{
-		unpublishVideoStream({});
+		unpublishStream({});
 	})
 }
 
 // 
-function publishStream()
+function createPublishStream()
 {
 	// 
 	if (tttStatus !== 1)
 	{
-		console.log('<demo> publishStream - 请先[加入房间]');
+		console.log('<demo> createPublishStream - 请先[加入房间]');
 		return;
 	}
 
@@ -177,7 +184,7 @@ function publishStream()
 		// 
 	}, (evt) =>
 	{
-		console.log('<demo> publishStream - Stream.init failed. - error: ' + evt);
+		console.log('<demo> createPublishStream - Stream.init failed. - error: ' + evt);
 		
 		// 
 		gStream.close();
@@ -185,18 +192,34 @@ function publishStream()
 	});
 }
 
+function publishStream()
+{
+	// 
+	if (tttStatus !== 1)
+	{
+		console.log('<demo> publishStream - 请先[加入房间]');
+		return;
+	}
+
+	if (!gStream)
+	{
+		console.log('<demo> publishStream - gStream is null');
+		return;
+	}
+
+	client.publish(gStream, () => {}, () => {
+		// 
+		gStream.close();
+		gStream = null;
+	});
+}
+
 // 
-function unpublishVideoStream(opts)
+function unpublishStream(opts)
 {
 	const { trackClosed } = opts;
 
-	client.unpublish(gStream, () =>
-	{
-		console.log(`<demo> unpublishVideoStream - client.unpublish local stream ${gStream.getId()} success.`);
-	}, () =>
-	{
-		console.log('<demo> unpublishVideoStream - client.unpublish local stream failed');
-	}, false/*true*/);
+	client.unpublish(gStream, () => {}, () => {}, false/*true*/);
 
 	// 
 	if (!!trackClosed)

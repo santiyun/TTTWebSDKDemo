@@ -49,7 +49,16 @@ let speakerDevId = 'default';
 let audioProfile = 'default';
 let audioCodec = 'isac';
 
-const appIdEle = document.getElementById('appID');
+let xAppID = 'a967ac491e3acf92eed5e1b5ba641ab7';
+const appIdSelect = document.getElementById('appID');
+if (!!appIdSelect)
+{
+	appIdSelect.addEventListener('change', () =>
+	{
+		let index = appIdSelect.selectedIndex;
+		xAppID = appIdSelect.options[index].value;
+	})
+}
 
 // 
 let userId = 0;
@@ -147,7 +156,7 @@ if (!!joinChanEle)
 {
 	joinChanEle.addEventListener('click', () =>
 	{
-		let appId = appIdEle.value;
+		let appId = xAppID;
 		let rid = roomIdEle.value;
 		let uid = userIdEle.value;
 		joinChan(appId, rid, uid);
@@ -209,16 +218,16 @@ function joinChan(appid, chanid, userid)
 		{
 			tttStatus = 0;
 
-			text_info.value = text_info.value + `<demo> login failed. - error: ${JSON.stringify(err)}` + '\n';
-			console.log(`<demo> login failed. - error: ${JSON.stringify(err)}`);
+			text_info.value = text_info.value + `<demo> login fail - ${err}` + '\n';
+			console.log(`<demo> login fail - ${err}`);
 
 			document.getElementById('loginStatus').innerHTML = '<font color="red">登录失败</font>';
 			document.getElementById('loginInfo').innerHTML = '';
 		});
 	}, (err) =>
 	{
-		text_info.value = text_info.value + `<demo> init failed. - error: ${JSON.stringify(err)}` + '\n';
-		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
+		text_info.value = text_info.value + `<demo> init fail - ${err}` + '\n';
+		console.log(`<demo> init fail - ${err}`);
 
 		return;
 	});
@@ -237,7 +246,7 @@ function joinChan(appid, chanid, userid)
 	{
 		tttStatus = 0;
 
-		console.log(`<demo> - event [disconnected] - ${JSON.stringify(e)}`);
+		console.log('<demo> - event [disconnected]');
 
 		_onClose();
 	});
@@ -329,7 +338,7 @@ function joinChan(appid, chanid, userid)
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} fail - ${err}` + '\n';
 			// info.val(info.val() + 'Subscribe stream failed' + err + '\n');
 		});
 	});
@@ -358,7 +367,7 @@ function joinChan(appid, chanid, userid)
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} fail - ${err}` + '\n';
 			// info.val(info.val() + 'Subscribe stream failed' + err + '\n');
 		});
 
@@ -850,7 +859,7 @@ function setVideoProfile(prof)
 		console.log(`<demo> setVideoProfile - gStream.setVideoProfile succ: ${prof}`);
 	}, (e) =>
 	{
-		text_info.value = text_info.value + `<demo> setVideoProfile - gStream.setVideoProfile failed. - error: ${JSON.stringify(e)}` + '\n';
+		text_info.value = text_info.value + `<demo> setVideoProfile - gStream.setVideoProfile fail - ${e}` + '\n';
 		console.log('<demo> setVideoProfile - gStream.setVideoProfile - error: ' + e);
 	});
 }
@@ -953,8 +962,8 @@ function previewLocalStream(opts)
 			// 
 		}, (evt) =>
 		{
-			text_info.value = text_info.value + `<demo> previewLocalStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
-			console.log('<demo> previewLocalStream - Stream.init failed. - error: ' + evt);
+			text_info.value = text_info.value + `<demo> previewLocalStream - Stream.init fail - ${evt}` + '\n';
+			console.log(`<demo> previewLocalStream - Stream.init fail - ${evt}`);
 		});
 	}
 	else
@@ -1117,8 +1126,8 @@ function publishStream(opts)
 			// 
 		}, (evt) =>
 		{
-			text_info.value = text_info.value + `<demo> publishStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
-			console.log('<demo> publishStream - Stream.init failed. - error: ' + evt);
+			text_info.value = text_info.value + `<demo> publishStream - Stream.init fail - ${evt}` + '\n';
+			console.log(`<demo> publishStream - Stream.init fail - ${evt}`);
 			
 			// 
 			gStream.close();
@@ -1215,7 +1224,7 @@ function publishScreenCDNStream()
 		{
 			gScreenCDNStream.on('screen-close', (e) =>
 			{
-				console.log(`<demo> event [screen-close] - ${JSON.stringify(e)}`);
+				console.log(`<demo> event [screen-close] - ${e.streamId}`);
 				unpublishScreenCDNStream();
 			});
 			//
@@ -1265,8 +1274,8 @@ function publishScreenCDNStream()
 				}
 			}, (evt) =>
 			{
-				text_info.value = text_info.value + `publishScreenCDNStream - client.publishScreen failed. - error: ${JSON.stringify(evt)}` + '\n';
-				console.log(`<demo> publishScreenCDNStream - client.publishScreen failed. - error: ${JSON.stringify(evt)}`);
+				text_info.value = text_info.value + `publishScreenCDNStream - client.publishScreen fail - ${evt}` + '\n';
+				console.log(`<demo> publishScreenCDNStream - client.publishScreen fail - ${evt}`);
 				
 				//
 				let publishScreenCDNStatusEle = document.getElementById('publishScreenCDNStatus');
@@ -1281,8 +1290,8 @@ function publishScreenCDNStream()
 			});
 		}, (evt) =>
 		{
-			text_info.value = text_info.value + `<demo> publishScreenCDNStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
-			console.log('<demo> publishScreenCDNStream - Stream.init failed. - error: ' + evt);
+			text_info.value = text_info.value + `<demo> publishScreenCDNStream - Stream.init fail - ${evt}` + '\n';
+			console.log(`<demo> publishScreenCDNStream - Stream.init fail - ${evt}`);
 
 			// 
 			gScreenCDNStream.close();
@@ -1390,7 +1399,7 @@ function publishScreenStream(opts)
 		{
 			gScreenStream.on('screen-close', (e) =>
 			{
-				console.log(`<demo> event [screen-close] - ${JSON.stringify(e)}`);
+				console.log(`<demo> event [screen-close] - ${e.streamId}`);
 				unpublishScreenStream({ trackClosed: true });
 			});
 			//
@@ -1430,8 +1439,8 @@ function publishScreenStream(opts)
 			// 
 		}, (evt) =>
 		{
-			text_info.value = text_info.value + `<demo> publishScreenStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
-			console.log('<demo> publishScreenStream - Stream.init failed. - error: ' + evt);
+			text_info.value = text_info.value + `<demo> publishScreenStream - Stream.init fail - ${evt}` + '\n';
+			console.log(`<demo> publishScreenStream - Stream.init fail - ${evt}`);
 
 			// 
 			gScreenStream.close();
@@ -1611,8 +1620,8 @@ function publishMediaSourceStream(opts)
 			// 
 		}, (evt) =>
 		{
-			text_info.value = text_info.value + `<demo> publishMediaSourceStream - Stream.init failed. - error: ${JSON.stringify(evt)}` + '\n';
-			console.log('<demo> publishMediaSourceStream - Stream.init failed. - error: ' + evt);
+			text_info.value = text_info.value + `<demo> publishMediaSourceStream - Stream.init fail - ${evt}` + '\n';
+			console.log(`<demo> publishMediaSourceStream - Stream.init fail - ${evt}`);
 		});
 	}
 	else
@@ -1709,8 +1718,8 @@ function _publishStream(userid, mediaStream, onSuccess, onFailure)
 		}
 	}, (evt) =>
 	{
-		text_info.value = text_info.value + `_publishStream - client.publish failed. - error: ${JSON.stringify(evt)}` + '\n';
-		console.log(`<demo> _publishStream - client.publish failed. - error: ${JSON.stringify(evt)}`);
+		text_info.value = text_info.value + `_publishStream - client.publish fail - ${evt}` + '\n';
+		console.log(`<demo> _publishStream - client.publish fail - ${evt}`);
 
 		onFailure && onFailure();
 	});
@@ -2082,11 +2091,11 @@ if (!!audioOutputSelect)
 				// 
 				item.setAudioOutput(speakerDevId, (e) =>
 				{
-					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput succc - ${JSON.stringify(e)}` + '\n';
+					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput succc - ${e}` + '\n';
 					console.log('<demo> switch speaker - Stream.setAudioOutput succc. - ' + e);
 				}, (e) =>
 				{
-					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput fail - ${JSON.stringify(e)}` + '\n';
+					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput fail - ${e}` + '\n';
 					console.log('<demo> switch speaker - Stream.setAudioOutput fail. - ' + e);
 				});
 			}

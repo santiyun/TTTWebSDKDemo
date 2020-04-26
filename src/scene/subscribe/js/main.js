@@ -70,14 +70,14 @@ function joinChan(appid, chanid, userid)
 		{
 			tttStatus = 0;
 
-			console.log(`<demo> login failed. - error: ${JSON.stringify(err)}`);
+			console.log(`<demo> login fail - ${err}`);
 
 			document.getElementById('loginStatus').innerHTML = '<font color="red">登录失败</font>';
 			document.getElementById('loginInfo').innerHTML = '';
 		});
 	}, (err) =>
 	{
-		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
+		console.log(`<demo> init fail - ${err}`);
 
 		return;
 	});
@@ -100,7 +100,7 @@ function joinChan(appid, chanid, userid)
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			console.log(`<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}`);
+			console.log(`<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} fail - ${err}`);
 		});
 	});
 
@@ -128,7 +128,7 @@ function joinChan(appid, chanid, userid)
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			console.log(`<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}`);
+			console.log(`<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} fail - ${err}`);
 		});
 	})
 

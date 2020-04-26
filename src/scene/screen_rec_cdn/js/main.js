@@ -81,14 +81,14 @@ function joinChan(appid, chanid, userid)
 		{
 			tttStatus = 0;
 
-			console.log(`<demo> login failed. - error: ${JSON.stringify(err)}`);
+			console.log(`<demo> login fail - ${err}`);
 
 			document.getElementById('loginStatus').innerHTML = '<font color="red">登录失败</font>';
 			document.getElementById('loginInfo').innerHTML = '';
 		});
 	}, (err) =>
 	{
-		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
+		console.log(`<demo> init fail - ${err}`);
 
 		return;
 	});
@@ -106,7 +106,7 @@ function joinChan(appid, chanid, userid)
 
 	client.on('screen-unpublished', (evt) =>
 	{
-		console.log(`<demo> - event [screen-unpublished] uid: ${evt.streamId}`);
+		console.log(`<demo> - event [screen-unpublished] sid: ${evt.streamId}`);
 		document.getElementById('publishScreenCDNStatus').innerHTML = `<font color="black">未推流</font>`;
 
 		// TODO : re-layout
@@ -197,7 +197,23 @@ if (!!publishScreenCDNEle)
 {
 	publishScreenCDNEle.addEventListener('click', () =>
 	{
-		publishStream();
+		if (!!gAudioStream)
+		{
+			publishAudioStream();
+		}
+		else
+		{
+			createPublishAudioStream();
+		}
+
+		if (!!gStream)
+		{
+			publishVideoStream();
+		}
+		else
+		{
+			createPublishVideoStream();
+		}
 	})
 }
 
@@ -211,12 +227,12 @@ if (!!unpublishScreenCDNEle)
 }
 
 // 
-function publishStream()
+function createPublishAudioStream()
 {
 	// 
 	if (tttStatus !== 1)
 	{
-		console.log('<demo> publishStream - 请先[加入房间]');
+		console.log('<demo> createPublishAudioStream - 请先[加入房间]');
 		return;
 	}
 
@@ -240,13 +256,38 @@ function publishStream()
 		});
 	}, (evt) =>
 	{
-		console.log('<demo> publish AudioStream - Stream.init failed. - error: ' + evt);
+		console.log(`<demo> createPublishAudioStream - Stream.init fail - ${evt}`);
 		
 		// 
 		gAudioStream.close();
 		gAudioStream = null;
 	});
+}
 
+function publishAudioStream()
+{
+	// 
+	if (tttStatus !== 1)
+	{
+		console.log('<demo> publishAudioStream - 请先[加入房间]');
+		return;
+	}
+
+	if (!gAudioStream)
+	{
+		console.log('<demo> publishAudioStream - gAudioStream is null');
+		return;
+	}
+
+	client.publish(gAudioStream, () => {}, () => {
+		// 
+		gAudioStream.close();
+		gAudioStream = null;
+	});
+}
+
+function createPublishVideoStream()
+{
 	// for screen stream
 	gStream = window.RTCObj.createStream({
 		userId: +userId,
@@ -262,7 +303,7 @@ function publishStream()
 	{
 		gStream.on('screen-close', (e) =>
 		{
-			console.log(`<demo> event [screen-close] - ${JSON.stringify(e)}`);
+			console.log(`<demo> event [screen-close] - ${e.streamId}`);
 			unpublishStream({ trackClosed: true });
 		});
 
@@ -290,8 +331,30 @@ function publishStream()
 		// 
 	}, (evt) =>
 	{
-		console.log('<demo> publishStream - Stream.init failed. - error: ' + evt);
+		console.log(`<demo> createPublishVideoStream - Stream.init fail - ${evt}`);
 		
+		// 
+		gStream.close();
+		gStream = null;
+	});
+}
+
+function publishVideoStream()
+{
+	// 
+	if (tttStatus !== 1)
+	{
+		console.log('<demo> publishVideoStream - 请先[加入房间]');
+		return;
+	}
+
+	if (!gStream)
+	{
+		console.log('<demo> publishVideoStream - gStream is null');
+		return;
+	}
+
+	client.publishScreen(gStream, () => {}, () => {
 		// 
 		gStream.close();
 		gStream = null;
@@ -307,13 +370,7 @@ function unpublishStream(opts)
 	client.unpublish(gAudioStream, () => {}, () => {});
 
 	// for screen stream
-	client.unpublishScreen(gStream, () =>
-	{
-		console.log(`<demo> unpublishStream - client.unpublishScreen local stream ${gStream.getId()} success.`);
-	}, () =>
-	{
-		console.log('<demo> unpublishStream - client.unpublishScreen local stream failed');
-	}, false/*true*/);
+	client.unpublishScreen(gStream, () => {}, () => {}, false/*true*/);
 
 	// 
 	if (!!trackClosed)

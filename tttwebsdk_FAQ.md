@@ -11,7 +11,7 @@ TTT Web SDK 支持如下浏览器及平台：
 
 ## 私有化部署
 ---
-TTT Web SDK 后端需要相应的服务支持，除 3T 的通用大网服务外，还有如下两个web专用服务：
+TTT Web SDK 后端需要相应的服务支持，除 3T 的通用大网服务外，还有如下两个web专用服务：  
 注：通过 superctl status 查得
 * node
 * node_msgw

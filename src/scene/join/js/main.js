@@ -65,14 +65,14 @@ function joinChan(appid, chanid, userid)
 		{
 			tttStatus = 0;
 
-			console.log(`<demo> login failed. - error: ${JSON.stringify(err)}`);
+			console.log(`<demo> login failed. - error: ${err}`);
 
 			document.getElementById('loginStatus').innerHTML = '<font color="red">登录失败</font>';
 			document.getElementById('loginInfo').innerHTML = '';
 		});
 	}, (err) =>
 	{
-		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
+		console.log(`<demo> init failed. - error: ${err}`);
 
 		return;
 	});
@@ -86,7 +86,7 @@ function joinChan(appid, chanid, userid)
 	{
 		tttStatus = 0;
 
-		console.log(`<demo> - event [disconnected] - ${JSON.stringify(e)}`);
+		console.log(`<demo> - event [disconnected] - ${e.code}`);
 
 		_onClose();
 	});

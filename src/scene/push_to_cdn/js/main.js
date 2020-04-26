@@ -80,14 +80,14 @@ function joinChan(appid, chanid, userid)
 		{
 			tttStatus = 0;
 
-			console.log(`<demo> login failed. - error: ${JSON.stringify(err)}`);
+			console.log(`<demo> login fail - ${err}`);
 
 			document.getElementById('loginStatus').innerHTML = '<font color="red">登录失败</font>';
 			document.getElementById('loginInfo').innerHTML = '';
 		});
 	}, (err) =>
 	{
-		console.log(`<demo> init failed. - error: ${JSON.stringify(err)}`);
+		console.log(`<demo> init fail - ${err}`);
 
 		return;
 	});
@@ -233,7 +233,7 @@ function publishStream()
 	{
 		gStream.on('stream-close', (e) =>
 		{
-			console.log(`<demo> event [stream-close] - ${JSON.stringify(e)}`);
+			console.log(`<demo> event [stream-close] - ${e.streamId}`);
 			unpublishStream({ trackClosed: true });
 		});
 
@@ -274,13 +274,7 @@ function unpublishStream(opts)
 {
 	const { trackClosed } = opts;
 
-	client.unpublish(gStream, () =>
-	{
-		console.log(`<demo> unpublishStream - client.unpublish local stream ${gStream.getId()} success.`);
-	}, () =>
-	{
-		console.log('<demo> unpublishStream - client.unpublish local stream failed');
-	}, false/*true*/);
+	client.unpublish(gStream, () => {}, () => {}, false/*true*/);
 
 	// 
 	if (!!trackClosed)
