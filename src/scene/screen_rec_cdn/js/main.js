@@ -191,6 +191,34 @@ function setRtmpUrl(url)
 
 /******************* for Audio/Video Stream */
 //
+let closeStreamEle = document.getElementById('closeStream');
+if (!!closeStreamEle)
+{
+	closeStreamEle.addEventListener('click', () =>
+	{
+		closeStream();
+	})
+}
+
+//
+function closeStream()
+{
+	if (!!gStream)
+	{
+		gStream.close();
+	}
+
+	const videoId = '3t_local';
+	let obj = document.getElementById(videoId);
+	if (obj)
+	{
+		console.log('<demo> closeStream - obj.remove -- 3t_local');
+		obj.remove();
+	}
+
+	gStream = null;
+}
+
 // 
 let publishScreenCDNEle = document.getElementById('publishScreenCDN');
 if (!!publishScreenCDNEle)
@@ -307,7 +335,7 @@ function createPublishVideoStream()
 			unpublishStream({ trackClosed: true });
 		});
 
-		const videoId = '3t_local_screen';
+		const videoId = '3t_local';
 		let videoE = document.createElement('video');
 		videoE.id = videoId;
 		videoE.muted = true;
@@ -321,7 +349,7 @@ function createPublishVideoStream()
 			videoEle.append(videoE);
 		}
 
-		gStream.play(videoId);
+		gStream.play(videoId, {}, () => {}, () => {});
 		
 		client.publishScreen(gStream, () => {}, () => {
 			// 
@@ -389,14 +417,13 @@ function unpublishStream(opts)
 			gStream = null;
 		}
 
-		const videoId = '3t_local_screen';
+		const videoId = '3t_local';
 		let obj = document.getElementById(videoId);
 		if (obj)
 		{
-			console.log('<demo> unpublishStream - obj.remove -- 3t_local_screen');
+			console.log('<demo> unpublishStream - obj.remove -- 3t_local');
 			obj.remove();
 		}
-
 	}
 }
 

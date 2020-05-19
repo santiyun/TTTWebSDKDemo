@@ -6,7 +6,7 @@ let client = null;
 
 let gStream = null;
 
-let videoEle = document.getElementById('screen');
+let videoEle = document.getElementById('video');
 
 let tttStatus = 0;
 
@@ -52,6 +52,9 @@ function joinChan(appid, chanid, userid)
 		return;
 	}
 
+	// TODO : 
+	window.setTurnServers();
+
 	client = window.RTCObj.createClient({
 		role: userRole
 	});
@@ -86,13 +89,13 @@ function joinChan(appid, chanid, userid)
 	client.on('stream-published', (evt) =>
 	{
 		console.log(`<demo> - event [stream-published] uid: ${evt.streamId}`);
-		document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
+		document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
 	});
 
 	client.on('stream-unpublished', (evt) =>
 	{
 		console.log(`<demo> - event [stream-unpublished] uid: ${evt.streamId}`);
-		document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
+		document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
 	});
 }
 
@@ -129,7 +132,7 @@ function leaveChan()
 	console.log('<demo> leaveChan OK');
 }
 
-/******************* for Screen Stream */
+/******************* for Audio/Video Stream */
 //
 let closeStreamEle = document.getElementById('closeStream');
 if (!!closeStreamEle)
@@ -159,11 +162,12 @@ function closeStream()
 	gStream = null;
 }
 
+
 // 
-let publishScreenEle = document.getElementById('publishScreen');
-if (!!publishScreenEle)
+let publishStreamEle = document.getElementById('publishStream');
+if (!!publishStreamEle)
 {
-	publishScreenEle.addEventListener('click', () =>
+	publishStreamEle.addEventListener('click', () =>
 	{
 		if (!!gStream)
 		{
@@ -176,10 +180,10 @@ if (!!publishScreenEle)
 	})
 }
 
-let unpublishScreenEle = document.getElementById('unpublishScreen');
-if (!!unpublishScreenEle)
+let unpublishStreamEle = document.getElementById('unpublishStream');
+if (!!unpublishStreamEle)
 {
-	unpublishScreenEle.addEventListener('click', () =>
+	unpublishStreamEle.addEventListener('click', () =>
 	{
 		unpublishStream({});
 	})
@@ -189,18 +193,11 @@ if (!!unpublishScreenEle)
 function createPublishStream()
 {
 	// 
-	if (tttStatus !== 1)
-	{
-		console.log('<demo> createPublishStream - 请先[加入房间]');
-		return;
-	}
-
-	// 
 	gStream = window.RTCObj.createStream({
 		userId: +userId,
 		audio: true,
-		video: false,
-		screen: true
+		video: true,
+		attributes: { videoProfile: '480p' }
 	});
 
 	if (!gStream)
@@ -208,13 +205,12 @@ function createPublishStream()
 
 	gStream.init(() =>
 	{
-		gStream.on('screen-close', (e) =>
+		gStream.on('stream-close', (e) =>
 		{
-			console.log(`<demo> event [screen-close] - ${e.streamId}`);
+			console.log(`<demo> event [stream-close] - ${e.streamId}`);
 			unpublishStream({ trackClosed: true });
 		});
 
-		// 
 		const videoId = '3t_local';
 		let videoE = document.createElement('video');
 		videoE.id = videoId;

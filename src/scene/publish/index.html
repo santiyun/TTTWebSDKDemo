@@ -75,18 +75,52 @@
 		<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#987cb9 SIZE=3>
 		<div>
 			<table>
-				<table>
-					<tr>
-						<td>
-							<button id="publishStream">发布 音视频流</button>
-						</td>
-						<td>
-							<button id="unpublishStream">取消</button>
-						</td>
-						<td>状态 : </td>
-						<td><p id = "publishStreamStatus">未推流</p></td>
-					</tr>
-				</table>
+				<tr>
+					<td>
+						<button id="publishStream">发布 音视频流</button>
+					</td>
+					<td>
+						<button id="unpublishStream">取消</button>
+					</td>
+					<td>状态 : </td>
+					<td><p id = "publishStreamStatus">未推流</p></td>
+				</tr>
+				<tr>
+					<td>
+						<button id="closeStream">关闭流</button>
+					</td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<td>
+						<button id="refreshDevices">获取设备</button>
+					</td>
+					<td>
+						<label for="switchCamera">切换摄像头 : </label>
+					</td>
+					<td>
+						<select id="cameraDev"></select>
+					</td>
+				</tr>
+				<tr>
+					<td> - </td>
+					<td>
+						<label for="switchMic">切换Mic : </label>
+					</td>
+					<td>
+						<select id="micDev"></select>
+					</td>
+				</tr>
+				<tr>
+					<td> - </td>
+					<td>
+						<label for="switchSpeaker">切换Speaker : </label>
+					</td>
+					<td>
+						<select id="speakerDev"></select>
+					</td>
+				</tr>
 			</table>
 		</div>
 		<div id="video" class="grid-container-video"></div>

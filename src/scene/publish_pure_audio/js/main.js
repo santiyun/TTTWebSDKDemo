@@ -129,6 +129,26 @@ function leaveChan()
 
 /******************* for Audio Stream */
 //
+let closeStreamEle = document.getElementById('closeStream');
+if (!!closeStreamEle)
+{
+	closeStreamEle.addEventListener('click', () =>
+	{
+		closeStream();
+	})
+}
+
+//
+function closeStream()
+{
+	if (!!gStream)
+	{
+		gStream.close();
+	}
+
+	gStream = null;
+}
+
 // 
 let publishStreamEle = document.getElementById('publishAudioStream');
 if (!!publishStreamEle)

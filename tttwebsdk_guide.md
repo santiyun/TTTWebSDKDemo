@@ -125,9 +125,11 @@ ROOM_ID: 类型为整型，大于0且小于2^32，要加入的房间号，如果
 		// 订阅成功
 		let { stream } = evt；
 
-		if(stream.type === 'audio') { // 如果stream是纯音频流，不用传elementID
+		if(stream.hasAudio()) { // 如果stream是纯音频流，不用传elementID
 			stream.play()
-		} else {
+		}
+		
+		if(stream.hasVideo()) {
 			let video = document.createElement('video');
 			video.id = `3t_remote_${stream.innerStreamID}`;
 			video.muted = false;

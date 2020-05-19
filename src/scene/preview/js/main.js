@@ -66,7 +66,7 @@ function previewLocalStream(opts)
 				videoEle.append(videoE);
 			}
 
-			gStream.play(videoId, true);
+			gStream.play(videoId, {}, () => {}, () => {});
 			// 
 		}, (evt) =>
 		{
@@ -76,6 +76,34 @@ function previewLocalStream(opts)
 	else
 	{
 		const videoId = '3t_local';
-		gStream.play(videoId, true);
+		gStream.play(videoId, {}, () => {}, () => {});
 	}
+}
+
+// 
+let closePreviewEle = document.getElementById('closeStream');
+if (!!closePreviewEle)
+{
+	closePreviewEle.addEventListener('click', () =>
+	{
+		closeStream();
+	})
+}
+
+function closeStream()
+{
+	if (!!gStream)
+	{
+		gStream.close();
+	}
+
+	const videoId = '3t_local';
+	let obj = document.getElementById(videoId);
+	if (obj)
+	{
+		console.log('<demo> closeStream - obj.remove -- 3t_local');
+		obj.remove();
+	}
+
+	gStream = null;
 }

@@ -189,6 +189,34 @@ function setRtmpUrl(url)
 
 /******************* for Audio/Video Stream */
 //
+let closeStreamEle = document.getElementById('closeStream');
+if (!!closeStreamEle)
+{
+	closeStreamEle.addEventListener('click', () =>
+	{
+		closeStream();
+	})
+}
+
+//
+function closeStream()
+{
+	if (!!gStream)
+	{
+		gStream.close();
+	}
+
+	const videoId = '3t_local';
+	let obj = document.getElementById(videoId);
+	if (obj)
+	{
+		console.log('<demo> closeStream - obj.remove -- 3t_local');
+		obj.remove();
+	}
+
+	gStream = null;
+}
+
 // 
 let publishStreamEle = document.getElementById('publishStream');
 if (!!publishStreamEle)
@@ -251,7 +279,7 @@ function publishStream()
 			videoEle.append(videoE);
 		}
 
-		gStream.play(videoId);
+		gStream.play(videoId, {}, () => {}, () => {});
 		
 		client.publish(gStream, () => {}, () => {
 			// 
@@ -279,7 +307,10 @@ function unpublishStream(opts)
 	// 
 	if (!!trackClosed)
 	{
-		gStream.close();
+		if (!!gStream)
+		{
+			gStream.close();
+		}
 
 		const videoId = '3t_local';
 		let obj = document.getElementById(videoId);

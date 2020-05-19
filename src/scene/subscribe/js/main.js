@@ -96,11 +96,10 @@ function joinChan(appid, chanid, userid)
 		let in_stream = remote_stream.get(stream.getId());
 		client.subscribe(in_stream, (event) =>
 		{
-			console.log(`<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} succ`);
-			// successful doing someting, like play remote video or audio.
+			console.log(`<demo> subscribe audio ${evt.stream.getId()} succ`);
 		}, (err) =>
 		{
-			console.log(`<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} fail - ${err}`);
+			console.log(`<demo> subscribe audio ${evt.stream.getId()} fail - ${err}`);
 		});
 	});
 
@@ -124,11 +123,11 @@ function joinChan(appid, chanid, userid)
 		let in_stream = remote_stream.get(stream.getId());
 		client.subscribe(in_stream, (event) =>
 		{
-			console.log(`<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} succ`);
+			console.log(`<demo> subscribe video ${evt.stream.getId()} succ`);
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			console.log(`<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} fail - ${err}`);
+			console.log(`<demo> subscribe video ${evt.stream.getId()} fail - ${err}`);
 		});
 	})
 
@@ -155,13 +154,9 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 
-		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type} stream.videoType: ${stream.videoType}`);
+		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.hasAudio: ${stream.hasAudio()} stream.hasVideo: ${stream.hasVideo()} stream.videoType: ${stream.videoType}`);
 
-		if (stream.type === 'audio')
-		{
-			stream.play();
-		}
-		else
+		if (stream.hasVideo())
 		{
 			var videoId = '3t_remote' + stream.getId();
 			if (!!videoEle && !document.getElementById(videoId))
@@ -176,7 +171,23 @@ function joinChan(appid, chanid, userid)
 				videoEle.append(video);
 			}
 
-			stream.play('3t_remote' + stream.getId(), true);
+			stream.play('3t_remote' + stream.getId(), { isControls: true }, () => {
+				console.log('<demo> - stream.play succ');
+			}, () => {
+				console.log(`<demo> - stream.play fail - ${JSON.stringify(e)}`);
+			});
+		}
+
+		if (stream.hasAudio())
+		{
+			stream.play();
+			/*
+			stream.play('', {}, () => {
+				console.log('<demo> - stream.play succ');
+			}, (e) => {
+				console.log(`<demo> - stream.play fail - ${JSON.stringify(e)}`)
+			});
+			*/
 		}
 	});
 
@@ -186,7 +197,7 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 
-		console.log(`<demo> - event [stream-unsubscribed] streamId: ${stream.getId()} stream.type: ${stream.type} stream.videoType: ${stream.videoType}`);
+		console.log(`<demo> - event [stream-unsubscribed] streamId: ${stream.getId()} stream.videoType: ${stream.videoType}`);
 	});
 }
 

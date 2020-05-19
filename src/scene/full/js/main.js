@@ -291,11 +291,11 @@ function joinChan(appid, chanid, userid)
 		let in_stream = remote_stream.get(stream.getId());
 		client.subscribe(in_stream, (event) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} succ.` + '\n';
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} failed. - error: ${JSON.stringify(err)}` + '\n';
 			// info.val(info.val() + 'Subscribe stream failed' + err + '\n');
 		});
 	});
@@ -320,11 +320,11 @@ function joinChan(appid, chanid, userid)
 		let in_stream = remote_stream.get(stream.getId());
 		client.subscribe(in_stream, (event) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} succ` + '\n';
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} failed. - error: ${JSON.stringify(err)}` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} failed - error: ${JSON.stringify(err)}` + '\n';
 			// info.val(info.val() + 'Subscribe stream failed' + err + '\n');
 		});
 
@@ -369,7 +369,7 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 
-		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type} stream.videoType: ${stream.videoType}`);
+		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.videoType: ${stream.videoType}`);
 
 		if (stream.hasAudio())
 		{
@@ -377,13 +377,10 @@ function joinChan(appid, chanid, userid)
 			{
 				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
-		}
 
-		if (stream.type === 'audio')
-		{
-			stream.play();
+			stream.play('', {}, () => {}, () => {});
 		}
-		else
+		if (stream.hasVideo())
 		{
 			var videoId = '3t_remote' + stream.getId();
 			if (!!videoEle && !document.getElementById(videoId))
@@ -398,7 +395,7 @@ function joinChan(appid, chanid, userid)
 				videoEle.append(video);
 			}
 
-			stream.play('3t_remote' + stream.getId(), true);
+			stream.play('3t_remote' + stream.getId(), {}, () => {}, () => {});
 		}
 	});
 
@@ -408,7 +405,7 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 
-		console.log(`<demo> - event [stream-unsubscribed] streamId: ${stream.getId()} stream.type: ${stream.type} stream.videoType: ${stream.videoType}`);
+		console.log(`<demo> - event [stream-unsubscribed] streamId: ${stream.getId()} stream.videoType: ${stream.videoType}`);
 	});
 
 	client.on('video-mute', (evt) =>
@@ -906,7 +903,7 @@ function previewLocalStream(opts)
 					videoEle.append(videoE);
 				}
 
-				gStream.play(videoId, true);
+				gStream.play(videoId, {}, () => {}, () => {});
 			}
 			// 
 
@@ -921,7 +918,7 @@ function previewLocalStream(opts)
 	else
 	{
 		const videoId = '3t_local';
-		gStream.play(videoId, true);
+		gStream.play(videoId, {}, () => {}, () => {});
 	}
 }
 
@@ -1055,14 +1052,9 @@ function publishStream(opts)
 					videoEle.append(videoE);
 				}
 
-				gStream.play(videoId, true, micPlayback);
+				gStream.play(videoId, {}, () => {}, () => {});
 			}
 			//
-			if (gStream.type === 'audio')
-			{
-				gStream.play();
-			}
-			// 
 
 			streams.set(gStream.getId(), gStream);
 			
@@ -1196,7 +1188,7 @@ function publishScreenCDNStream()
 				screenRecEle.append(videoE);
 			}
 
-			gScreenCDNStream.play(videoId, true, false);
+			gScreenCDNStream.play(videoId, {}, () => {}, () => {});
 
 			streams.set(gScreenCDNStream.getId(), gScreenCDNStream);
 
@@ -1372,7 +1364,7 @@ function publishScreenStream(opts)
 					screenEle.append(videoE);
 				}
 
-				gScreenStream.play(videoId, true, false);
+				gScreenStream.play(videoId, {}, () => {}, () => {});
 			}
 			//
 			streams.set(gScreenStream.getId(), gScreenStream);
@@ -1687,18 +1679,11 @@ if (!!micPlaybackEle)
 		let micPlayback = document.getElementById('micPlayback').checked;
 		if (Boolean(micPlayback))
 		{
-			gStream.play('3t_local', true, true);
+			gStream.play('3t_local', { isControls: true }, () => {}, () => {});
 		}
 		else
 		{
-			if (gStream.type === 'audio')
-			{
-				gStream.stopPlay();
-			}
-			else
-			{
-				gStream.play('3t_local', true, false);
-			}
+			gStream.stopPlay();
 		}
 	});
 }

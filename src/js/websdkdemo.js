@@ -334,11 +334,11 @@ function joinChan(appid, chanid, userid)
 		let in_stream = remote_stream.get(stream.getId());
 		client.subscribe(in_stream, (event) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} succ` + '\n';
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} type: ${evt.stream.type} fail - ${err}` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe audio ${evt.stream.getId()} fail - ${err}` + '\n';
 			// info.val(info.val() + 'Subscribe stream failed' + err + '\n');
 		});
 	});
@@ -363,11 +363,11 @@ function joinChan(appid, chanid, userid)
 		let in_stream = remote_stream.get(stream.getId());
 		client.subscribe(in_stream, (event) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} succ.` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} succ` + '\n';
 			// successful doing someting, like play remote video or audio.
 		}, (err) =>
 		{
-			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} type: ${evt.stream.type} fail - ${err}` + '\n';
+			text_info.value = text_info.value + `<demo> subscribe video ${evt.stream.getId()} fail - ${err}` + '\n';
 			// info.val(info.val() + 'Subscribe stream failed' + err + '\n');
 		});
 
@@ -412,7 +412,7 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 
-		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.type: ${stream.type} stream.videoType: ${stream.videoType}`);
+		console.log(`<demo> - event [stream-subscribed] streamId: ${stream.getId()} stream.videoType: ${stream.videoType}`);
 
 		if (stream.hasAudio())
 		{
@@ -420,13 +420,11 @@ function joinChan(appid, chanid, userid)
 			{
 				; // console.log(`<AUDIO-VOLUME> - volume-change -- userID: ${e.userID} volume: ${e.volume}`);
 			});
-		}
-
-		if (stream.type === 'audio')
-		{
+			
 			stream.play();
 		}
-		else
+
+		if (stream.hasVideo())
 		{
 			var videoId = '3t_remote' + stream.getId();
 			if (!!videoEle && !document.getElementById(videoId))
@@ -451,7 +449,7 @@ function joinChan(appid, chanid, userid)
 		if (!stream)
 			return;
 
-		console.log(`<demo> - event [stream-unsubscribed] streamId: ${stream.getId()} stream.type: ${stream.type} stream.videoType: ${stream.videoType}`);
+		console.log(`<demo> - event [stream-unsubscribed] streamId: ${stream.getId()} stream.videoType: ${stream.videoType}`);
 	});
 
 	client.on('video-mute', (evt) =>
@@ -1106,11 +1104,6 @@ function publishStream(opts)
 				gStream.play(videoId, true, micPlayback);
 			}
 			//
-			if (gStream.type === 'audio')
-			{
-				gStream.play();
-			}
-			// 
 
 			streams.set(gStream.getId(), gStream);
 			
@@ -1739,14 +1732,7 @@ if (!!micPlaybackEle)
 		}
 		else
 		{
-			if (gStream.type === 'audio')
-			{
-				gStream.stopPlay();
-			}
-			else
-			{
-				gStream.play('3t_local', true, false);
-			}
+			gStream.stopPlay();
 		}
 	});
 }

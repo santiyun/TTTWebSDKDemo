@@ -131,6 +131,35 @@ function leaveChan()
 
 /******************* for Audio/Video Stream */
 //
+let closeStreamEle = document.getElementById('closeStream');
+if (!!closeStreamEle)
+{
+	closeStreamEle.addEventListener('click', () =>
+	{
+		closeStream();
+	})
+}
+
+//
+function closeStream()
+{
+	if (!!gStream)
+	{
+		gStream.close();
+	}
+
+	const videoId = '3t_local';
+	let obj = document.getElementById(videoId);
+	if (obj)
+	{
+		console.log('<demo> closeStream - obj.remove -- 3t_local');
+		obj.remove();
+	}
+
+	gStream = null;
+}
+
+
 // 
 let publishStreamEle = document.getElementById('publishStream');
 if (!!publishStreamEle)
@@ -193,7 +222,7 @@ function createPublishStream()
 			videoEle.append(videoE);
 		}
 
-		gStream.play(videoId);
+		gStream.play(videoId, {}, () => {}, () => {});
 
 		client.publish(gStream, () => {}, () => {
 			// 
@@ -243,7 +272,10 @@ function unpublishStream(opts)
 	// 
 	if (!!trackClosed)
 	{
-		gStream.close();
+		if (!!gStream)
+		{
+			gStream.close();
+		}
 
 		const videoId = '3t_local';
 		let obj = document.getElementById(videoId);
@@ -256,3 +288,177 @@ function unpublishStream(opts)
 		gStream = null;
 	}
 }
+
+// 
+const videoSelect = document.getElementById("cameraDev");
+const audioInputSelect = document.getElementById('micDev');
+const audioOutputSelect = document.getElementById('speakerDev');
+
+/******************* for list Devices */
+// 
+let refreshDevicesEle = document.getElementById('refreshDevices');
+if (!!refreshDevicesEle)
+{
+	refreshDevicesEle.addEventListener('click', () =>
+	{
+		getDevices();
+	})
+}
+
+function getDevices()
+{
+	let message = '';
+
+	// 首先
+	for (let index = 0; index < audioInputSelect.childNodes.length; index++)
+	{
+		audioInputSelect.removeChild(audioInputSelect.options[0]);
+		audioInputSelect.remove(0);
+		audioInputSelect.options[0] = null;
+	}
+
+	// 
+	for (let index = 0; index < audioOutputSelect.childNodes.length; index++)
+	{
+		audioOutputSelect.removeChild(audioOutputSelect.options[0]);
+		audioOutputSelect.remove(0);
+		audioOutputSelect.options[0] = null;
+	}
+
+	// 
+	for (let index = 0; index < videoSelect.childNodes.length; index++)
+	{
+		videoSelect.removeChild(videoSelect.options[0]);
+		videoSelect.remove(0);
+		videoSelect.options[0] = null;
+	}
+	
+	window.RTCObj.getDevices((devices) =>
+	{
+		// 
+		devices.forEach((deviceInfo) =>
+		{
+			message = '<demo> getDevices - ' + deviceInfo.kind + ': ' + deviceInfo.label + ' id: ' + deviceInfo.deviceId + '\n';
+			text_info.value = text_info.value + message;
+			console.log(message);
+
+			let option = document.createElement('option');
+			option.value = deviceInfo.deviceId;
+			if (deviceInfo.kind === 'audioinput')
+			{
+				if (!!audioInputSelect)
+				{
+					option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
+					audioInputSelect.appendChild(option);
+				}
+			}
+			else if (deviceInfo.kind === 'audiooutput')
+			{
+				if (!!audioOutputSelect)
+				{
+					option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
+					audioOutputSelect.appendChild(option);
+				}
+			}
+			else if (deviceInfo.kind === 'videoinput')
+			{
+				if (!!videoSelect)
+				{
+					option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
+					videoSelect.appendChild(option);
+				}
+			}
+			else
+			{
+				console.log('<demo> Some other kind of source/device: ', deviceInfo);
+			}
+		});
+	}, (err) =>
+	{
+		const errMsg = err.name + err.message + '\n';
+		text_info.value = text_info.value + errMsg;
+	});
+}
+
+/******************* for switchDevices */
+// 
+if (!!videoSelect)
+{
+	videoSelect.addEventListener('change', () =>
+	{
+		let index = videoSelect.selectedIndex;
+
+		cameraDevId = videoSelect.options[index].value;
+
+		console.log(`<demo> cameraDev change - cameraDevId: ${cameraDevId}`);
+
+		// switch device for Stream
+		if (!!gStream)
+		{
+			gStream.switchDevice('video', cameraDevId, () =>
+			{
+				console.log(`<demo> switchDevice succ - deviceId: ${cameraDevId}`);
+			}, (e) =>
+			{
+				console.log(`<demo> switchDevice fail - deviceId: ${cameraDevId} - ${e.toString()}`);
+			});
+		}
+	})
+}
+
+// 
+if (!!audioInputSelect)
+{
+	audioInputSelect.addEventListener('change', () =>
+	{
+		let index = audioInputSelect.selectedIndex;
+
+		micDevId = audioInputSelect.options[index].value;
+
+		console.log(`<demo> micDev change - micDevId: ${micDevId}`);
+
+		// switch device for Stream
+		if (!!gStream)
+		{
+			gStream.switchDevice('audio', micDevId, () =>
+			{
+				console.log(`<demo> switchDevice succ - deviceId: ${micDevId}`);
+			}, (e) =>
+			{
+				console.log(`<demo> switchDevice fail - deviceId: ${micDevId} - ${e.toString()}`);
+			});
+		}
+	})
+}
+
+// 
+if (!!audioOutputSelect)
+{
+	audioOutputSelect.addEventListener('change', () =>
+	{
+		let index = audioOutputSelect.selectedIndex;
+
+		speakerDevId = audioOutputSelect.options[index].value;
+
+		// 
+		remote_stream.forEach((item) =>
+		{
+			if (!!item)
+			{
+				// 
+				item.setAudioOutput(speakerDevId, (e) =>
+				{
+					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput succc - ${JSON.stringify(e)}` + '\n';
+					console.log('<demo> switch speaker - Stream.setAudioOutput succc. - ' + e);
+				}, (e) =>
+				{
+					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput fail - ${JSON.stringify(e)}` + '\n';
+					console.log('<demo> switch speaker - Stream.setAudioOutput fail. - ' + e);
+				});
+			}
+		});
+
+		console.log(`<demo> speakerDev change - speakerDevId: ${speakerDevId}`);
+	})
+}
+/********************/

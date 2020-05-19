@@ -12,7 +12,7 @@
 <body>
 	<div id="container">
 		
-		<h1><a href="https://github.com/santiyun/TTTWebSDKDemo/" title="TTTWebRTC SDK Demo homepage">TTTWebRTC SDK Demo</a> <span> - 音视频 RTC 推流 + CDN 推流</span>
+		<h1><a href="https://github.com/santiyun/TTTWebSDKDemo/" title="TTTWebRTC SDK Demo homepage">TTTWebRTC SDK Demo</a> <span> - 音视频 RTC 推流 - TURN</span>
 		</h1>
 	
 		<div id='div-area'>
@@ -37,15 +37,6 @@
 							<tr>
 								<td>房间ID : <input type="text" value="666777000" id="chanid" /></td>
 							</tr>
-							<tr>
-								<td>
-									rtmp url : <input type="text" value="" id="rtmpUrl" size="36"/>
-								</td>
-								<td>
-									<input type="checkbox" id="pureAudio">只推音频</input>
-									<button id="setRtmpUrl">设置/切换</button>
-								</td>
-							</tr>	
 						</table>
 					</td>
 				</tr>
@@ -79,11 +70,6 @@
 						</table>
 					</td>
 				</tr>
-				<tr>
-					<td>
-						<p id = "rtmpStatus"> - </p>
-					</td>
-				</tr>
 			</table>
 		</div>
 		<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#987cb9 SIZE=3>
@@ -113,7 +99,7 @@
 			title="TTTWebRTC SDK API 文档">TTTWebRTC SDK API 文档</a></li></p>
 		<p id="sdkVersion"> - </p>
 
-		<a href="https://github.com/santiyun/TTTWebSDKDemo/tree/master/src/scene/push_to_cdn"
+		<a href="https://github.com/santiyun/TTTWebSDKDemo/tree/master/src/scene/publish"
 		title="TTTWebSDK Demo sources on GitHub" id="viewSource">TTTWebSDK Demo sources on GitHub</a>
 	</div>
 
