@@ -5,6 +5,7 @@
 let client = null;
 
 let gStream = null;
+let sourceMediaStream = null;
 
 let videoEle = document.getElementById('video');
 
