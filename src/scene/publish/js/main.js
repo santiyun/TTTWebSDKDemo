@@ -386,7 +386,7 @@ if (!!videoSelect)
 	{
 		let index = videoSelect.selectedIndex;
 
-		cameraDevId = videoSelect.options[index].value;
+		const cameraDevId = videoSelect.options[index].value;
 
 		console.log(`<demo> cameraDev change - cameraDevId: ${cameraDevId}`);
 
@@ -411,7 +411,7 @@ if (!!audioInputSelect)
 	{
 		let index = audioInputSelect.selectedIndex;
 
-		micDevId = audioInputSelect.options[index].value;
+		const micDevId = audioInputSelect.options[index].value;
 
 		console.log(`<demo> micDev change - micDevId: ${micDevId}`);
 
@@ -457,7 +457,7 @@ if (!!audioOutputSelect)
 	{
 		let index = audioOutputSelect.selectedIndex;
 
-		speakerDevId = audioOutputSelect.options[index].value;
+		const speakerDevId = audioOutputSelect.options[index].value;
 
 		// 
 		remote_stream.forEach((item) =>
