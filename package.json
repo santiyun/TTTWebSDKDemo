@@ -7,7 +7,8 @@
     "test": "webpack-dev-server --open",
     "host": "webpack-dev-server --https --host=0.0.0.0 --open --watch --inline --mode=development",
     "build:test": "webpack --config webpack.config.js",
-    "build:wrap": "webpack --config webpack.wrap.config.js"
+    "build:wrap": "webpack --config webpack.wrap.config.js",
+    "build:test:av_screen_cdn": "webpack --config webpack.test.av_screen_cdn.config.js"
   },
   "author": "",
   "license": "ISC",
