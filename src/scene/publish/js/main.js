@@ -429,7 +429,7 @@ if (!!audioInputSelect)
 			*/
 			const constraints = {
 				audio: {
-					deviceId: { exact: this._spec.microphoneId.trim() }
+					deviceId: { exact: micDevId }
 				}
 			}
 			navigator.mediaDevices.getUserMedia(constraints)
