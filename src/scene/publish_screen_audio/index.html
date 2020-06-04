@@ -6,7 +6,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
 
-    <link rel="stylesheet" href="../../css/main.css"/>
+    <link rel="stylesheet" href="./main.css"/>
 </head>
 
 <body>
@@ -87,10 +87,45 @@
 					</td>
 					<td>状态 : </td>
 					<td><p id = "publishStreamStatus">未推流</p></td>
+					<td>
+						<button id="publishStream_noAudio">发布 视频流(noAudio)</button>
+					</td>
+					<td>
+						<button id="unpublishStream_noAudio">取消</button>
+					</td>
+					<td>状态 : </td>
+					<td><p id = "publishStream_noAudioStatus">未推流</p></td>
 				</tr>
 				<tr>
 					<td>
-						<button id="closeStream">关闭流</button>
+						<button id="publishScreen">发布 桌面流</button>
+					</td>
+					<td>
+						<button id="publishScreen">取消</button>
+					</td>
+					<td>状态 : </td>
+					<td><p id = "publishScreenStatus">未推流</p></td>
+					<td>
+						<button id="publishScreen_noAudio">发布 桌面流(noAudio)</button>
+					</td>
+					<td>
+						<button id="unpublishScreen_noAudio">取消</button>
+					</td>
+					<td>状态 : </td>
+					<td><p id = "publishScreen_noAudioStatus">未推流</p></td>
+				</tr>
+				<tr>
+					<td>
+						<button id="closeStream">关闭 音视频流</button>
+					</td>
+					<td>
+						<button id="closeStream_noAudio">关闭 视频流</button>
+					</td>
+					<td>
+						<button id="closeScreen">关闭 桌面流</button>
+					</td>
+					<td>
+						<button id="closeScreen_noAudio">关闭 桌面流(noAudio)</button>
 					</td>
 				</tr>
 			</table>
@@ -137,7 +172,7 @@
 		title="TTTWebSDK Demo sources on GitHub" id="viewSource">TTTWebSDK Demo sources on GitHub</a>
 	</div>
 
-    <script type='text/javascript' src='../../../dist/websdkwrap.js' charset="utf-8"></script>
+    <script type='text/javascript' src='./../../../dist/websdkwrap.js' charset="utf-8"></script>
     <script type='text/javascript' src='./js/main.js' charset="utf-8"></script>
 </body>
 

@@ -9,7 +9,7 @@ import TTTRtcWeb from '../../lib/tttwebsdk'; // import from local tttwebsdk.js
 // TTTRtcWeb.setServerUrl('gzeduservice.3ttech.cn');
 // TTTRtcWeb.setLogSubmit(false);
 // TTTRtcWeb.setServerUrl('xiaoyao1.3ttech.cn');
-// TTTRtcWeb.setServerUrl('webmedia7.3ttech.cn');
+// TTTRtcWeb.setServerUrl('114_115_172_21.3ttech.cn'); 
 
 const pkg = require('../../package.json');
 const demoVersion = pkg.version;
@@ -17,10 +17,11 @@ const demoVersion = pkg.version;
 const sdkVersion = TTTRtcWeb.getVersion();
 const isSupp = TTTRtcWeb.isSystemSupported();
 
+
 document.getElementById('sysVersion').innerHTML = `ver: ${demoVersion} - ${sdkVersion} -- isSupp: ${isSupp}`;
 
 // 
-let RTCObj = null;
+let RTCObj = new TTTRtcWeb();
 let client = null;
 let streams = new Map();
 
@@ -186,8 +187,7 @@ function joinChan(appid, chanid, userid)
 	TTTRtcWeb.setLogSubmit(true);
 
 	// 
-	RTCObj = new TTTRtcWeb();
-
+	
 	const cdnUrl = (!!rtmpUrlEle) ? rtmpUrlEle.value : '';
 	client = RTCObj.createClient({
 		role: userRole,

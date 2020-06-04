@@ -6,6 +6,12 @@ let client = null;
 
 let gStream = null;
 
+let gStream_noAudio = null;
+
+let gScreen = null;
+
+let gScreen_noAudio = null;
+
 let videoEle = document.getElementById('video');
 
 let tttStatus = 0;
@@ -18,6 +24,7 @@ let userRole = 2;
 
 let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab8131651339518
 
+let text_info = document.getElementById("text_info");
 const sdkVersionEle = document.getElementById('sdkVersion');
 const sdkVersion = window.getVersion();
 if (!!sdkVersionEle)
@@ -53,11 +60,13 @@ function joinChan(appid, chanid, userid)
 		return;
 	}
 
-	// window.setServerUrl("152-136-34-204.3ttech.cn");
+	// window.RTCObj.setServerUrl("aaa")
+	window.setServerUrl("152-136-34-204.3ttech.cn");
 
 	client = window.RTCObj.createClient({
 		role: userRole
 	});
+
 
 	client.init(appid, userid, () =>
 	{
@@ -89,13 +98,36 @@ function joinChan(appid, chanid, userid)
 	client.on('stream-published', (evt) =>
 	{
 		console.log(`<demo> - event [stream-published] uid: ${evt.streamId}`);
-		document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
+		if(!!gStream && evt.streamId === gStream.streamId){
+			document.getElementById('publishStreamStatus').innerHTML = `<font color="green">已推流</font>`;
+		}
+		if(!!gStream_noAudio && evt.streamId === gStream_noAudio.streamId){
+			document.getElementById('publishStream_noAudioStatus').innerHTML = `<font color="green">已推流</font>`;
+		}
+		if(!!gScreen && evt.streamId === gScreen.streamId){
+			document.getElementById('publishScreenStatus').innerHTML = `<font color="green">已推流</font>`;
+		}
+		if(!!gScreen_noAudio && evt.streamId === gScreen_noAudio.streamId){
+			document.getElementById('publishScreen_noAudioStatus').innerHTML = `<font color="green">已推流</font>`;
+		}
+
 	});
 
 	client.on('stream-unpublished', (evt) =>
 	{
 		console.log(`<demo> - event [stream-unpublished] uid: ${evt.streamId}`);
-		document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
+		if(!!gStream && evt.streamId === gStream.streamId){
+			document.getElementById('publishStreamStatus').innerHTML = `<font color="black">未推流</font>`;
+		}
+		if(!!gStream_noAudio && evt.streamId === gStream_noAudio.streamId){
+			document.getElementById('publishStream_noAudioStatus').innerHTML = `<font color="black">未推流</font>`;
+		}
+		if(!!gScreen && evt.streamId === gScreen.streamId){
+			document.getElementById('publishScreenStatus').innerHTML = `<font color="black">未推流</font>`;
+		}
+		if(!!gScreen_noAudio && evt.streamId === gScreen_noAudio.streamId){
+			document.getElementById('publishScreen_noAudioStatus').innerHTML = `<font color="black">未推流</font>`;
+		}
 	});
 }
 
@@ -135,23 +167,62 @@ function leaveChan()
 /******************* for Audio/Video Stream */
 //
 let closeStreamEle = document.getElementById('closeStream');
+let closeStream_noAudioEle = document.getElementById('closeStream_noAudio');
+let closeScreenEle = document.getElementById('closeScreen');
+let closeScreen_noAudioEle = document.getElementById('closeScreen_noAudio');
 if (!!closeStreamEle)
 {
 	closeStreamEle.addEventListener('click', () =>
 	{
-		closeStream();
+		closeStream(gStream);
 	})
 }
-
-//
-function closeStream()
+if (!!closeStream_noAudioEle)
 {
-	if (!!gStream)
+	closeStream_noAudioEle.addEventListener('click', () =>
+	{
+		closeStream(gStream_noAudio);
+	})
+}
+if (!!closeScreenEle)
+{
+	closeScreenEle.addEventListener('click', () =>
+	{
+		closeStream(gScreen);
+	})
+}
+if (!!closeScreen_noAudioEle)
+{
+	closeScreen_noAudioEle.addEventListener('click', () =>
+	{
+		closeStream(gScreen_noAudio);
+	})
+}
+//
+function closeStream(stream)
+{
+	const videoId = '3t_local'+stream.streamId;
+	if (!!gStream && stream.streamId === gStream.streamId)
 	{
 		gStream.close();
+		gStream = null;
+	}
+	if (!!gStream_noAudio && stream.streamId === gStream_noAudio.streamId)
+	{
+		gStream_noAudio.close();
+		gStream_noAudio = null;
+	}
+	if (!!gScreen && stream.streamId === gScreen.streamId)
+	{
+		gScreen.close();
+		gScreen = null;
+	}
+	if (!!gScreen_noAudio && stream.streamId === gScreen_noAudio.streamId)
+	{
+		gScreen_noAudio.close();
+		gScreen_noAudio = null;
 	}
 
-	const videoId = '3t_local';
 	let obj = document.getElementById(videoId);
 	if (obj)
 	{
@@ -159,7 +230,6 @@ function closeStream()
 		obj.remove();
 	}
 
-	gStream = null;
 }
 
 
@@ -171,11 +241,11 @@ if (!!publishStreamEle)
 	{
 		if (!!gStream)
 		{
-			publishStream();
+			publishStream(gStream);
 		}
 		else
 		{
-			createPublishStream();
+			createPublishStream(true,true,false);
 		}
 	})
 }
@@ -185,33 +255,49 @@ if (!!unpublishStreamEle)
 {
 	unpublishStreamEle.addEventListener('click', () =>
 	{
-		unpublishStream({});
+		unpublishStream({stream: gStream, trackClosed: false});
 	})
 }
 
 // 
-function createPublishStream()
+function createPublishStream(video,audio,screen)
 {
+	if (tttStatus !== 1)
+	{
+		console.log('<demo> publishStream - 请先[加入房间]');
+		return;
+	}
 	// 
-	gStream = window.RTCObj.createStream({
+	let stream = window.RTCObj.createStream({
 		userId: +userId,
-		audio: true,
-		video: true,
+		audio: audio,
+		video: video,
+		screen: screen,
 		attributes: { videoProfile: '480p' }
 	});
+	
+	if(video && audio){
+		gStream = stream;
+	}else if(video && !audio){
+		gStream_noAudio = stream;
+	}else if(screen && audio){
+		gScreen = stream;
+	}else if(screen && !audio){
+		gScreen_noAudio = stream;
+	}
 
-	if (!gStream)
+	if (!stream)
 		return;
 
-	gStream.init(() =>
+	stream.init(() =>
 	{
-		gStream.on('stream-close', (e) =>
+		stream.on('stream-close', (e) =>
 		{
 			console.log(`<demo> event [stream-close] - ${e.streamId}`);
-			unpublishStream({ trackClosed: true });
+			unpublishStream({stream, trackClosed: true });
 		});
 
-		const videoId = '3t_local';
+		const videoId = '3t_local'+ stream.streamId;
 		let videoE = document.createElement('video');
 		videoE.id = videoId;
 		videoE.muted = true;
@@ -225,12 +311,12 @@ function createPublishStream()
 			videoEle.append(videoE);
 		}
 
-		gStream.play(videoId, {}, () => {}, () => {});
+		stream.play(videoId, {}, () => {}, () => {});
 
-		client.publish(gStream, () => {}, () => {
+		client.publish(stream, () => {}, () => {
 			// 
-			gStream.close();
-			gStream = null;
+			stream.close();
+			stream = null;
 		});
 		// 
 	}, (evt) =>
@@ -238,12 +324,11 @@ function createPublishStream()
 		console.log('<demo> createPublishStream - Stream.init failed. - error: ' + evt);
 		
 		// 
-		gStream.close();
-		gStream = null;
+		stream.close();
 	});
 }
 
-function publishStream()
+function publishStream(stream)
 {
 	// 
 	if (tttStatus !== 1)
@@ -252,44 +337,99 @@ function publishStream()
 		return;
 	}
 
-	if (!gStream)
+	if (!stream)
 	{
-		console.log('<demo> publishStream - gStream is null');
+		console.log('<demo> publishStream - stream is null');
 		return;
 	}
 
-	client.publish(gStream, () => {}, () => {
+	client.publish(stream, () => {}, () => {
 		// 
-		gStream.close();
-		gStream = null;
+		stream.close();
 	});
 }
 
 // 
 function unpublishStream(opts)
 {
-	const { trackClosed } = opts;
+	const {stream, trackClosed } = opts;
 
-	client.unpublish(gStream, () => {}, () => {}, false/*true*/);
+	client.unpublish(stream, () => {}, () => {}, false/*true*/);
 
 	// 
 	if (!!trackClosed)
 	{
-		if (!!gStream)
-		{
-			gStream.close();
-		}
-
-		const videoId = '3t_local';
-		let obj = document.getElementById(videoId);
-		if (obj)
-		{
-			console.log('<demo> unpublishStream - obj.remove -- 3t_local');
-			obj.remove();
-		}
-
-		gStream = null;
+		closeStream(stream);
 	}
+}
+
+//  纯视频流
+let publishStream_noAudioEle = document.getElementById('publishStream_noAudio');
+if (!!publishStream_noAudioEle)
+{
+	publishStream_noAudioEle.addEventListener('click', () =>
+	{
+		if(!!gStream_noAudio){
+			publishStream(gStream_noAudio)
+		}else{
+			createPublishStream(true,false,false)
+		}
+	})
+}
+
+let unpublishStream_noAudioEle = document.getElementById('unpublishStream_noAudio');
+if (!!unpublishStreamEle)
+{
+	unpublishStream_noAudioEle.addEventListener('click', () =>
+	{
+		unpublishStream({stream: gStream_noAudio, trackClosed: false});
+	})
+}
+
+// 屏幕流
+let publishScreenEle = document.getElementById('publishScreen');
+if (!!publishScreenEle)
+{
+	publishScreenEle.addEventListener('click', () =>
+	{
+		if(!!gScreen){
+			publishStream(gScreen)
+		}else{
+			createPublishStream(false,true,true)
+		}
+	})
+}
+
+let unpublishScreenEle = document.getElementById('unpublishScreen');
+if (!!unpublishScreenEle)
+{
+	unpublishScreenEle.addEventListener('click', () =>
+	{
+		unpublishStream({stream: gScreen, trackClosed: false});
+	})
+}
+
+// 屏幕流无声音
+let publishScreen_noAudioEle = document.getElementById('publishScreen_noAudio');
+if (!!publishScreen_noAudioEle)
+{
+	publishScreen_noAudioEle.addEventListener('click', () =>
+	{
+		if(!!gScreen_noAudio){
+			publishStream(gScreen_noAudio)
+		}else{
+			createPublishStream(false,false,true)
+		}
+	})
+}
+
+let unpublishScreen_noAudioEle = document.getElementById('unpublishScreen_noAudio');
+if (!!unpublishScreen_noAudioEle)
+{
+	unpublishScreen_noAudioEle.addEventListener('click', () =>
+	{
+		unpublishStream({stream: gScreen_noAudio, trackClosed: false});
+	})
 }
 
 // 

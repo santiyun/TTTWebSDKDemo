@@ -26,5 +26,11 @@ global.setTurnServers = function ()
 	}
 	TTTRtcWeb.setTurnServers(conf);
 }
+global.setServerUrl = function(url){
+	TTTRtcWeb.setServerUrl(url);
+}
+global.getVersion = function(){
+	return TTTRtcWeb.getVersion();
+}
 
 global.RTCObj = new TTTRtcWeb();

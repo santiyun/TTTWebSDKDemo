@@ -21,9 +21,10 @@ let userRole = 1; // 要确保本用户以 主播 角色登录
 let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab8131651339518
 
 const sdkVersionEle = document.getElementById('sdkVersion');
+const sdkVersion = window.getVersion();
 if (!!sdkVersionEle)
 {
-	sdkVersionEle.innerHTML = `sdk version : ${window.RTCObj.version}`;
+	sdkVersionEle.innerHTML = `sdk version : ${sdkVersion}`;
 }
 
 const roomIdEle = document.getElementById('chanid');
