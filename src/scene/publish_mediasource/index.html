@@ -6,11 +6,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
 
-<<<<<<< HEAD
-    <link rel="stylesheet" href="./main.css"/>
-=======
     <link rel="stylesheet" href="../../css/main.css"/>
->>>>>>> 96a4f0219b6125e3c3f903ed8fba0f64bb7b05bb
 </head>
 
 <body>
@@ -48,9 +44,6 @@
 					<td><font color="green"><b>首先请登录 : </b></font></td>
 				</tr>
 				<tr>
-					<td><textarea id="text_info" type="text" rows="4" cols="90" readonly="readonly"></textarea></td>
-				</tr>
-				<tr>
 					<td>
 						<table>
 							<tr>
@@ -84,103 +77,35 @@
 			<table>
 				<tr>
 					<td>
-						<button id="publishStream">发布 音视频流</button>
+						<button id="publishMediaSource">发布媒体流</button>
 					</td>
 					<td>
-						<button id="unpublishStream">取消</button>
+						<button id="unpublishMediaSource">取消发布媒体流</button>
 					</td>
+					<td> - </td>
 					<td>状态 : </td>
 					<td><p id = "publishStreamStatus">未推流</p></td>
-					<td>
-						<button id="publishStream_noAudio">发布 视频流(noAudio)</button>
-					</td>
-					<td>
-						<button id="unpublishStream_noAudio">取消</button>
-					</td>
-					<td>状态 : </td>
-					<td><p id = "publishStream_noAudioStatus">未推流</p></td>
-				</tr>
-				<tr>
-					<td>
-						<button id="publishScreen">发布 桌面流</button>
-					</td>
-					<td>
-						<button id="publishScreen">取消</button>
-					</td>
-					<td>状态 : </td>
-					<td><p id = "publishScreenStatus">未推流</p></td>
-					<td>
-						<button id="publishScreen_noAudio">发布 桌面流(noAudio)</button>
-					</td>
-					<td>
-						<button id="unpublishScreen_noAudio">取消</button>
-					</td>
-					<td>状态 : </td>
-					<td><p id = "publishScreen_noAudioStatus">未推流</p></td>
-				</tr>
-				<tr>
-					<td>
-						<button id="closeStream">关闭 音视频流</button>
-					</td>
-					<td>
-						<button id="closeStream_noAudio">关闭 视频流</button>
-					</td>
-					<td>
-						<button id="closeScreen">关闭 桌面流</button>
-					</td>
-					<td>
-						<button id="closeScreen_noAudio">关闭 桌面流(noAudio)</button>
-					</td>
-				</tr>
-			</table>
-			<table>
-				<tr>
-					<td>
-						<button id="refreshDevices">获取设备</button>
-					</td>
-					<td>
-						<label for="switchCamera">切换摄像头 : </label>
-					</td>
-					<td>
-						<select id="cameraDev"></select>
-					</td>
-				</tr>
-				<tr>
-					<td> - </td>
-					<td>
-						<label for="switchMic">切换Mic : </label>
-					</td>
-					<td>
-						<select id="micDev"></select>
-					</td>
-				</tr>
-				<tr>
-					<td> - </td>
-					<td>
-						<label for="switchSpeaker">切换Speaker : </label>
-					</td>
-					<td>
-						<select id="speakerDev"></select>
-					</td>
 				</tr>
 			</table>
 		</div>
-		<div id="video" class="grid-container-video"></div>
+	
+		<video id="mediaSource" playsinline controls muted style="height: 300px; width: 300px; background: black; position: relative; display: inline-block;">
+			<source src="../../../res/chrome.webm" type="video/webm"/>
+			<source src="../../../res/video/chrome.mp4" type="video/mp4"/>
+			<p>This browser does not support the video element.</p>
+		</video>
+		<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="95%"color=#987cb9 SIZE=3>
 
 		<p><li>更多信息，请参考： <a
 			href="https://www.3ttech.cn/index.php?menu=105&type=Web"
 			title="TTTWebRTC SDK API 文档">TTTWebRTC SDK API 文档</a></li></p>
 		<p id="sdkVersion"> - </p>
 
-		<a href="https://github.com/santiyun/TTTWebSDKDemo/tree/master/src/scene/publish"
+		<a href="https://github.com/santiyun/TTTWebSDKDemo/tree/master/src/scene/publish_mediasource"
 		title="TTTWebSDK Demo sources on GitHub" id="viewSource">TTTWebSDK Demo sources on GitHub</a>
 	</div>
 
-<<<<<<< HEAD
-    <script type='text/javascript' src='./../../../dist/websdkwrap.js' charset="utf-8"></script>
-=======
     <script type='text/javascript' src='../../../dist/websdkwrap.js' charset="utf-8"></script>
->>>>>>> 96a4f0219b6125e3c3f903ed8fba0f64bb7b05bb
     <script type='text/javascript' src='./js/main.js' charset="utf-8"></script>
 </body>
 

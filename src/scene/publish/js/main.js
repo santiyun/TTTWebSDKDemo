@@ -342,7 +342,6 @@ function getDevices()
 		devices.forEach((deviceInfo) =>
 		{
 			message = '<demo> getDevices - ' + deviceInfo.kind + ': ' + deviceInfo.label + ' id: ' + deviceInfo.deviceId + '\n';
-			text_info.value = text_info.value + message;
 			console.log(message);
 
 			let option = document.createElement('option');
@@ -378,8 +377,7 @@ function getDevices()
 		});
 	}, (err) =>
 	{
-		const errMsg = err.name + err.message + '\n';
-		text_info.value = text_info.value + errMsg;
+		console.log(`<demo> ${err.name} ${err.message}`);
 	});
 }
 
@@ -391,7 +389,7 @@ if (!!videoSelect)
 	{
 		let index = videoSelect.selectedIndex;
 
-		cameraDevId = videoSelect.options[index].value;
+		const cameraDevId = videoSelect.options[index].value;
 
 		console.log(`<demo> cameraDev change - cameraDevId: ${cameraDevId}`);
 
@@ -416,19 +414,40 @@ if (!!audioInputSelect)
 	{
 		let index = audioInputSelect.selectedIndex;
 
-		micDevId = audioInputSelect.options[index].value;
+		const micDevId = audioInputSelect.options[index].value;
 
 		console.log(`<demo> micDev change - micDevId: ${micDevId}`);
 
 		// switch device for Stream
 		if (!!gStream)
 		{
+			/*
 			gStream.switchDevice('audio', micDevId, () =>
 			{
 				console.log(`<demo> switchDevice succ - deviceId: ${micDevId}`);
 			}, (e) =>
 			{
 				console.log(`<demo> switchDevice fail - deviceId: ${micDevId} - ${e.toString()}`);
+			});
+			*/
+			const constraints = {
+				audio: {
+					deviceId: { exact: micDevId }
+				}
+			}
+			navigator.mediaDevices.getUserMedia(constraints)
+			.then(stream =>
+			{
+				let audioTracks = stream.getAudioTracks();
+				if (audioTracks.length > 0)
+				{
+					const track = audioTracks[0];
+					gStream.replaceTrack(track, () => {
+						console.log('<demo> gStream.replaceTrack succ');
+					}, (e, desc) => {
+						console.log(`<demo> gStream.replaceTrack fail - ${e} ${JSON.stringify(desc)}`);
+					});
+				}
 			});
 		}
 	})
@@ -441,7 +460,7 @@ if (!!audioOutputSelect)
 	{
 		let index = audioOutputSelect.selectedIndex;
 
-		speakerDevId = audioOutputSelect.options[index].value;
+		const speakerDevId = audioOutputSelect.options[index].value;
 
 		// 
 		remote_stream.forEach((item) =>
@@ -451,12 +470,10 @@ if (!!audioOutputSelect)
 				// 
 				item.setAudioOutput(speakerDevId, (e) =>
 				{
-					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput succc - ${JSON.stringify(e)}` + '\n';
-					console.log('<demo> switch speaker - Stream.setAudioOutput succc. - ' + e);
+					console.log(`<demo> switch speaker - Stream.setAudioOutput succc - ${JSON.stringify(e)}`);
 				}, (e) =>
 				{
-					text_info.value = text_info.value + `<demo> switch speaker - Stream.setAudioOutput fail - ${JSON.stringify(e)}` + '\n';
-					console.log('<demo> switch speaker - Stream.setAudioOutput fail. - ' + e);
+					console.log(`<demo> switch speaker - Stream.setAudioOutput fail - ${JSON.stringify(e)}`);
 				});
 			}
 		});

@@ -26,10 +26,16 @@ let xAppId = 'a967ac491e3acf92eed5e1b5ba641ab7'; // test900572e02867fab813165133
 
 let text_info = document.getElementById("text_info");
 const sdkVersionEle = document.getElementById('sdkVersion');
+<<<<<<< HEAD
 const sdkVersion = window.getVersion();
 if (!!sdkVersionEle)
 {
 	sdkVersionEle.innerHTML = `sdk version : ${sdkVersion}`;
+=======
+if (!!sdkVersionEle)
+{
+	sdkVersionEle.innerHTML = `sdk version : ${window.RTCObj.version}`;
+>>>>>>> 96a4f0219b6125e3c3f903ed8fba0f64bb7b05bb
 }
 
 const roomIdEle = document.getElementById('chanid');
@@ -60,7 +66,10 @@ function joinChan(appid, chanid, userid)
 		return;
 	}
 
+<<<<<<< HEAD
 	// window.RTCObj.setServerUrl("aaa")
+=======
+>>>>>>> 96a4f0219b6125e3c3f903ed8fba0f64bb7b05bb
 	window.setServerUrl("152-136-34-204.3ttech.cn");
 
 	client = window.RTCObj.createClient({

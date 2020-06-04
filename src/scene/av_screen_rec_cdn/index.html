@@ -1,0 +1,123 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
+
+    <link rel="stylesheet" href="../../css/main.css"/>
+</head>
+
+<body>
+	<div id="container">
+		
+		<h1><a href="https://github.com/santiyun/TTTWebSDKDemo/" title="TTTWebRTC SDK Demo homepage">TTTWebRTC SDK Demo</a> <span> - 屏幕流推 CDN 录制</span>
+		</h1>
+	
+		<div id='div-area'>
+			<table>
+				<tr>
+					<td>
+						<font color="green" style="font-size:12px">
+							<i>
+								&nbsp;&nbsp;如下注意事项：<br/>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注 -- [主播]、[副播] 可以推流/拉流；[观众] 只能拉流；<br/>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注 -- 房间ID、用户ID 将自动生成；<br/>
+							</i>
+						</font>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<table>
+							<tr>
+								<td>AppID    : a967ac491e3acf92eed5e1b5ba641ab7</td>
+							</tr>
+							<tr>
+								<td>房间ID : <input type="text" value="666777000" id="chanid" /></td>
+							</tr>
+							<tr>
+								<td>
+									rtmp url : <input type="text" value="" id="rtmpUrl" size="36"/>
+								</td>
+								<td>
+									<button id="setRtmpUrl">设置/切换</button>
+								</td>
+							</tr>	
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td><font color="green"><b>首先请登录 : </b></font></td>
+				</tr>
+				<tr>
+					<td>
+						<table>
+							<tr>
+								<td></td>
+								<td>
+									<button id="joinChan">加入房间</button>
+								</td>
+								<td>
+									<button id="leaveChan">离开房间</button>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<table>
+							<tr>
+								<td></td>
+								<td>登录状态 : </td>
+								<td><p id = "loginStatus">未登录</p></td>
+								<td><p id = "loginInfo"> - </p></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p id = "rtmpStatus"> - </p>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<HR style="FILTER:alpha(opacity=0,finishopacity=100,style=1)" width="90%"color=#987cb9 SIZE=3>
+		<div>
+			<table>
+				<tr>
+					<td>
+						<button id="publishScreenCDN">发布到 CDN 录制</button>
+					</td>
+					<td>
+						<button id="unpublishScreenCDN">取消</button>
+					</td>
+					<td>状态 : </td>
+					<td><p id = "publishScreenCDNStatus">未推流</p></td>
+				</tr>
+				<tr>
+					<td>
+						<button id="closeStream">关闭流</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="screen" class="grid-container-video"></div>
+
+		<p><li>更多信息，请参考： <a
+			href="https://www.3ttech.cn/index.php?menu=105&type=Web"
+			title="TTTWebRTC SDK API 文档">TTTWebRTC SDK API 文档</a></li></p>
+		<p id="sdkVersion"> - </p>
+
+		<a href="https://github.com/santiyun/TTTWebSDKDemo/tree/master/src/scene/screen_rec_cdn"
+		title="TTTWebSDK Demo sources on GitHub" id="viewSource">TTTWebSDK Demo sources on GitHub</a>
+	</div>
+
+    <script type='text/javascript' src='../../../dist/websdkwrap.js' charset="utf-8"></script>
+    <script type='text/javascript' src='./js/main.js' charset="utf-8"></script>
+</body>
+
+</html>
