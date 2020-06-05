@@ -2,7 +2,9 @@ import TTTRtcWeb from '../../lib/tttwebsdk'; // import from local tttwebsdk.js
 // import TTTRtcWeb from 'tttwebsdk'; // npm install tttwebsdk@latest
 
 // 
-// TTTRtcWeb.setPrivate(true);
+TTTRtcWeb.setPrivate(true);
+TTTRtcWeb.setIpLocationAddress('xxx.xxx.cn');
+TTTRtcWeb.setIpLocationPort(8443);
 // TTTRtcWeb.setIpLocationAddress('v1.jkim.ccb.com');
 // TTTRtcWeb.setServerUrl('114_115_172_21.3ttech.cn'); 
 // TTTRtcWeb.setServerUrl('v7.jkim.ccb.com');
@@ -10,6 +12,7 @@ import TTTRtcWeb from '../../lib/tttwebsdk'; // import from local tttwebsdk.js
 // TTTRtcWeb.setLogSubmit(false);
 // TTTRtcWeb.setServerUrl('xiaoyao1.3ttech.cn');
 // TTTRtcWeb.setServerUrl('114_115_172_21.3ttech.cn'); 
+// TTTRtcWeb.setServerUrl('webmedia3.3ttech.cn'); 
 
 const pkg = require('../../package.json');
 const demoVersion = pkg.version;
